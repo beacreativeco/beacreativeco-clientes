@@ -46,7 +46,8 @@ export function parametro(nome) {
 }
 
 // ---------------------------------------------------------------- mídias
-// Mesmas regras de functions/_lib/midias.js (o servidor confere de novo).
+// O que a Bea pode escolher. Antes de subir, otimizar.js transforma tudo em JPEG/MP4 leve
+// (o servidor, em functions/_lib/midias.js, só aceita o resultado).
 
 export const TIPOS_ARQUIVO = {
   'image/jpeg': 'imagem',
@@ -56,7 +57,8 @@ export const TIPOS_ARQUIVO = {
   'video/quicktime': 'video',
 };
 
-export const LIMITE_MB = { imagem: 30, video: 2048 };
+export const LIMITE_MB = { imagem: 30, video: 2048 };          // arquivo escolhido
+export const LIMITE_OTIMIZADO_MB = { imagem: 8, video: 300 };  // depois de comprimido
 
 // O que cada formato aceita e quantos arquivos precisa para ir ao cliente.
 export const REGRAS_FORMATO = {
@@ -112,6 +114,7 @@ export function problemaDasMidias(formato, midias) {
 
 export function tamanhoLegivel(mb) {
   if (mb == null) return '';
+  if (mb < 1) return `${Math.max(1, Math.round(mb * 1024))} KB`;
   return mb >= 1024 ? `${(mb / 1024).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} GB`
     : `${mb.toLocaleString('pt-BR', { maximumFractionDigits: mb < 10 ? 1 : 0 })} MB`;
 }

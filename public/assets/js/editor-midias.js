@@ -1,8 +1,11 @@
-// Seção "Arquivos" do editor: lista na ordem, envio com progresso, mover, baixar e remover.
+// Seção "Arquivos" do editor: lista na ordem, compressão e envio com progresso, mover, baixar e remover.
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
-import { FORMATOS, REGRAS_FORMATO, aceiteDoInput, problemaDoArquivo, tamanhoLegivel } from './conteudos.js';
+import {
+  FORMATOS, REGRAS_FORMATO, LIMITE_OTIMIZADO_MB, TIPOS_ARQUIVO, aceiteDoInput, problemaDoArquivo, tamanhoLegivel, tipoMime,
+} from './conteudos.js';
 import { enviarArquivo, excluirMidia } from './upload.js';
+import { otimizarImagem, otimizarVideo } from './otimizar.js';
 
 const lista = document.getElementById('lista-midias');
 const fila = document.getElementById('fila-envio');
@@ -14,6 +17,7 @@ const modeloEnvio = document.getElementById('modelo-envio');
 
 let midias = [];          // linhas de `midias` da versão atual, em ordem
 let formato = 'post';
+let driveUrl = '';        // com Drive, "Baixar" leva ao original de lá
 let envios = [];          // [{ arquivo, conteudoId, li, controle }]
 let enviando = false;
 let garantirConteudo;     // () => Promise<conteudoId> (cria o rascunho se ainda não existe)
@@ -57,6 +61,27 @@ export function definirFormato(novo) {
   regraTexto.textContent = REGRAS_FORMATO[novo].dica;
   lista.dataset.formato = novo;
   desenhar();
+}
+
+export function definirDrive(url) {
+  driveUrl = /^https:\/\//.test(url || '') ? url : '';
+  // Só os links: redesenhar recarregaria os vídeos a cada letra digitada.
+  lista.querySelectorAll('.midia').forEach((li) => {
+    const m = midias.find((x) => x.id === li.dataset.id);
+    if (m) configurarBaixar(li.querySelector('[data-acao="baixar"]'), m);
+  });
+}
+
+function configurarBaixar(link, m) {
+  link.href = driveUrl || `${m.arquivo_url}?download=1`;
+  link.textContent = driveUrl ? 'Original (Drive)' : 'Baixar';
+  if (driveUrl) {
+    link.target = '_blank';
+    link.rel = 'noopener';
+  } else {
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+  }
 }
 
 export const midiasAtuais = () => midias;
@@ -106,6 +131,17 @@ async function adicionar(arquivos) {
   processarFila();
 }
 
+// Comprime no navegador e só então sobe (o original nunca vai pro sistema).
+async function otimizar(arquivo, opcoes) {
+  const tipo = TIPOS_ARQUIVO[tipoMime(arquivo)];
+  const leve = tipo === 'video' ? await otimizarVideo(arquivo, opcoes) : await otimizarImagem(arquivo);
+  if (leve.size > LIMITE_OTIMIZADO_MB[tipo] * 1024 * 1024) {
+    throw new Error(`mesmo comprimido ficou com ${tamanhoLegivel(leve.size / 1024 / 1024)} `
+      + `(limite de ${LIMITE_OTIMIZADO_MB[tipo]} MB).${tipo === 'video' ? ' Encurte o vídeo ou deixe só no Drive.' : ''}`);
+  }
+  return leve;
+}
+
 // Um arquivo por vez (cada um já sobe em partes paralelas).
 async function processarFila() {
   if (enviando) return;
@@ -114,13 +150,20 @@ async function processarFila() {
     const envio = envios[0];
     const barra = envio.li.querySelector('.envio-barra');
     const porcentagem = envio.li.querySelector('.envio-porcentagem');
+    const etapa = (rotulo) => (fracao) => {
+      barra.value = fracao;
+      porcentagem.textContent = `${rotulo} ${Math.floor(fracao * 100)}%`;
+    };
     try {
-      const midia = await enviarArquivo(envio.arquivo, envio.conteudoId, {
+      etapa('Comprimindo')(0);
+      const leve = await otimizar(envio.arquivo, { sinal: envio.controle.signal, aoProgredir: etapa('Comprimindo') });
+      if (envio.controle.signal.aborted) throw new DOMException('Envio cancelado.', 'AbortError');
+      envio.li.querySelector('.envio-nome').textContent =
+        `${envio.arquivo.name} (${tamanhoLegivel(envio.arquivo.size / 1024 / 1024)} → ${tamanhoLegivel(leve.size / 1024 / 1024)})`;
+      etapa('Enviando')(0);
+      const midia = await enviarArquivo(leve, envio.conteudoId, {
         sinal: envio.controle.signal,
-        aoProgredir: (fracao) => {
-          barra.value = fracao;
-          porcentagem.textContent = `${Math.floor(fracao * 100)}%`;
-        },
+        aoProgredir: etapa('Enviando'),
       });
       midias.push(midia);
       desenhar();
@@ -163,7 +206,7 @@ function desenhar() {
     li.querySelector('.midia-posicao').textContent = midias.length > 1 ? String(i + 1) : '';
     li.querySelector('.midia-tamanho').textContent =
       `${m.tipo === 'video' ? 'Vídeo' : 'Imagem'}, ${tamanhoLegivel(Number(m.tamanho_mb))}`;
-    li.querySelector('[data-acao="baixar"]').href = `${m.arquivo_url}?download=1`;
+    configurarBaixar(li.querySelector('[data-acao="baixar"]'), m);
     li.querySelector('[data-acao="antes"]').disabled = i === 0;
     li.querySelector('[data-acao="depois"]').disabled = i === midias.length - 1;
     li.querySelector('[data-acao="antes"]').hidden = midias.length < 2;
@@ -182,7 +225,7 @@ function criarPrevia(m, i) {
     video.addEventListener('error', () => {
       const aviso = document.createElement('p');
       aviso.className = 'midia-falha';
-      aviso.textContent = 'O navegador não conseguiu tocar este vídeo. Use Baixar para ver o original.';
+      aviso.textContent = 'O navegador não conseguiu tocar este vídeo. Use Baixar para ver o arquivo.';
       video.replaceWith(aviso);
     }, { once: true });
     return video;

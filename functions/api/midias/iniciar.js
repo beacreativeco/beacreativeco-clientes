@@ -13,10 +13,11 @@ export async function onRequestPost({ request, env }) {
   if (!conteudoId || !UUID.test(conteudoId)) return responder(400, 'Conteúdo inválido.');
 
   const regra = TIPOS[tipo];
-  if (!regra) return responder(400, 'Formato de arquivo não aceito. Use JPG, PNG, WEBP, MP4 ou MOV.');
+  if (!regra) return responder(400, 'Só entram arquivos já otimizados (JPG ou MP4).');
   if (!Number.isFinite(tamanho) || tamanho <= 0) return responder(400, 'Arquivo vazio.');
   if (tamanho > LIMITE_MB[regra.tipo] * 1024 * 1024) {
-    return responder(413, `Arquivo grande demais (limite de ${LIMITE_MB[regra.tipo]} MB para ${regra.tipo}).`);
+    return responder(413, `Mesmo comprimido, o arquivo passou de ${LIMITE_MB[regra.tipo]} MB.`
+      + (regra.tipo === 'video' ? ' Encurte o vídeo ou deixe só no Drive.' : ''));
   }
 
   const [conteudo] = (await rest(env, `conteudos?select=id&id=eq.${conteudoId}`)) ?? [];

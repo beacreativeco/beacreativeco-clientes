@@ -3,7 +3,7 @@ import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
-  iniciarMidias, carregarMidias, definirFormato, midiasAtuais, enviandoArquivos, excluirTodas,
+  iniciarMidias, carregarMidias, definirFormato, definirDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 
 const form = document.getElementById('form-conteudo');
@@ -28,6 +28,7 @@ iniciarPagina('admin', async () => {
   form.legenda.addEventListener('input', atualizarContador);
   form.querySelectorAll('input[name="formato"]').forEach((r) =>
     r.addEventListener('change', () => definirFormato(form.formato.value)));
+  form.drive_url.addEventListener('input', () => definirDrive(form.drive_url.value.trim()));
   iniciarMidias({
     // Arquivo precisa de um conteúdo salvo: cria o rascunho na hora, se for novo.
     garantirConteudo: async () => {
@@ -93,6 +94,7 @@ function desenhar() {
   }
 
   definirFormato(form.formato.value);
+  definirDrive(form.drive_url.value.trim());
   atualizarContador();
   atualizarSituacao();
 }

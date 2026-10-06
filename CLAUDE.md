@@ -12,12 +12,27 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Backend: Supabase (Postgres, Auth, Realtime). Cliente JS do Supabase via CDN ou ES module.
 - Arquivos (imagens, vídeos, áudios): Cloudflare R2, acessado só pelo binding `MIDIAS` das Pages Functions (sem chaves de acesso do R2).
   - Upload sempre em partes (multipart, 10 MiB por parte) pelas funções em `functions/api/midias/`, para passar do limite de corpo de requisição das Functions e aguentar vídeos grandes.
-  - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar o original com o nome do arquivo.
+  - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar a versão do sistema com o nome do arquivo.
   - Os links de arquivo não exigem login: a proteção é a chave impossível de adivinhar (`<conteudo_id>/<uuid>.<ext>`). Decisão consciente para prévias de agência.
   - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/`. Em produção, o R2 ainda não está ativado na conta (a Bea vai decidir sobre o cartão); quando ativar, criar o bucket `beacreativeco-midias` e o binding `MIDIAS` no Pages.
+  - Regras de armazenamento: ver a seção "Armazenamento (nunca passar dos 10 GB grátis do R2)".
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
 - E-mail transacional: Resend (ou similar), a definir na implementação.
+
+## Armazenamento (nunca passar dos 10 GB grátis do R2)
+
+- **Otimizar antes de subir, no navegador da Bea.** O sistema guarda só a versão leve; o original de alta qualidade fica no Google Drive.
+  - Imagens: caber em 1080 × 1920 (nunca aumentar), JPEG qualidade 85% (`public/assets/js/otimizar.js`).
+  - Vídeos: Mediabunny (WebCodecs, aceleração do computador) em H.264, lado menor até 1080, até 30 fps, ~4 Mbps, áudio AAC, com barra de progresso. Navegador sem suporte: o envio é recusado (nunca sobe o original).
+  - O servidor só aceita o resultado otimizado: JPEG até 8 MB e MP4 até 300 MB.
+  - Baixar: quando o original não está no sistema, o botão aponta pro Drive (`drive_url` do conteúdo).
+- **Exclusão automática por tempo** com Lifecycle Rules do R2, separando os arquivos por pasta (prefixo):
+  - Conteúdos em andamento: sem regra de exclusão.
+  - Conteúdos aprovados: apagados 30 dias depois da aprovação.
+  - Conteúdos na vitrine (`na_vitrine`): pasta separada, **nunca** apagados.
+  - Arquivo já apagado: a tela mostra "Arquivo expirado, veja no Drive" com o link, nunca imagem quebrada.
+- Painel da Bea mostra quanto do espaço já foi usado (soma de `tamanho_mb` no banco dos arquivos não expirados, aproximada; aviso a partir de 8 GB).
 
 ## Regras de segurança (inegociáveis)
 
