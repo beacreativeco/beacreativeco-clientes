@@ -15,7 +15,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - Upload sempre em partes (multipart, 10 MiB por parte) pelas funções em `functions/api/midias/`, para passar do limite de corpo de requisição das Functions e aguentar vídeos grandes.
   - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar a versão do sistema com o nome do arquivo.
   - Os links de arquivo não exigem login: a proteção é a chave impossível de adivinhar (`<conteudo_id>/<uuid>.<ext>`). Decisão consciente para prévias de agência.
-  - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/`. Em produção, o R2 ainda não está ativado na conta (a Bea vai decidir sobre o cartão); quando ativar, criar o bucket `beacreativeco-midias` e o binding `MIDIAS` no Pages.
+  - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/` (sem Lifecycle Rules: para testar a expiração, mudar `expira_em` no banco). Em produção: R2 ativado na conta da BeaCreative, bucket `beacreativeco-midias` criado (Standard, acesso público desativado), alerta de orçamento de US$ 1 e de uso em 9 GB. Falta só o binding `MIDIAS` no Pages, na publicação.
   - Regras de armazenamento: ver a seção "Armazenamento (nunca passar dos 10 GB grátis do R2)".
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
@@ -28,12 +28,16 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - Vídeos: Mediabunny (WebCodecs, aceleração do computador) em H.264, lado menor até 1080, até 30 fps, ~4 Mbps, áudio AAC, com barra de progresso. Navegador sem suporte: o envio é recusado (nunca sobe o original).
   - O servidor só aceita o resultado otimizado: JPEG até 8 MB e MP4 até 300 MB.
   - Baixar: quando o original não está no sistema, o botão aponta pro Drive (`drive_url` do conteúdo).
-- **Exclusão automática por tempo** com Lifecycle Rules do R2, separando os arquivos por pasta (prefixo):
-  - Conteúdos em andamento: sem regra de exclusão.
-  - Conteúdos aprovados: apagados 30 dias depois da aprovação.
-  - Conteúdos na vitrine (`na_vitrine`): pasta separada, **nunca** apagados.
-  - Arquivo já apagado: a tela mostra "Arquivo expirado, veja no Drive" com o link, nunca imagem quebrada.
-- Painel da Bea mostra quanto do espaço já foi usado (soma de `tamanho_mb` no banco dos arquivos não expirados, aproximada; aviso a partir de 8 GB).
+- **Pastas (prefixos) no bucket**, cada uma com a sua Lifecycle Rule no R2 (`functions/_lib/midias.js`):
+  - `trabalho/<conteudo_id>/…` (rascunho, com o cliente, em ajuste, versões antigas, conversa): **sem regra**.
+  - `aprovados/<conteudo_id>/…`: regra **"apagar 30 dias depois"** (`DIAS_APROVADOS`).
+  - `vitrine/<conteudo_id>/…` (`na_vitrine`): **nunca** apagados (nenhuma regra com esse prefixo).
+  - Bucket inteiro: regra **"cancelar uploads em partes incompletos depois de 1 dia"**.
+  - Nunca criar regra de exclusão sem prefixo (pegaria a vitrine).
+  - Chaves antigas, sem pasta (`<conteudo_id>/…`), continuam válidas e contam como trabalho.
+- **Mudança de pasta:** o arquivo nasce na pasta da situação do conteúdo e, quando a situação muda, `/api/conteudo/organizar` (chamado pela página depois de enviar, retirar, aprovar ou pedir ajuste) copia para a pasta nova, atualiza o banco e só então apaga a chave antiga (`functions/_lib/armazenamento.js`). Como a cópia é um objeto novo, a regra do R2 conta a partir da aprovação. O mesmo endpoint acerta o cartão do Trello.
+- **Expiração na tela:** `midias.expira_em` e `mensagens.arquivo_expira_em` (data em que o R2 apaga). Passou da data, ou o arquivo deu 404: a tela mostra "Arquivo expirado, veja no Drive" com o link, nunca imagem quebrada (prévia, editor e conversa).
+- **Espaço usado:** página Clientes, pela função `espaco_usado()` (soma de `midias.tamanho_mb` e `mensagens.arquivo_mb` não expirados, aproximada; só admin); aviso a partir de 8 GB.
 
 ## Regras de segurança (inegociáveis)
 

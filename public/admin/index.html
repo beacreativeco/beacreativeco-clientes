@@ -36,6 +36,19 @@
         <p>Nenhum cliente ainda. Cadastre o primeiro para começar a enviar conteúdos para aprovação.</p>
       </div>
       <ul id="lista-clientes" class="lista-clientes"></ul>
+
+      <!-- Espaço usado no armazenamento (R2): 10 GB grátis, aviso a partir de 8 GB. -->
+      <section id="espaco" class="espaco" aria-labelledby="titulo-espaco" hidden>
+        <div class="espaco-topo">
+          <h2 id="titulo-espaco">Armazenamento</h2>
+          <span id="espaco-texto"></span>
+        </div>
+        <div id="espaco-barra" class="espaco-barra" role="meter" aria-labelledby="titulo-espaco" aria-valuemin="0" aria-valuemax="10">
+          <span id="espaco-uso"></span>
+        </div>
+        <p id="espaco-aviso" class="espaco-aviso" role="status" hidden></p>
+        <p class="dica">Aproximado. Os arquivos dos aprovados são apagados sozinhos 30 dias depois da aprovação; os originais ficam no Drive.</p>
+      </section>
     </main>
   </div>
 

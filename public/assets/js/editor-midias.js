@@ -3,6 +3,7 @@ import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
 import {
   FORMATOS, REGRAS_FORMATO, LIMITE_OTIMIZADO_MB, TIPOS_ARQUIVO, aceiteDoInput, problemaDoArquivo, tamanhoLegivel, tipoMime,
+  expirou, avisarSeSumiu,
 } from './conteudos.js';
 import { enviarArquivo, excluirMidia } from './upload.js';
 import { otimizarImagem, otimizarVideo } from './otimizar.js';
@@ -75,6 +76,7 @@ export function definirDrive(url) {
 }
 
 function configurarBaixar(link, m) {
+  link.hidden = expirou(m.expira_em) && !driveUrl;
   link.href = driveUrl || `${m.arquivo_url}?download=1`;
   link.textContent = driveUrl ? 'Original (Drive)' : 'Baixar';
   if (driveUrl) {
@@ -218,7 +220,16 @@ function desenhar() {
   aoMudar?.();
 }
 
+// Apagado pela exclusão automática: aviso com o Drive (o original fica lá).
+function avisoExpirado() {
+  const aviso = document.createElement('p');
+  aviso.className = 'midia-falha midia-expirada';
+  aviso.textContent = driveUrl ? 'Arquivo expirado, veja no Drive.' : 'Arquivo expirado. O original está no Drive.';
+  return aviso;
+}
+
 function criarPrevia(m, i) {
+  if (expirou(m.expira_em)) return avisoExpirado();
   if (m.tipo === 'video') {
     const video = document.createElement('video');
     video.src = m.arquivo_url;
@@ -238,6 +249,7 @@ function criarPrevia(m, i) {
   img.alt = `Arquivo ${i + 1}`;
   img.loading = 'lazy';
   img.decoding = 'async';
+  avisarSeSumiu(img, m.arquivo_url, avisoExpirado);
   return img;
 }
 

@@ -24,6 +24,22 @@ export const SITUACOES_CLIENTE = {
 
 export const LIMITE_LEGENDA = 2200; // limite do Instagram
 
+// Arquivo apagado pela exclusão automática do armazenamento (aprovados/, 30 dias depois).
+export const expirou = (quando) => Boolean(quando) && new Date(quando) <= new Date();
+
+/**
+ * Se a imagem ou o vídeo falhar ao carregar e o arquivo não existir mais (404), troca pelo
+ * aviso. Falha de outro tipo (vídeo que o navegador não toca) fica com quem chamou.
+ */
+export function avisarSeSumiu(midia, src, trocarPor) {
+  midia.addEventListener('error', async () => {
+    try {
+      const resp = await fetch(src, { method: 'HEAD', cache: 'no-store' }); // o arquivo fica em cache por 1 ano
+      if (resp.status === 404) midia.replaceWith(trocarPor());
+    } catch { /* sem internet: deixa como está */ }
+  }, { once: true });
+}
+
 // "2026-10-14" vira Date local (sem o fuso empurrar para o dia anterior).
 export function lerData(iso) {
   if (!iso) return null;

@@ -22,7 +22,31 @@ iniciarPagina('admin', async () => {
   dialogo.querySelectorAll('[data-fechar]').forEach((b) => b.addEventListener('click', () => dialogo.close()));
 
   await carregarClientes();
+  mostrarEspaco().catch(console.error); // não trava a página
 });
+
+// ---------------------------------------------------------------- armazenamento
+
+const LIMITE_GB = 10; // grátis no R2
+const AVISO_GB = 8;
+
+async function mostrarEspaco() {
+  const { data: mb, error } = await supabase.rpc('espaco_usado');
+  if (error) throw error;
+  const gb = Number(mb) / 1024;
+  const numero = (n) => n.toLocaleString('pt-BR', { maximumFractionDigits: n < 10 ? 1 : 0 });
+  const texto = gb < 1 ? `${numero(Number(mb))} MB de ${LIMITE_GB} GB` : `${numero(gb)} GB de ${LIMITE_GB} GB`;
+  document.getElementById('espaco-texto').textContent = texto;
+  const barra = document.getElementById('espaco-barra');
+  barra.setAttribute('aria-valuenow', gb.toFixed(2));
+  barra.setAttribute('aria-valuetext', texto);
+  barra.classList.toggle('alerta', gb >= AVISO_GB);
+  document.getElementById('espaco-uso').style.width = `${Math.min(100, (gb / LIMITE_GB) * 100)}%`;
+  const aviso = document.getElementById('espaco-aviso');
+  aviso.hidden = gb < AVISO_GB;
+  aviso.textContent = 'Passou de 8 GB: perto do limite grátis de 10 GB. Vale apagar rascunhos antigos que não vão mais ao ar.';
+  document.getElementById('espaco').hidden = false;
+}
 
 // ---------------------------------------------------------------- lista
 

@@ -19,6 +19,14 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [0.9.0] — 06/10/2026
+
+### Novidades
+
+- Os arquivos dos conteúdos aprovados são apagados sozinhos do sistema 30 dias depois da aprovação; o original continua no Drive. Conteúdos em andamento e os da vitrine não são apagados.
+- Quando um arquivo já foi apagado, aparece "Arquivo expirado, veja no Drive" com o link, no lugar da imagem.
+- Na página Clientes, a Bea vê quanto do espaço de armazenamento já foi usado, com aviso quando passar de 8 GB.
+
 ## [0.8.0] — 06/10/2026
 
 ### Novidades

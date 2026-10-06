@@ -172,6 +172,7 @@ function atualizarPrevia() {
     legenda: form.legenda.value,
     data: form.data_prevista.value || null,
     cliente,
+    drive: form.drive_url.value.trim(),
   });
 }
 
@@ -309,7 +310,7 @@ async function enviarParaAprovacao() {
   conteudo = data;
   atualizarSituacao();
   avisar('Enviado para aprovação.');
-  refletirNoTrello(conteudo.id);
+  organizarDepois(conteudo.id);
 }
 
 async function voltarParaRascunho() {
@@ -320,13 +321,14 @@ async function voltarParaRascunho() {
   conteudo = data;
   atualizarSituacao();
   avisar('Voltou para rascunho. O cliente não vê mais este conteúdo.');
-  refletirNoTrello(conteudo.id);
+  organizarDepois(conteudo.id);
 }
 
-// Leva ao cartão do Trello o que acabou de acontecer (etiquetas e comentário). Não trava
-// a tela: se o Trello falhar, a ação no sistema já valeu e a próxima chamada acerta o cartão.
-function refletirNoTrello(id) {
-  chamarServidor('/api/trello/refletir', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
+// Depois de mudar a situação, o servidor acerta o que fica fora do banco: a pasta dos arquivos
+// no armazenamento (ex.: aprovados/, apagados 30 dias depois) e o cartão do Trello. Não trava a
+// tela: se falhar, a ação no sistema já valeu e a próxima chamada acerta o resto.
+function organizarDepois(id) {
+  chamarServidor('/api/conteudo/organizar', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
 }
 
 

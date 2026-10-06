@@ -152,6 +152,27 @@
   filter: blur(24px) brightness(0.75);
 }
 
+/* Arquivo apagado pela exclusão automática: aviso no lugar da imagem. */
+.ig-expirado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 6);
+  width: 100%;
+  height: 100%;
+  min-height: calc(var(--u) * 200);
+  padding: calc(var(--u) * 24);
+  background: #1F1A17;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: calc(var(--u) * 14);
+  text-align: center;
+}
+
+.ig-expirado p { margin: 0; }
+.ig-expirado a { color: #fff; font-weight: 600; }
+.ig-expirado-dica { opacity: 0.7; font-size: calc(var(--u) * 12); }
+
 .ig-vazio {
   padding: calc(var(--u) * 24);
   color: rgba(255, 255, 255, 0.75);

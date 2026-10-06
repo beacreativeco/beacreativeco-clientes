@@ -27,7 +27,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conteudo = c.data;
   cliente = cad.data;
 
-  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem')
+  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
     .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem');
   if (midias.error) throw midias.error;
 
@@ -37,6 +37,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
     legenda: conteudo.legenda ?? '',
     data: conteudo.data_prevista,
     cliente,
+    drive: conteudo.drive_url ?? '',
   });
 
   // "Pedir ajuste" abre a conversa: a próxima mensagem do cliente vira o pedido.
@@ -56,7 +57,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
       conteudo = data;
       desenhar();
       avisar('Pedido de ajuste enviado para a Bea.');
-      refletirNoTrello(conteudo.id);
+      organizarDepois(conteudo.id);
     },
   });
   await conversa.carregar();
@@ -157,13 +158,14 @@ async function decidir(botao, chamada, sucesso) {
   desenhar();
   if (conteudo.status === 'aprovado') $('resultado').classList.add('acabou-de-aprovar');
   avisar(sucesso);
-  refletirNoTrello(conteudo.id);
+  organizarDepois(conteudo.id);
 }
 
-// Leva ao cartão do Trello o que acabou de acontecer (etiquetas e comentário). Não trava
-// a tela: se o Trello falhar, a ação no sistema já valeu e a próxima chamada acerta o cartão.
-function refletirNoTrello(id) {
-  chamarServidor('/api/trello/refletir', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
+// Depois de mudar a situação, o servidor acerta o que fica fora do banco: a pasta dos arquivos
+// no armazenamento (ex.: aprovados/, apagados 30 dias depois) e o cartão do Trello. Não trava a
+// tela: se falhar, a ação no sistema já valeu e a próxima chamada acerta o resto.
+function organizarDepois(id) {
+  chamarServidor('/api/conteudo/organizar', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
 }
 
 

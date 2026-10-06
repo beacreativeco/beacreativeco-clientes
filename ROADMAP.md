@@ -63,8 +63,36 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
      - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
    - [ ] 4c. Tempo real com o webhook do Trello (só com o site publicado, junto do item 7)
-5. [ ] **Exclusão automática das mídias e espaço usado no painel**
+5. [ ] **Exclusão automática das mídias e espaço usado no painel** (versão 0.9.0, migração `20261013000000`)
+   - [x] R2 ativado na conta da BeaCreative: bucket `beacreativeco-midias` (Standard, sem acesso público), alerta de orçamento de US$ 1 e de uso em 9 GB
+   - [x] Pastas `trabalho/`, `aprovados/`, `vitrine/`; arquivos novos já nascem na pasta da situação; `/api/conteudo/organizar` move ao mudar de situação (chaves antigas, sem pasta, continuam funcionando)
+   - [x] Prazos: `aprovados/` 30 dias depois da aprovação; `vitrine/` nunca; `trabalho/` sem regra; uploads incompletos cancelados depois de 1 dia
+   - [x] "Arquivo expirado, veja no Drive" na prévia, no editor e na conversa (pela data ou quando o arquivo dá 404)
+   - [x] Espaço usado na página Clientes, com aviso a partir de 8 GB
+   - [x] Testado no bucket local: aprovar move para `aprovados/` com validade de 30 dias; voltar desfaz; arquivo de outro conteúdo não é tocado; "expirado" na prévia e na conversa
+   - [ ] Criar as Lifecycle Rules no painel da Cloudflare (passo a passo combinado em 06/10/2026)
+   - Binding `MIDIAS` do bucket com o projeto do Pages: na publicação (item 7)
+5b. [ ] **Excluir cliente** (plano aprovado em 06/10/2026)
+   - Também para quem nunca recebeu convite (sem login para suspender)
+   - Botão "Excluir cliente" na página do cliente, só com o acesso suspenso
+   - Confirmação forte: digitar o nome do cliente, aviso de que não dá para desfazer, e o que vai ser apagado (conteúdos, conversas, arquivos e o espaço liberado)
+   - Apaga login, conteúdos, conversas e todos os arquivos dele no R2 (todas as pastas)
+   - Vitrine: se houver conteúdos na vitrine, a Bea escolhe manter (o cadastro fica arquivado, sem login, só para a vitrine) ou apagar junto
+   - No servidor (`/api/clientes/excluir`), com a chave de serviço, conferindo que é a admin; o Trello não é tocado
+5c. [ ] **Perfil da Bea** (no padrão do menu do avatar do LAEG-BIO)
+   - Foto ou iniciais no topo, abrindo o menu: nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
+   - Meu perfil: foto, nome, e-mail (dá para trocar, com confirmação no e-mail novo) e troca de senha
+   - Dados da agência: nome, WhatsApp, Instagram e e-mail de contato (usados no envio do link e nos e-mails aos clientes, quando essas partes entrarem)
+   - Foto e nome da Bea nos balões da conversa, do lado do cliente
+5d. [ ] **Perfil do cliente** (mesmo estilo)
+   - Foto (ou logo) e nome de quem aprova os conteúdos; e-mail só leitura (quem troca é a Bea); troca de senha
+   - Foto e nome nos balões da conversa, do lado da Bea
+   - A foto e o @ da prévia dos posts continuam os que a Bea cadastrou (o cliente não mexe)
+   - Atalho para "Sobre o sistema" no menu do perfil
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"
+5e. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
+   - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
+   - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
 6. [ ] **Avisos por e-mail**
 7. [ ] **Publicação (versão 1.0.0):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
    - Variáveis no Pages: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TRELLO_API_KEY`, `TRELLO_API_SECRET`, `TRELLO_TOKEN` e `SITE_URL` (`https://clientes.beacreativeco.com.br`, liga o link do sistema nos cartões do Trello)

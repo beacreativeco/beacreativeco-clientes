@@ -4,6 +4,7 @@
 // Medidas em "u": 1u = 1/390 da largura da tela (largura lógica de um iPhone), então tudo
 // fica proporcional em qualquer tamanho. As faixas das guias estão em pixels de um vídeo
 // 1080 × 1920, que é como a Bea monta o arquivo no CapCut ou no Canva.
+import { expirou, avisarSeSumiu } from './conteudos.js';
 
 const FAIXAS = {
   reels: [
@@ -146,11 +147,28 @@ function dataDoFeed(iso) {
   return new Date(a, m - 1, d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
 }
 
-function criarMidia(m, { video: opcoesVideo = {}, fundo = false } = {}) {
+// Arquivo que a exclusão automática já apagou: aviso no lugar, nunca imagem quebrada.
+function expirado(drive) {
+  const caixa = el('div', 'ig-expirado', el('p', null, 'Arquivo expirado'));
+  if (drive) {
+    const link = el('a', null, 'Veja no Drive');
+    link.href = drive;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    caixa.append(link);
+  } else {
+    caixa.append(el('p', 'ig-expirado-dica', 'O original está no Drive.'));
+  }
+  return caixa;
+}
+
+function criarMidia(m, { video: opcoesVideo = {}, fundo = false, drive = '' } = {}) {
+  if (expirou(m.expira_em)) return expirado(drive);
   if (m.tipo === 'video') {
     const v = el('video', 'ig-video');
     Object.assign(v, { src: m.arquivo_url, muted: true, playsInline: true, preload: 'auto', ...opcoesVideo });
     v.setAttribute('playsinline', '');
+    avisarSeSumiu(v, m.arquivo_url, () => expirado(drive));
     return v;
   }
   const img = new Image();
@@ -158,11 +176,19 @@ function criarMidia(m, { video: opcoesVideo = {}, fundo = false } = {}) {
   img.alt = '';
   img.decoding = 'async';
   img.className = 'ig-imagem';
-  if (!fundo) return img;
+  if (!fundo) {
+    avisarSeSumiu(img, m.arquivo_url, () => expirado(drive));
+    return img;
+  }
   // Story com foto fora de 9:16: o app preenche o fundo com a própria foto desfocada.
   const fundoImg = img.cloneNode();
   fundoImg.className = 'ig-imagem-fundo';
-  return el('div', 'ig-imagem-com-fundo', fundoImg, img);
+  const caixa = el('div', 'ig-imagem-com-fundo', fundoImg, img);
+  img.addEventListener('error', () => {
+    fetch(m.arquivo_url, { method: 'HEAD', cache: 'no-store' })
+      .then((r) => { if (r.status === 404) caixa.replaceWith(expirado(drive)); }).catch(() => {});
+  }, { once: true });
+  return caixa;
 }
 
 function vazio(texto) {
@@ -200,7 +226,7 @@ function montarReels(estado, tela) {
   let video = null;
 
   if (m) {
-    video = criarMidia(m, { video: { loop: true, autoplay: true } });
+    video = criarMidia(m, { video: { loop: true, autoplay: true }, drive: estado.drive });
     palco.append(video);
   } else {
     palco.append(vazio(estado.midias.length ? 'Reels precisa de vídeo.' : 'Adicione o vídeo para ver a prévia.'));
@@ -311,7 +337,7 @@ function montarStory(estado, tela) {
     const m = itens[atual];
     feitas.forEach((f, n) => { f.style.width = n < atual ? '100%' : '0%'; });
     video?.pause();
-    const midia = criarMidia(m, { fundo: true, video: { autoplay: true, muted: !somLigado } });
+    const midia = criarMidia(m, { fundo: true, video: { autoplay: true, muted: !somLigado }, drive: estado.drive });
     video = m.tipo === 'video' ? midia : null;
     botaoSom.hidden = !video;
     video?.addEventListener('ended', () => mostrar(atual + 1));
@@ -400,7 +426,7 @@ function montarFeed(estado, tela) {
     trilho.append(el('div', 'ig-post-item', vazio('Adicione as imagens para ver a prévia.')));
   }
   for (const m of itens) {
-    const item = el('div', 'ig-post-item', criarMidia(m, { video: { loop: true, autoplay: true } }));
+    const item = el('div', 'ig-post-item', criarMidia(m, { video: { loop: true, autoplay: true }, drive: estado.drive }));
     if (m.tipo === 'video') {
       const v = item.firstChild;
       videos.push(v);
@@ -525,7 +551,7 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
     botaoGuias.setAttribute('aria-pressed', String(ligadas));
   });
 
-  const estado = { formato: 'post', midias: [], legenda: '', cliente: null, data: null };
+  const estado = { formato: 'post', midias: [], legenda: '', cliente: null, data: null, drive: '' };
   let montada = null;
   let chave = '';
   // Mudou a largura (girar o celular, abrir a lateral): o corte da legenda muda junto.
@@ -542,7 +568,7 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
     atualizar(novo) {
       Object.assign(estado, novo);
       const novaChave = JSON.stringify([estado.formato, estado.data, estado.cliente?.instagram,
-        estado.cliente?.foto_perfil, estado.midias.map((m) => m.arquivo_url)]);
+        estado.cliente?.foto_perfil, estado.midias.map((m) => [m.arquivo_url, m.expira_em])]);
       if (novaChave !== chave) {
         chave = novaChave;
         montada?.parar();

@@ -275,8 +275,11 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       corpo.append(el('p', 'conversa-texto', m.autor === eu ? 'Você apagou esta mensagem' : 'Mensagem apagada'));
     } else {
       if (m.pedido_ajuste) corpo.append(el('span', 'conversa-etiqueta', 'Pedido de ajuste'));
-      if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
-      if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s, m.onda));
+      // Já apagado pela exclusão automática (aprovados/, 30 dias depois): só o aviso.
+      const sumiu = m.arquivo_url && m.arquivo_expira_em && new Date(m.arquivo_expira_em) <= new Date();
+      if (sumiu) corpo.append(el('p', 'conversa-expirado', m.tipo === 'audio' ? 'Áudio expirado' : 'Imagem expirada'));
+      else if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
+      else if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s, m.onda));
       if (m.texto) corpo.append(el('p', 'conversa-texto', textoComLinks(m.texto)));
     }
     corpo.append(el('span', 'conversa-hora', `${m.editada_em && !m.apagada_em ? 'editada ' : ''}${hora(m.criado_em)}`));
@@ -445,7 +448,8 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     });
     const corpo = await resp.json().catch(() => ({}));
     if (!resp.ok) throw Object.assign(new Error(corpo.erro || 'O arquivo não foi enviado.'), { code: 'P0001' });
-    return corpo.arquivo_url;
+    // Tamanho e validade vão junto na mensagem (espaço usado no painel e "expirado" na tela).
+    return { arquivo_url: corpo.arquivo_url, arquivo_mb: corpo.arquivo_mb ?? null, arquivo_expira_em: corpo.arquivo_expira_em ?? null };
   }
 
   // Manda uma mensagem com arquivo; no modo "Pedir ajuste", ela vira o pedido.
@@ -471,9 +475,9 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       rolarProFim();
       try {
         const leve = await otimizarImagem(arquivo);
-        const arquivoUrl = await subirArquivo(leve);
+        const arquivo = await subirArquivo(leve);
         espera.remove();
-        await enviarComArquivo({ tipo: 'referencia', arquivo_url: arquivoUrl });
+        await enviarComArquivo({ tipo: 'referencia', ...arquivo });
         rolarProFim();
         marcarLida(true);
       } catch (err) {
@@ -580,9 +584,9 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     try {
       const { arquivo, duracao, onda } = await atual.concluir();
       if (duracao < 1) throw Object.assign(new Error('Áudio curto demais. Toque no microfone, fale e depois envie.'), { code: 'P0001' });
-      const arquivoUrl = await subirArquivo(arquivo);
+      const enviado = await subirArquivo(arquivo);
       espera.remove();
-      await enviarComArquivo({ tipo: 'audio', arquivo_url: arquivoUrl, duracao_s: duracao, onda });
+      await enviarComArquivo({ tipo: 'audio', ...enviado, duracao_s: duracao, onda });
       rolarProFim();
       marcarLida(true);
     } catch (err) {
@@ -776,7 +780,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
 
   async function carregar() {
     const { data, error } = await supabase.from('mensagens')
-      .select('id, autor, tipo, texto, arquivo_url, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
+      .select('id, autor, tipo, texto, arquivo_url, arquivo_expira_em, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
       .eq('conteudo_id', conteudoId).order('criado_em');
     if (error) throw error;
     data.forEach(adicionar);

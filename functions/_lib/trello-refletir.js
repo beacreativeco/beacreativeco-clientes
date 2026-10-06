@@ -1,39 +1,21 @@
-// POST /api/trello/refletir  { conteudo_id }
-// Sistema → Trello. Chamado pela página depois de enviar ao cliente, retirar, aprovar ou
-// pedir ajuste. Não confia em quem chama: lê o estado no banco e deixa o cartão igual a ele.
+// Sistema → Trello: deixa o cartão igual ao conteúdo no banco (não confia em quem chamou).
 //   - etiqueta AGUARDANDO APROVAÇÃO enquanto está com o cliente; APROVADO quando aprovado;
 //   - um comentário por aprovação ou pedido de ajuste ainda não levado ao Trello;
 //   - o anexo "Abrir no sistema de aprovação" (só com SITE_URL, ou seja, com o site no ar).
-// Pode ser chamado de novo à vontade: o que já está no cartão não se repete.
-import { responder, exigirAcessoConversa, rest, UUID } from '../../_lib/servidor.js';
-import { trello, trelloConfigurado } from '../../_lib/trello.js';
+// Pode rodar de novo à vontade: o que já está no cartão não se repete.
+// Chamado por /api/conteudo/organizar, depois de cada mudança de situação.
+import { rest } from './servidor.js';
+import { trello } from './trello.js';
 
 const AGUARDANDO = { nome: 'AGUARDANDO APROVAÇÃO', cor: 'yellow' };
 const APROVADO = { nome: 'APROVADO', cor: 'green' };
 const PREFIXO = 'Sistema de aprovação:';
 
-export async function onRequestPost({ request, env }) {
-  const corpo = await request.json().catch(() => null);
-  const conteudoId = corpo?.conteudo_id;
-  if (!conteudoId || !UUID.test(conteudoId)) return responder(400, 'Conteúdo inválido.');
-
-  const { resposta } = await exigirAcessoConversa(request, env, conteudoId);
-  if (resposta) return resposta;
-  if (!trelloConfigurado(env)) return responder(200, null, { ok: true, trello: false });
-
-  try {
-    return responder(200, null, { ok: true, ...(await refletir(env, conteudoId)) });
-  } catch (err) {
-    console.error('refletir', conteudoId, err);
-    return responder(502, err.message || 'Não foi possível atualizar o Trello.');
-  }
-}
-
 const quando = (iso) => new Date(iso).toLocaleString('pt-BR', {
   timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
 }).replace(', ', ' às ');
 
-async function refletir(env, conteudoId) {
+export async function refletirNoTrello(env, conteudoId) {
   const [conteudo] = (await rest(env,
     `conteudos?select=id,titulo,status,aprovado_por,trello_card_id,clientes(nome,trello_board_id),conteudos_internos(trello_refletido_ate,trello_anexado)&id=eq.${conteudoId}`)) ?? [];
   if (!conteudo?.trello_card_id || !conteudo.clientes?.trello_board_id) return { trello: false };
