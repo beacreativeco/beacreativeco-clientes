@@ -15,11 +15,12 @@ export async function iniciarPagina(area, montar) {
     const acesso = await protegerPagina(area);
     if (!acesso) return; // já está redirecionando
     await montar(acesso);
+    if (area === 'admin') montarNavegacaoAdmin();
     carregando.hidden = true;
     app.hidden = false;
     // Rodapé com "Sobre o sistema" (versão, novidades e créditos), nos dois lados.
     import('./sobre.js').then((m) => m.ligarRodapeSobre(app)).catch(console.error);
-    // Painel da Bea: "Mensagens" no topo, avisos e notificação de mensagens novas.
+    // Painel da Bea: contador de não lidas, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);
     }
@@ -27,6 +28,30 @@ export async function iniciarPagina(area, montar) {
     console.error(err);
     mostrarFalhaAoCarregar(carregando);
   }
+}
+
+// Painel da Bea: Clientes · Calendário · Mensagens, logo abaixo do topo.
+// O contador de não lidas no "Mensagens" é pendurado por avisos-admin.js.
+const NAVEGACAO_ADMIN = [
+  { texto: 'Clientes', href: '/admin/', ativo: (p) => p === '/admin/' || p.startsWith('/admin/cliente/') },
+  { texto: 'Calendário', href: '/admin/calendario/', ativo: (p) => p.startsWith('/admin/calendario/') },
+  { texto: 'Mensagens', href: '/admin/mensagens/', ativo: (p) => p.startsWith('/admin/mensagens/') },
+];
+
+function montarNavegacaoAdmin() {
+  const topo = document.querySelector('.topo');
+  if (!topo || document.querySelector('.painel-nav')) return;
+  const nav = document.createElement('nav');
+  nav.className = 'painel-nav';
+  nav.setAttribute('aria-label', 'Painel');
+  for (const item of NAVEGACAO_ADMIN) {
+    const a = document.createElement('a');
+    a.href = item.href;
+    a.textContent = item.texto;
+    if (item.ativo(location.pathname)) a.setAttribute('aria-current', 'page');
+    nav.append(a);
+  }
+  topo.after(nav);
 }
 
 function mostrarFalhaAoCarregar(container) {

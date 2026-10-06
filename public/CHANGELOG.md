@@ -19,6 +19,18 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [0.7.0] — 06/10/2026
+
+### Novidades
+
+- Calendário no painel da Bea: as entregas de todos os clientes no mês, cada cliente com a sua cor, e quantas entregas e aprovações cada um tem no mês.
+- Tocar num cliente no calendário mostra só as entregas dele; tocar numa entrega abre o conteúdo.
+- No celular, o calendário vira uma lista com os dias que têm entrega.
+
+### Melhorias
+
+- O painel da Bea ganhou uma barra de navegação: Clientes, Calendário e Mensagens (com o número de mensagens não lidas).
+
 ## [0.6.0] — 06/10/2026
 
 ### Novidades

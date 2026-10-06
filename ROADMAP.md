@@ -45,11 +45,16 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - [x] Monograma b✦ no "Carregando…", na falha ao carregar e nas telas vazias
    - [x] Painel da Bea: botões dos cabeçalhos não quebram mais em duas linhas no celular
    - [x] Páginas do cliente revisadas (360, 390 e computador): "Pedir ajuste" não quebra mais em duas linhas
-4. [ ] **Página da Bea: clientes, calendário e Trello**
-   - Visão de todos os clientes e calendário com as entregas (quantas por cliente, datas)
-   - Trello manda: cada cartão vira um conteúdo (cliente, data, formato); mexer no Trello atualiza o sistema
-   - Webhook do Trello só chega com o site publicado; no localhost, sincronizar sob demanda
-   - Antes de começar: ver como o quadro dela está organizado (listas, etiquetas, um quadro por cliente ou um só)
+4. [ ] **Página da Bea: clientes, calendário e Trello** (o sistema complementa o Trello, não substitui: conversa nos dois sentidos)
+   - [x] 4a. Calendário (versão 0.7.0): `/admin/calendario/`, entregas do mês de todos os clientes com cor por cliente, total e aprovadas por cliente (filtra ao tocar), grade no computador e lista por dia no celular, "Sem data"; navegação Clientes · Calendário · Mensagens no painel
+   - [ ] 4b. Trello ↔ sistema
+     - Quadros das clientes (vistos em 06/10/2026): "comunicação - casa coelho", "comunicação | j.franco", "comunicação | le bel"; listas por mês e "[FEED] semana um…cinco"; cartão sem título com capa = separador de semana
+     - Padrão combinado: data e formato no título do cartão ("13/10 · Reels · Título", como já faz o Casa Coelho); a "Data de entrega" do Trello fica livre para os prazos internos da Bea
+     - Etiquetas de etapa (GRAVAR, GRAVADO, EDITAR, CRIAR ARTE, AGUARDANDO APROVAÇÃO, PROGRAMAR, PROGRAMADO, POSTADO) viram a etapa no sistema, só para a Bea (em `conteudos_internos`)
+     - Trello → sistema: título, data, formato e etapa; nunca mexe em situação, mídias e legenda
+     - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
+     - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
+   - [ ] 4c. Tempo real com o webhook do Trello (só com o site publicado, junto do item 7)
 5. [ ] **Exclusão automática das mídias e espaço usado no painel**
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"
 6. [ ] **Avisos por e-mail**

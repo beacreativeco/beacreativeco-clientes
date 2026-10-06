@@ -1,5 +1,5 @@
 // Avisos de mensagens no painel da Bea (ligado em toda página da admin por ui.js):
-// "Mensagens" com o número de não lidas no topo, aviso na tela e notificação do
+// "Mensagens" com o número de não lidas na navegação, aviso na tela e notificação do
 // navegador quando um cliente escreve. As listas ouvem o evento 'mensagens-mudaram'.
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
@@ -23,22 +23,14 @@ export async function iniciarAvisosAdmin() {
     .subscribe();
 }
 
+// O link "Mensagens" vem da navegação do painel (ui.js); aqui só entra o contador.
 function montarLinkNoTopo() {
-  const topo = document.querySelector('.topo');
-  const sair = document.getElementById('sair');
-  if (!topo || !sair || topo.querySelector('.topo-mensagens')) return;
-  const link = document.createElement('a');
-  link.className = 'topo-mensagens';
-  link.href = '/admin/mensagens/';
-  link.textContent = 'Mensagens';
+  const link = document.querySelector('.painel-nav a[href="/admin/mensagens/"]');
+  if (!link || link.querySelector('.nao-lidas')) return;
   contador = document.createElement('span');
   contador.className = 'nao-lidas';
   contador.hidden = true;
   link.append(contador);
-  const acoes = document.createElement('div');
-  acoes.className = 'topo-acoes';
-  sair.replaceWith(acoes);
-  acoes.append(link, sair);
 }
 
 async function recontar() {

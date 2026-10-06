@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/base.css">
-  <title>Mensagens · BeaCreative</title>
+  <title>Calendário · BeaCreative</title>
 </head>
 <body>
   <div id="carregando" class="carregando" role="status"><img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256"><span class="carregando-texto">Carregando…</span></div>
@@ -25,43 +25,43 @@
       <button id="sair" class="botao-link" type="button">Sair</button>
     </header>
 
-    <main class="conteudo-pagina">
-
+    <main class="conteudo-pagina calendario-pagina">
       <div class="cabecalho-secao">
-        <div>
-          <h1>Mensagens</h1>
-          <p id="resumo" class="subtitulo"></p>
+        <h1>Calendário</h1>
+        <div class="cal-mes" role="group" aria-label="Mês">
+          <button id="mes-anterior" class="cal-seta" type="button" aria-label="Mês anterior">‹</button>
+          <p id="mes-nome" class="cal-mes-nome" aria-live="polite"></p>
+          <button id="mes-seguinte" class="cal-seta" type="button" aria-label="Próximo mês">›</button>
+          <button id="mes-hoje" class="botao-link cal-hoje" type="button">Hoje</button>
         </div>
-        <button id="ativar-notificacoes" class="botao-secundario" type="button" hidden>Avisar no navegador</button>
       </div>
-      <p id="notificacoes-info" class="dica" hidden></p>
 
-      <div id="caixa-vazia" class="vazio" hidden>
+      <!-- Entregas do mês por cliente; tocar num cliente filtra o calendário. -->
+      <section class="cal-resumo" aria-labelledby="titulo-resumo">
+        <h2 id="titulo-resumo" class="so-leitor">Entregas do mês por cliente</h2>
+        <p id="resumo-total" class="subtitulo"></p>
+        <ul id="resumo-clientes" class="cal-clientes"></ul>
+      </section>
+
+      <div id="cal-vazio" class="vazio" hidden>
         <img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256">
-        <p>Nenhuma conversa ainda. Quando um cliente escrever, aprovar ou pedir ajuste, aparece aqui.</p>
+        <p>Nenhuma entrega com data neste mês.</p>
       </div>
-      <ol id="caixa" class="caixa"></ol>
+
+      <!-- Computador: grade do mês. Celular: lista por dia (só os dias com entrega). -->
+      <div id="grade" class="cal-grade" role="table" aria-label="Entregas do mês"></div>
+      <ol id="lista-dias" class="cal-dias"></ol>
+
+      <section id="sem-data" class="cal-sem-data" aria-labelledby="titulo-sem-data" hidden>
+        <h2 id="titulo-sem-data">Sem data</h2>
+        <p class="subtitulo">Conteúdos que ainda não têm data de publicação.</p>
+        <ul id="lista-sem-data" class="cal-itens"></ul>
+      </section>
     </main>
   </div>
 
-  <template id="modelo-conversa">
-    <li class="caixa-item">
-      <a class="caixa-link">
-        <span class="caixa-topo">
-          <span class="caixa-cliente"></span>
-          <span class="caixa-quando"></span>
-        </span>
-        <span class="caixa-titulo"></span>
-        <span class="caixa-rodape">
-          <span class="caixa-previa"></span>
-          <span class="nao-lidas" hidden></span>
-        </span>
-      </a>
-    </li>
-  </template>
-
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <script type="module" src="/assets/js/admin-mensagens.js"></script>
+  <script type="module" src="/assets/js/admin-calendario.js"></script>
 </body>
 </html>
