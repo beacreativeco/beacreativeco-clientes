@@ -12,6 +12,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Backend: Supabase (Postgres, Auth, Realtime). Cliente JS do Supabase via CDN ou ES module.
 - Arquivos (imagens, vídeos, áudios): Cloudflare R2.
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
+- Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
 - E-mail transacional: Resend (ou similar), a definir na implementação.
 
 ## Regras de segurança (inegociáveis)

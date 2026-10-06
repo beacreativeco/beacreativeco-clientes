@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Clientes · BeaCreative</title>
+</head>
+<body>
+  <div id="carregando" class="carregando">Carregando…</div>
+
+  <div id="app" hidden>
+    <header class="topo">
+      <span class="titulo">BeaCreative</span>
+      <button id="sair" class="botao-link" type="button">Sair</button>
+    </header>
+
+    <main class="conteudo-pagina">
+      <div class="cabecalho-secao">
+        <h1>Clientes</h1>
+        <button id="novo-cliente" class="botao botao-compacto" type="button">Novo cliente</button>
+      </div>
+
+      <p id="lista-vazia" class="vazio" hidden>
+        Nenhum cliente ainda. Cadastre o primeiro para começar a enviar conteúdos para aprovação.
+      </p>
+      <ul id="lista-clientes" class="lista-clientes"></ul>
+    </main>
+  </div>
+
+  <template id="modelo-cliente">
+    <li class="cliente">
+      <div class="cliente-info">
+        <span class="cliente-nome"></span>
+        <span class="cliente-meta"></span>
+      </div>
+      <span class="situacao"></span>
+      <div class="cliente-acoes">
+        <button class="botao-link" type="button" data-acao="editar">Editar</button>
+        <button class="botao-secundario" type="button" data-acao=""></button>
+      </div>
+    </li>
+  </template>
+
+  <dialog id="dialogo-cliente" class="dialogo" aria-labelledby="titulo-dialogo">
+    <form id="form-cliente" novalidate>
+      <header class="dialogo-topo">
+        <h2 id="titulo-dialogo">Novo cliente</h2>
+        <button class="botao-fechar" type="button" data-fechar aria-label="Fechar">×</button>
+      </header>
+
+      <div id="aviso-form" class="aviso erro" role="alert" hidden></div>
+
+      <div class="campo">
+        <label for="c-nome">Nome da marca</label>
+        <input id="c-nome" name="nome" type="text" required autocomplete="off">
+      </div>
+      <div class="campo">
+        <label for="c-email">E-mail de acesso</label>
+        <input id="c-email" name="email" type="email" autocomplete="off">
+        <small class="dica">O convite para criar a senha vai para este e-mail.</small>
+      </div>
+      <div class="campos-lado-a-lado">
+        <div class="campo">
+          <label for="c-instagram">Instagram</label>
+          <input id="c-instagram" name="instagram" type="text" placeholder="@marca" autocomplete="off">
+        </div>
+        <div class="campo">
+          <label for="c-whatsapp">WhatsApp</label>
+          <input id="c-whatsapp" name="whatsapp" type="tel" placeholder="(11) 91234-5678" autocomplete="off">
+        </div>
+      </div>
+      <div class="campo">
+        <label for="c-drive">Pasta no Drive</label>
+        <input id="c-drive" name="drive_pasta_url" type="url" placeholder="https://drive.google.com/…" autocomplete="off">
+      </div>
+      <div class="campos-lado-a-lado">
+        <div class="campo">
+          <label for="c-prazo">Prazo para aprovar (dias)</label>
+          <input id="c-prazo" name="prazo_padrao_dias" type="number" min="0" max="30" value="2">
+        </div>
+        <div class="campo">
+          <label for="c-inicio">Início do contrato</label>
+          <input id="c-inicio" name="contrato_inicio" type="date">
+        </div>
+      </div>
+
+      <footer class="dialogo-rodape">
+        <button class="botao-link" type="button" data-fechar>Cancelar</button>
+        <button class="botao botao-compacto" type="submit">Salvar cliente</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/assets/js/admin-clientes.js"></script>
+</body>
+</html>

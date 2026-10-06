@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <!-- The Seasons (Adobe Fonts): adicionar o <link> do kit aqui quando o subdomínio estiver liberado no kit -->
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -54,11 +54,16 @@
     }
 
     // Já logado? Vai direto pra área certa.
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      const destino = decidirDestino(await carregarPerfil(session.user.id));
-      if (destino.rota) window.location.replace(destino.rota);
-      else await supabase.auth.signOut();
+    // Se falhar, só fica na tela de login normalmente.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const destino = decidirDestino(await carregarPerfil(session.user.id));
+        if (destino.rota) window.location.replace(destino.rota);
+        else await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.error(err);
     }
 
     form.addEventListener('submit', async (e) => {

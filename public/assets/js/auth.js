@@ -50,7 +50,16 @@ export async function entrar(email, senha) {
     );
   }
 
-  const destino = decidirDestino(await carregarPerfil(data.user.id));
+  let perfil;
+  try {
+    perfil = await carregarPerfil(data.user.id);
+  } catch (err) {
+    console.error(err);
+    await supabase.auth.signOut();
+    throw new Error('Não foi possível carregar seu acesso. Confira sua internet e tente de novo.');
+  }
+
+  const destino = decidirDestino(perfil);
   if (destino.erro) {
     await supabase.auth.signOut();
     throw new Error(destino.erro);

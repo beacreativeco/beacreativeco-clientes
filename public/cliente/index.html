@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <!-- The Seasons (Adobe Fonts): adicionar o <link> do kit aqui quando o subdomínio estiver liberado no kit -->
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/base.css">
-  <title>Painel · BeaCreative</title>
+  <title>Seus conteúdos · BeaCreative</title>
 </head>
 <body>
   <div id="carregando" class="carregando">Carregando…</div>
@@ -20,20 +20,19 @@
       <button id="sair" class="botao-link" type="button">Sair</button>
     </header>
     <main class="conteudo-pagina">
-      <h2>Painel</h2>
-      <!-- Próxima etapa: lista e cadastro de clientes -->
+      <h2 id="saudacao">Seus conteúdos</h2>
+      <!-- Próxima etapa: lista de conteúdos com preview estilo Instagram -->
     </main>
   </div>
 
   <script type="module">
-    import { protegerPagina, sair } from '/assets/js/auth.js';
+    import { sair } from '/assets/js/auth.js';
+    import { iniciarPagina } from '/assets/js/ui.js';
 
-    const acesso = await protegerPagina('admin');
-    if (acesso) {
+    iniciarPagina('cliente', ({ perfil }) => {
+      document.getElementById('saudacao').textContent = 'Olá, ' + perfil.cliente.nome;
       document.getElementById('sair').addEventListener('click', sair);
-      document.getElementById('carregando').hidden = true;
-      document.getElementById('app').hidden = false;
-    }
+    });
   </script>
 </body>
 </html>
