@@ -78,6 +78,11 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Fontes: The Seasons (Adobe Fonts, títulos; o subdomínio precisa estar no kit) e Poppins (Google Fonts, texto)
 - Símbolo: ✦ (botão "✦ Aprovado", selo "novo")
 - Exceção: a pré-visualização do Instagram usa o visual do próprio app, fiel ao que vai ao ar.
+  - Componente `public/assets/js/previa-instagram.js` + `public/assets/css/previa.css` (usado no editor e, depois, na página do cliente). Estilo da "Prévia de mídia social" do CapCut.
+  - Reels e Story em 9:16 com a interface nas posições reais; post e carrossel no feed em 4:5. Ícones desenhados por nós, sem logo do Instagram.
+  - Legenda em tempo real, como no app: no feed começa com o @ em negrito e fica acima de "Ver todos os comentários"; no Reels fica por cima do vídeo, embaixo. Corte medido de verdade em 2 linhas com "… mais" (clicar abre inteira), mantendo quebras de linha e emojis; #hashtags e @menções na cor de link. Story não tem legenda no Instagram: o texto aparece embaixo da tela, com esse aviso.
+  - A página do cliente usa este mesmo componente (sem as "Áreas cobertas").
+  - Botão "Ocultar interface" para ver o vídeo limpo. "Áreas cobertas" (só no editor da Bea) destaca as faixas da interface, em pixels de 1080 × 1920: Reels 250 em cima, 420 embaixo e 230 à direita (a partir de 960); Story 250 em cima e 340 embaixo.
 - Definir as cores como variáveis CSS em `:root` num arquivo de estilos base.
 
 ## Fases

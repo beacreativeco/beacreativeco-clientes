@@ -5,6 +5,7 @@ import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } fro
 import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
+import { criarPrevia } from './previa-instagram.js';
 
 const form = document.getElementById('form-conteudo');
 const aviso = document.getElementById('aviso');
@@ -16,7 +17,7 @@ const botoes = {
 };
 
 let conteudo = null;      // linha de `conteudos` (null enquanto é novo)
-let cliente = null;       // { id, nome, prazo_padrao_dias }
+let cliente = null;       // { id, nome, prazo_padrao_dias, instagram, foto_perfil }
 let temNotaInterna = false;
 
 iniciarPagina('admin', async () => {
@@ -25,7 +26,8 @@ iniciarPagina('admin', async () => {
   botoes.enviar.addEventListener('click', () => executar(botoes.enviar, enviarParaAprovacao));
   botoes.retirar.addEventListener('click', () => executar(botoes.retirar, voltarParaRascunho));
   botoes.excluir.addEventListener('click', excluirRascunho);
-  form.legenda.addEventListener('input', atualizarContador);
+  form.legenda.addEventListener('input', () => { atualizarContador(); atualizarPrevia(); });
+  form.data_prevista.addEventListener('change', () => atualizarPrevia());
   form.querySelectorAll('input[name="formato"]').forEach((r) =>
     r.addEventListener('change', () => definirFormato(form.formato.value)));
   form.drive_url.addEventListener('input', () => definirDrive(form.drive_url.value.trim()));
@@ -36,6 +38,7 @@ iniciarPagina('admin', async () => {
       return conteudo.id;
     },
     aoErro: mostrarErro,
+    aoMudar: () => atualizarPrevia(),
   });
 
   const id = parametro('id');
@@ -53,7 +56,7 @@ iniciarPagina('admin', async () => {
 
 async function carregarCliente(id) {
   const { data, error } = await supabase
-    .from('clientes').select('id, nome, prazo_padrao_dias').eq('id', id).maybeSingle();
+    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil').eq('id', id).maybeSingle();
   if (error) throw error;
   cliente = data;
 }
@@ -97,6 +100,22 @@ function desenhar() {
   definirDrive(form.drive_url.value.trim());
   atualizarContador();
   atualizarSituacao();
+  atualizarPrevia();
+}
+
+// ---------------------------------------------------------------- prévia
+
+let previa;
+function atualizarPrevia() {
+  if (!cliente) return; // a lista de mídias pode avisar antes do cliente carregar
+  previa ??= criarPrevia(document.getElementById('previa'), { guias: true });
+  previa.atualizar({
+    formato: form.formato.value,
+    midias: midiasAtuais(),
+    legenda: form.legenda.value,
+    data: form.data_prevista.value || null,
+    cliente,
+  });
 }
 
 function atualizarSituacao() {

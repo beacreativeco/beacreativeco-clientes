@@ -22,10 +22,12 @@ let envios = [];          // [{ arquivo, conteudoId, li, controle }]
 let enviando = false;
 let garantirConteudo;     // () => Promise<conteudoId> (cria o rascunho se ainda não existe)
 let aoErro;
+let aoMudar;              // avisa a prévia quando a lista muda
 
 export function iniciarMidias(opcoes) {
   garantirConteudo = opcoes.garantirConteudo;
   aoErro = opcoes.aoErro;
+  aoMudar = opcoes.aoMudar;
 
   input.addEventListener('change', () => {
     adicionar([...input.files]);
@@ -213,6 +215,7 @@ function desenhar() {
     li.querySelector('[data-acao="depois"]').hidden = midias.length < 2;
     return li;
   }));
+  aoMudar?.();
 }
 
 function criarPrevia(m, i) {

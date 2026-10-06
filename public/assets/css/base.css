@@ -592,6 +592,47 @@ a.cliente-nome:hover {
   max-width: 720px;
 }
 
+/* Prévia: embaixo do formulário no celular, ao lado (e acompanhando a rolagem) no computador. */
+.previa-painel {
+  margin: 40px 0 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(77, 59, 49, 0.25);
+}
+
+.previa-painel h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.previa-painel .dica {
+  max-width: 340px;
+  margin: 12px auto 0;
+  text-align: center;
+}
+
+@media (min-width: 1080px) {
+  .editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 48px;
+    align-items: start;
+    max-width: 1100px;
+  }
+
+  .editor > .voltar,
+  .editor > .editor-form { grid-column: 1; }
+
+  .previa-painel {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 24px;
+    margin: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
 .editor-cabecalho {
   margin: 16px 0 24px;
 }
