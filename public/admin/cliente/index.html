@@ -41,8 +41,48 @@
         <p>Nenhum conteúdo para este cliente ainda. Crie o primeiro para montar a agenda.</p>
       </div>
       <ol id="agenda" class="agenda"></ol>
+
+      <!-- Excluir de vez: só com o acesso suspenso (ou de quem nunca teve login). -->
+      <section id="zona-excluir" class="zona-excluir" aria-labelledby="titulo-zona-excluir" hidden>
+        <h2 id="titulo-zona-excluir">Excluir cliente</h2>
+        <p id="zona-excluir-texto"></p>
+        <button id="abrir-excluir" class="botao-secundario botao-perigo" type="button" hidden>Excluir cliente</button>
+      </section>
     </main>
   </div>
+
+  <dialog id="dialogo-excluir" class="dialogo" aria-labelledby="titulo-excluir">
+    <form id="form-excluir" novalidate>
+      <header class="dialogo-topo">
+        <h2 id="titulo-excluir">Excluir cliente</h2>
+        <button class="botao-fechar" type="button" data-fechar aria-label="Fechar">×</button>
+      </header>
+
+      <div class="aviso erro excluir-aviso">
+        <p><strong>Não dá para desfazer.</strong> Vai ser apagado de vez:</p>
+        <ul id="excluir-resumo"><li>Calculando…</li></ul>
+        <p class="dica">Os cartões do Trello e os originais no Drive não são tocados.</p>
+      </div>
+
+      <fieldset id="excluir-vitrine" class="excluir-vitrine" hidden>
+        <legend id="excluir-vitrine-titulo"></legend>
+        <label><input type="radio" name="vitrine" value="manter"> Manter na vitrine (o cadastro fica arquivado, sem login, só para a vitrine)</label>
+        <label><input type="radio" name="vitrine" value="apagar"> Apagar junto com o resto</label>
+      </fieldset>
+
+      <div class="campo">
+        <label for="excluir-nome">Para confirmar, digite o nome do cliente: <strong id="excluir-nome-esperado"></strong></label>
+        <input id="excluir-nome" name="nome" type="text" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div id="excluir-erro" class="aviso erro" role="alert" hidden></div>
+
+      <footer class="dialogo-rodape">
+        <button class="botao-link" type="button" data-fechar>Cancelar</button>
+        <button id="confirmar-excluir" class="botao botao-compacto botao-excluir" type="submit" disabled>Excluir de vez</button>
+      </footer>
+    </form>
+  </dialog>
 
   <template id="modelo-conteudo">
     <li class="agenda-item">

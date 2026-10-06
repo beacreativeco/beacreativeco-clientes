@@ -917,6 +917,57 @@ a.cliente-nome:hover {
   color: var(--erro);
 }
 
+/* Excluir cliente: no fim da página dele, separado do resto. */
+.zona-excluir {
+  max-width: 560px;
+  margin: 56px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(154, 59, 59, 0.4);
+}
+
+.zona-excluir h2 {
+  margin-bottom: 4px;
+  font-size: 1.25rem;
+}
+
+.zona-excluir p {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.zona-excluir .botao-perigo { border-color: var(--erro); }
+
+.excluir-aviso p { margin: 0; }
+.excluir-aviso ul { margin: 6px 0 8px; padding-left: 20px; }
+.excluir-aviso .dica { opacity: 0.85; }
+
+.excluir-vitrine {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--espresso);
+  border-radius: 10px;
+}
+
+.excluir-vitrine legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.excluir-vitrine label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 0.9375rem;
+}
+
+.excluir-vitrine input { margin-top: 4px; accent-color: var(--erro); }
+
+.botao-excluir { background: var(--erro); }
+.botao-excluir:disabled { opacity: 0.45; cursor: not-allowed; }
+
 #prazo-info {
   margin-top: 12px;
 }

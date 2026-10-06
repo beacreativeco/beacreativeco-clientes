@@ -72,13 +72,15 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - [x] Testado no bucket local: aprovar move para `aprovados/` com validade de 30 dias; voltar desfaz; arquivo de outro conteúdo não é tocado; "expirado" na prévia e na conversa
    - [ ] Criar as Lifecycle Rules no painel da Cloudflare (passo a passo combinado em 06/10/2026)
    - Binding `MIDIAS` do bucket com o projeto do Pages: na publicação (item 7)
-5b. [ ] **Excluir cliente** (plano aprovado em 06/10/2026)
+5b. [x] **Excluir cliente** (versão 0.10.0, migrações `20261014000000` e `20261015000000`)
    - Também para quem nunca recebeu convite (sem login para suspender)
    - Botão "Excluir cliente" na página do cliente, só com o acesso suspenso
    - Confirmação forte: digitar o nome do cliente, aviso de que não dá para desfazer, e o que vai ser apagado (conteúdos, conversas, arquivos e o espaço liberado)
    - Apaga login, conteúdos, conversas e todos os arquivos dele no R2 (todas as pastas)
    - Vitrine: se houver conteúdos na vitrine, a Bea escolhe manter (o cadastro fica arquivado, sem login, só para a vitrine) ou apagar junto
    - No servidor (`/api/clientes/excluir`), com a chave de serviço, conferindo que é a admin; o Trello não é tocado
+   - Testado no bucket local: apagar tudo (nada sobra no banco nem no R2), manter a vitrine (cadastro arquivado, conteúdo e arquivo da vitrine ficam), cliente ativo barrado na tela e no servidor
+   - O teste achou uma falha da 0.9.0, corrigida na migração `20261015000000`: `mensagem_valida` recusava arquivos da conversa com a pasta na frente (imagem e áudio na conversa não enviavam)
 5c. [ ] **Perfil da Bea** (no padrão do menu do avatar do LAEG-BIO)
    - Foto ou iniciais no topo, abrindo o menu: nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
    - Meu perfil: foto, nome, e-mail (dá para trocar, com confirmação no e-mail novo) e troca de senha

@@ -54,7 +54,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 | Perfil | Acesso |
 | --- | --- |
 | Admin (Beatriz, única por enquanto) | Login e-mail/senha; tudo |
-| Cliente | Login e-mail/senha a partir de convite da Bea; Bea suspende/reativa a qualquer momento |
+| Cliente | Login e-mail/senha a partir de convite da Bea; Bea suspende/reativa a qualquer momento; exclui de vez só depois de suspenso (ou sem convite), digitando o nome (`/api/clientes/excluir`: apaga R2, conteúdos, login e cadastro; com vitrine mantida, o cadastro fica com `arquivado_em` e some das listas) |
 | Visitante | Só a vitrine pública (no site institucional, lendo dados liberados) |
 
 ## Situações de um conteúdo

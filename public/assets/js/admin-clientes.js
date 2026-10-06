@@ -23,6 +23,14 @@ iniciarPagina('admin', async () => {
 
   await carregarClientes();
   mostrarEspaco().catch(console.error); // não trava a página
+  // Voltou de uma exclusão (página do cliente): o aviso vem por aqui.
+  try {
+    const aviso = sessionStorage.getItem('aviso-clientes');
+    if (aviso) {
+      sessionStorage.removeItem('aviso-clientes');
+      avisar(aviso);
+    }
+  } catch { /* sem sessionStorage */ }
 });
 
 // ---------------------------------------------------------------- armazenamento
@@ -51,7 +59,7 @@ async function mostrarEspaco() {
 // ---------------------------------------------------------------- lista
 
 async function carregarClientes() {
-  const { data, error } = await supabase.from('clientes').select(CAMPOS).order('nome');
+  const { data, error } = await supabase.from('clientes').select(CAMPOS).is('arquivado_em', null).order('nome');
   if (error) throw error;
   clientes = data;
   desenharLista();

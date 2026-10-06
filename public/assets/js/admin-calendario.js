@@ -87,7 +87,7 @@ iniciarPagina('admin', async () => {
   });
 
   const { data, error } = await supabase.from('clientes')
-    .select('id, nome, trello_board_id, trello_sincronizado_em').order('nome');
+    .select('id, nome, trello_board_id, trello_sincronizado_em').is('arquivado_em', null).order('nome');
   if (error) throw error;
   clientes = darCores(data);
   porId = new Map(clientes.map((c) => [c.id, c]));

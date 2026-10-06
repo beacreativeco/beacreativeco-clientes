@@ -19,6 +19,17 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [0.10.0] — 06/10/2026
+
+### Novidades
+
+- A Bea pode excluir um cliente de vez, na página dele, depois de suspender o acesso (ou se ele nunca recebeu convite). Para confirmar, digita o nome do cliente.
+- A exclusão apaga o login, os conteúdos, as conversas e os arquivos do cliente, e mostra quanto espaço foi liberado. Se houver conteúdos na vitrine, a Bea escolhe se ficam ou se vão junto.
+
+### Correções
+
+- Imagens e áudios voltaram a funcionar na conversa (desde a versão 0.9.0 eles eram recusados ao enviar).
+
 ## [0.9.0] — 06/10/2026
 
 ### Novidades
