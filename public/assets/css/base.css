@@ -1562,3 +1562,90 @@ a.cliente-nome:hover {
 }
 
 .caixa-item.tem-novas .caixa-previa { font-weight: 600; }
+
+/* Imagens de referência na conversa */
+.conversa-anexar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--espresso);
+  cursor: pointer;
+}
+
+.conversa-anexar:hover { background: rgba(77, 59, 49, 0.08); }
+
+.conversa-anexar:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 0;
+}
+
+.conversa-imagem {
+  display: block;
+  margin: 0 0 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--creme);
+  cursor: zoom-in;
+}
+
+.conversa-imagem img {
+  display: block;
+  width: auto;
+  max-width: min(240px, 100%);
+  max-height: 280px;
+  object-fit: cover;
+}
+
+.conversa-imagem:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 2px;
+}
+
+.conversa-enviando { opacity: 0.6; }
+
+.conversa-expirado {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.conversa-visor {
+  max-width: 100vw;
+  max-height: 100vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.conversa-visor::backdrop { background: rgba(20, 14, 10, 0.85); }
+
+.conversa-visor img {
+  display: block;
+  max-width: 94vw;
+  max-height: 88vh;
+  border-radius: 8px;
+}
+
+.conversa-visor-fechar {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--espresso);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}

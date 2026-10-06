@@ -16,6 +16,13 @@ export const CHAVE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 // Arquivos da conversa (áudio, imagem de referência): <conteudo_id>/conversa/<uuid>.<ext>
 export const CHAVE_CONVERSA = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/conversa\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|m4a|webm|mp4)$/;
 
+// O que a conversa aceita (já otimizado no navegador) e o limite de cada um.
+export const TIPOS_CONVERSA = {
+  'image/jpeg': { tipo: 'imagem', ext: 'jpg', limiteMb: 8 },
+  'audio/mp4': { tipo: 'audio', ext: 'm4a', limiteMb: 5 },
+  'audio/webm': { tipo: 'audio', ext: 'webm', limiteMb: 5 },
+};
+
 export function conteudoDaChave(chave) {
   return CHAVE.exec(chave || '')?.[1] ?? null;
 }

@@ -115,3 +115,8 @@ export async function enviarArquivo(arquivo, conteudoId, { aoProgredir = () => {
 export async function excluirMidia(midiaId) {
   await chamar('/api/midias/excluir', { midia_id: midiaId });
 }
+
+// Arquivos da conversa (imagens e áudios) de um conteúdo que vai ser excluído.
+export async function limparArquivosDaConversa(conteudoId) {
+  await chamar('/api/conversa/limpar', { conteudo_id: conteudoId });
+}

@@ -3,6 +3,7 @@
 // Realtime) e "lida" quando a conversa está na tela.
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
+import { otimizarImagem } from './otimizar.js';
 
 const LIMITE_TEXTO = 2000;
 // Os mesmos prazos das funções do banco (editar_mensagem e apagar_mensagem), que são quem decide.
@@ -25,6 +26,26 @@ function icone(caminho) {
   return s;
 }
 const ICONE_ENVIAR = '<path d="M4 12 20 4l-4.5 16-3.7-6.8z"/><path d="m11.8 13.2 3.9-4.4"/>';
+const ICONE_ANEXAR = '<path d="m20.2 11.4-8 8a5 5 0 0 1-7.1-7.1l8.4-8.4a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7"/>';
+
+// Imagem aberta em tela cheia (uma para a página toda).
+let visor;
+function abrirImagem(src) {
+  if (!visor) {
+    visor = el('dialog', 'conversa-visor');
+    const img = el('img');
+    img.alt = 'Imagem de referência';
+    const fechar = el('button', 'conversa-visor-fechar', '×');
+    fechar.type = 'button';
+    fechar.setAttribute('aria-label', 'Fechar');
+    fechar.addEventListener('click', () => visor.close());
+    visor.addEventListener('click', (e) => { if (e.target === visor) visor.close(); });
+    visor.append(img, fechar);
+    document.body.append(visor);
+  }
+  visor.querySelector('img').src = src;
+  visor.showModal();
+}
 
 // Links no texto viram clicáveis, sem innerHTML.
 function textoComLinks(texto) {
@@ -100,7 +121,15 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
   const erro = el('p', 'conversa-erro');
   erro.setAttribute('role', 'alert');
   erro.hidden = true;
-  const form = el('form', 'conversa-escrever', campo, enviar);
+  const anexar = el('button', 'conversa-anexar', icone(ICONE_ANEXAR));
+  anexar.type = 'button';
+  anexar.setAttribute('aria-label', 'Anexar imagem de referência');
+  const seletor = el('input');
+  seletor.type = 'file';
+  seletor.accept = 'image/*';
+  seletor.multiple = true;
+  seletor.hidden = true;
+  const form = el('form', 'conversa-escrever', anexar, seletor, campo, enviar);
 
   const menu = el('div', 'conversa-menu');
   menu.setAttribute('role', 'menu');
@@ -139,6 +168,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       corpo.append(el('p', 'conversa-texto', m.autor === eu ? 'Você apagou esta mensagem' : 'Mensagem apagada'));
     } else {
       if (m.pedido_ajuste) corpo.append(el('span', 'conversa-etiqueta', 'Pedido de ajuste'));
+      if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
       if (m.texto) corpo.append(el('p', 'conversa-texto', textoComLinks(m.texto)));
     }
     corpo.append(el('span', 'conversa-hora', `${m.editada_em && !m.apagada_em ? 'editada ' : ''}${hora(m.criado_em)}`));
@@ -150,6 +180,24 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       corpo.append(mais);
     }
     return corpo;
+  }
+
+  // Miniatura no balão; um toque abre inteira. Arquivo que não existe mais
+  // (exclusão automática do armazenamento): aviso no lugar de imagem quebrada.
+  function miniatura(src) {
+    const botao = el('button', 'conversa-imagem');
+    botao.type = 'button';
+    botao.setAttribute('aria-label', 'Abrir imagem de referência');
+    const img = el('img');
+    img.src = src;
+    img.alt = 'Imagem de referência';
+    img.loading = 'lazy';
+    img.addEventListener('error', () => {
+      botao.replaceWith(el('p', 'conversa-expirado', 'Imagem expirada'));
+    }, { once: true });
+    botao.append(img);
+    botao.addEventListener('click', () => abrirImagem(src));
+    return botao;
   }
 
   // Edição ou exclusão (minha ou da outra pessoa, pelo Realtime): troca o balão no lugar.
@@ -269,6 +317,65 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     } finally {
       enviar.disabled = false;
     }
+  });
+
+  // ------------------------------------------------------------ imagens de referência
+
+  async function subirArquivo(blob) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const resp = await fetch(`/api/conversa/arquivo?conteudo_id=${conteudoId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': blob.type, Authorization: `Bearer ${session?.access_token ?? ''}` },
+      body: blob,
+    });
+    const corpo = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw Object.assign(new Error(corpo.erro || 'O arquivo não foi enviado.'), { code: 'P0001' });
+    return corpo.arquivo_url;
+  }
+
+  // Manda uma mensagem com arquivo; no modo "Pedir ajuste", ela vira o pedido.
+  async function enviarComArquivo(mensagem) {
+    if (modoAjuste) {
+      await pedirAjuste(mensagem);
+      definirModoAjuste(false);
+      await carregar();
+      return;
+    }
+    const { data, error } = await supabase.from('mensagens')
+      .insert({ conteudo_id: conteudoId, autor: eu, ...mensagem }).select().single();
+    if (error) throw error;
+    adicionar(data);
+  }
+
+  async function enviarImagens(arquivos) {
+    mostrarErro('');
+    for (const arquivo of arquivos) {
+      const espera = el('div', 'conversa-balao conversa-meu conversa-enviando', el('p', 'conversa-texto', 'Enviando imagem…'));
+      lista.append(espera);
+      vazia.remove();
+      rolarProFim();
+      try {
+        const leve = await otimizarImagem(arquivo);
+        const arquivoUrl = await subirArquivo(leve);
+        espera.remove();
+        await enviarComArquivo({ tipo: 'referencia', arquivo_url: arquivoUrl });
+        rolarProFim();
+        marcarLida(true);
+      } catch (err) {
+        console.error(err);
+        espera.remove();
+        const heic = /heic|heif/i.test(arquivo.type || arquivo.name);
+        mostrarErro(heic ? 'Fotos HEIC não abrem neste navegador. Exporte como JPG e envie de novo.'
+          : err.code === 'P0001' && err.message ? err.message : `${arquivo.name}: a imagem não foi enviada. Tente de novo.`);
+      }
+    }
+  }
+
+  anexar.addEventListener('click', () => seletor.click());
+  seletor.addEventListener('change', () => {
+    const arquivos = [...seletor.files];
+    seletor.value = '';
+    if (arquivos.length) enviarImagens(arquivos);
   });
 
   function definirModoAjuste(ligado) {

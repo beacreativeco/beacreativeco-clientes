@@ -60,3 +60,35 @@ export async function exigirAdmin(request, env) {
 }
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Quem pode escrever na conversa de um conteúdo: a admin, ou o cliente dono dele
+ * (login ativo) quando o conteúdo não está em rascunho. As mesmas regras do RLS.
+ * Devolve { autor: 'bea' | 'cliente' } ou { resposta } (um erro pronto para retornar).
+ */
+export async function exigirAcessoConversa(request, env, conteudoId) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { resposta: responder(500, 'Servidor sem configuração do Supabase.') };
+  }
+  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!token) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
+
+  const respUsuario = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
+  });
+  if (!respUsuario.ok) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
+  const usuario = await respUsuario.json();
+
+  const [conteudo] = (await rest(env, `conteudos?select=id,cliente_id,status&id=eq.${conteudoId}`)) ?? [];
+  if (!conteudo) return { resposta: responder(404, 'Conteúdo não encontrado.') };
+
+  const admins = await rest(env, `admins?select=user_id&user_id=eq.${usuario.id}`);
+  if (admins?.length) return { autor: 'bea' };
+
+  const [cliente] = (await rest(env,
+    `clientes?select=id&user_id=eq.${usuario.id}&login_ativo=is.true&id=eq.${conteudo.cliente_id}`)) ?? [];
+  if (!cliente || conteudo.status === 'rascunho') {
+    return { resposta: responder(403, 'Você não tem acesso a esta conversa.') };
+  }
+  return { autor: 'cliente' };
+}

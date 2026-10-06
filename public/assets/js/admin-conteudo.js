@@ -7,6 +7,7 @@ import {
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
 import { criarConversa } from './conversa.js';
+import { limparArquivosDaConversa } from './upload.js';
 
 const form = document.getElementById('form-conteudo');
 const aviso = document.getElementById('aviso');
@@ -300,6 +301,7 @@ async function excluirRascunho() {
   await executar(botao, async () => {
     if (enviandoArquivos()) throw new Error('Espere os arquivos terminarem de subir.');
     await excluirTodas(); // apaga os arquivos do R2 antes (o banco só apagaria as linhas)
+    await limparArquivosDaConversa(conteudo.id);
     const { error } = await supabase.from('conteudos').delete().eq('id', conteudo.id);
     if (error) throw new Error('Não foi possível excluir.');
     window.location.replace(`/admin/cliente/?id=${cliente.id}`);

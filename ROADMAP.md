@@ -23,7 +23,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Aprovação e pedido de ajuste não podem ser editados nem apagados
      - Menu nos três pontinhos (computador) ou segurando o balão (celular), em tempo real
      - Regras no Supabase, não só na tela
-   - [ ] Entrega 3: imagens de referência
+   - [x] Entrega 3: imagens de referência (comprimidas no navegador, miniatura e tela cheia, também como pedido de ajuste; "Excluir rascunho" tira os arquivos da conversa do armazenamento)
    - [ ] Entrega 4: áudio (até 3 min, gravar com toques)
    - Uma conversa por conteúdo, embaixo da prévia, balões dos dois lados com horário
    - Texto, áudio, imagens de referência e links
