@@ -1,0 +1,3 @@
+# Copie para .dev.vars (NUNCA commitar). Em produção, configurar no painel do Cloudflare Pages.
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=

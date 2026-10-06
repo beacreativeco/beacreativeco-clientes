@@ -34,17 +34,19 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Situações de um conteúdo
 
-`rascunho` → `em_aprovacao` → `aprovado` (pelo cliente ou por prazo) → opcional `na_vitrine`
+`rascunho` → `em_aprovacao` → `aprovado` (pelo cliente ou por prazo)
 `em_aprovacao` → `ajuste_solicitado` → nova versão → `em_aprovacao`
 
-- Aprovação registra data, hora, versão e `aprovado_por` (`cliente` ou `prazo`).
+- Aprovação registra `aprovado_em` (data e hora), `aprovado_versao` e `aprovado_por` (`cliente` ou `prazo`).
+- Vitrine não é situação: é a coluna booleana `na_vitrine`. O conteúdo continua `aprovado` e a vitrine é um extra.
 - Nova versão preserva as anteriores no histórico.
 - Bea pode retirar um conteúdo de `em_aprovacao` (volta a `rascunho`).
 
 ## Modelo de dados (base)
 
 - `clientes`: id, nome, slug, logo, foto_perfil, instagram, whatsapp, email, drive_pasta_url, trello_board_id, contrato_ativo, contrato_inicio, login_ativo, prazo_padrao_dias, aprovacao_automatica_dias, user_id (auth)
-- `conteudos`: id, cliente_id, titulo, formato (post, carrossel, story, reels), legenda, data_prevista, prazo_aprovacao, aprovacao_automatica, aprovado_por, drive_url, status, versao_atual, observacao_interna, na_vitrine, trello_card_id
+- `conteudos`: id, cliente_id, titulo, formato (post, carrossel, story, reels), legenda, data_prevista, prazo_aprovacao, aprovacao_automatica, aprovado_por, aprovado_em, aprovado_versao, drive_url, status, versao_atual, na_vitrine (boolean), trello_card_id
+- `conteudos_internos`: conteudo_id, observacao_interna (só admin; fica fora de `conteudos` porque RLS filtra linhas, não colunas)
 - `midias`: id, conteudo_id, versao, tipo (imagem, video), arquivo_url, otimizado_url, tamanho_mb, ordem
 - `mensagens`: id, conteudo_id, versao, autor (bea, cliente), tipo (texto, audio, referencia, aprovacao), texto, arquivo_url, criado_em
 - `notificacoes`: id, destinatario, conteudo_id, canal, lida, criado_em

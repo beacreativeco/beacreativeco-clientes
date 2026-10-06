@@ -1,0 +1,240 @@
+/* Estilos base BeaCreative */
+:root {
+  --creme: #FFF5E9;
+  --espresso: #4D3B31;
+  --periwinkle: #7B85CE;
+  --periwinkle-escuro: #636DB8;
+  --papel: #FFFCF7;
+  --erro: #9A3B3B;
+  --branco: #FFFFFF;
+
+  --fonte-titulo: "the-seasons", Georgia, "Times New Roman", serif;
+  --fonte-texto: "Poppins", system-ui, -apple-system, sans-serif;
+
+  --raio: 12px;
+  --espaco: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+/* Qualquer display definido aqui venceria o [hidden] do navegador. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--creme);
+  color: var(--espresso);
+  font-family: var(--fonte-texto);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0 0 var(--espaco);
+}
+
+a {
+  color: var(--periwinkle-escuro);
+}
+
+/* ---------- Telas de acesso (login, definir senha) ----------
+   Celular: marca em cima, formulário embaixo, tudo à esquerda.
+   Desktop: marca à esquerda, formulário à direita, separados por uma linha. */
+.pagina-central {
+  min-height: 100vh;
+  padding: 48px var(--espaco) 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartao {
+  width: 100%;
+  max-width: 420px;
+}
+
+.marca {
+  margin-bottom: 40px;
+}
+
+.marca h1 {
+  font-size: clamp(2.75rem, 13vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.marca h1 .estrela {
+  color: var(--periwinkle);
+  font-size: 0.45em;
+  vertical-align: 0.9em;
+  margin-left: 0.08em;
+}
+
+.marca p {
+  margin: 16px 0 0;
+  max-width: 28ch;
+  font-size: 1rem;
+}
+
+@media (min-width: 860px) {
+  .cartao {
+    max-width: 880px;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-areas:
+      "marca aviso"
+      "marca form"
+      "marca acoes";
+    grid-template-rows: auto auto 1fr;
+    column-gap: 64px;
+  }
+
+  .marca {
+    grid-area: marca;
+    margin: 0;
+    padding-right: 64px;
+    border-right: 1px solid var(--espresso);
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cartao > .aviso { grid-area: aviso; }
+  .cartao > form { grid-area: form; }
+  .cartao > .acoes-secundarias { grid-area: acoes; }
+}
+
+/* ---------- Formulários ---------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--espaco);
+}
+
+.campo label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.campo input {
+  font: inherit;
+  color: inherit;
+  padding: 12px 14px;
+  border: 1px solid var(--espresso);
+  border-radius: 10px;
+  background: var(--papel);
+}
+
+.campo input:focus {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 1px;
+}
+
+.botao {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  font: inherit;
+  font-weight: 500;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--periwinkle);
+  color: var(--branco);
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: var(--periwinkle-escuro);
+}
+
+.botao:focus-visible,
+.botao-link:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--espresso);
+  outline-offset: 3px;
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.botao-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--periwinkle-escuro);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.acoes-secundarias {
+  margin-top: 20px;
+}
+
+.aviso {
+  font-size: 0.875rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: var(--espaco);
+}
+
+.aviso.erro {
+  background: #F5E1DC;
+  color: var(--erro);
+}
+
+.aviso.ok {
+  background: #E6E8F7;
+  color: var(--espresso);
+}
+
+/* ---------- Topo das áreas logadas ---------- */
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px var(--espaco);
+  border-bottom: 1px solid var(--espresso);
+}
+
+.topo .titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 1.25rem;
+}
+
+.conteudo-pagina {
+  padding: var(--espaco);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.carregando {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}

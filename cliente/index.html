@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- The Seasons (Adobe Fonts): adicionar o <link> do kit aqui quando o subdomínio estiver liberado no kit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Seus conteúdos · BeaCreative</title>
+</head>
+<body>
+  <div id="carregando" class="carregando">Carregando…</div>
+
+  <div id="app" hidden>
+    <header class="topo">
+      <span class="titulo">BeaCreative</span>
+      <button id="sair" class="botao-link" type="button">Sair</button>
+    </header>
+    <main class="conteudo-pagina">
+      <h2 id="saudacao">Seus conteúdos</h2>
+      <!-- Próxima etapa: lista de conteúdos com preview estilo Instagram -->
+    </main>
+  </div>
+
+  <script type="module">
+    import { protegerPagina, sair } from '/assets/js/auth.js';
+
+    const acesso = await protegerPagina('cliente');
+    if (acesso) {
+      document.getElementById('saudacao').textContent = 'Olá, ' + acesso.perfil.cliente.nome + ' ✦';
+      document.getElementById('sair').addEventListener('click', sair);
+      document.getElementById('carregando').hidden = true;
+      document.getElementById('app').hidden = false;
+    }
+  </script>
+</body>
+</html>

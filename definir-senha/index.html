@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- The Seasons (Adobe Fonts): adicionar o <link> do kit aqui quando o subdomínio estiver liberado no kit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Definir senha · BeaCreative</title>
+</head>
+<body>
+  <main class="pagina-central">
+    <section class="cartao">
+      <header class="marca">
+        <h1>BeaCreative<span class="estrela" aria-hidden="true">✦</span></h1>
+        <p>Crie sua senha para acompanhar e aprovar seus conteúdos.</p>
+      </header>
+
+      <div id="aviso" class="aviso" role="alert" hidden></div>
+
+      <form id="form-senha" novalidate hidden>
+        <div class="campo">
+          <label for="senha">Nova senha</label>
+          <input id="senha" name="senha" type="password" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="campo">
+          <label for="confirmacao">Repita a senha</label>
+          <input id="confirmacao" name="confirmacao" type="password" autocomplete="new-password" minlength="8" required>
+        </div>
+        <button class="botao" type="submit">Salvar e entrar</button>
+      </form>
+
+      <div class="acoes-secundarias">
+        <a href="/">Voltar para o login</a>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { supabase } from '/assets/js/supabase.js';
+    import { definirSenha, carregarPerfil, decidirDestino } from '/assets/js/auth.js';
+
+    const form = document.getElementById('form-senha');
+    const aviso = document.getElementById('aviso');
+    const botao = form.querySelector('button[type=submit]');
+
+    function mostrar(texto, tipo = 'erro') {
+      aviso.textContent = texto;
+      aviso.className = 'aviso ' + tipo;
+      aviso.hidden = false;
+    }
+
+    // O link do convite/recuperação traz o token na URL; o supabase-js
+    // troca por uma sessão automaticamente ao iniciar.
+    const erroNaUrl = new URLSearchParams(window.location.hash.slice(1)).get('error_description');
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      mostrar(erroNaUrl
+        ? 'Este link expirou ou já foi usado. Peça um novo na tela de login.'
+        : 'Abra esta página pelo link que chegou no seu e-mail.');
+    } else {
+      form.hidden = false;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      aviso.hidden = true;
+      const senha = form.senha.value;
+      if (senha.length < 8) return mostrar('A senha precisa ter pelo menos 8 caracteres.');
+      if (senha !== form.confirmacao.value) return mostrar('As senhas não são iguais.');
+
+      botao.disabled = true;
+      try {
+        const user = await definirSenha(senha);
+        const destino = decidirDestino(await carregarPerfil(user.id));
+        if (destino.erro) {
+          await supabase.auth.signOut();
+          throw new Error(destino.erro);
+        }
+        window.location.replace(destino.rota);
+      } catch (err) {
+        mostrar(err.message);
+        botao.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

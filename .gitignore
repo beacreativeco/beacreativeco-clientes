@@ -1,0 +1,14 @@
+# Segredos locais (Cloudflare Pages Functions)
+.dev.vars
+
+# Supabase CLI
+supabase/.branches
+supabase/.temp
+
+# Wrangler / Node
+.wrangler/
+node_modules/
+
+# Sistema
+.DS_Store
+Thumbs.db

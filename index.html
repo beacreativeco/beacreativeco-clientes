@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- The Seasons (Adobe Fonts): adicionar o <link> do kit aqui quando o subdomínio estiver liberado no kit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Entrar · BeaCreative</title>
+</head>
+<body>
+  <main class="pagina-central">
+    <section class="cartao">
+      <header class="marca">
+        <h1>BeaCreative<span class="estrela" aria-hidden="true">✦</span></h1>
+        <p>Os conteúdos da sua marca, prontos para o seu ok.</p>
+      </header>
+
+      <div id="aviso" class="aviso" role="alert" hidden></div>
+
+      <form id="form-login" novalidate>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="botao" type="submit">Entrar</button>
+      </form>
+
+      <div class="acoes-secundarias">
+        <button id="esqueci" class="botao-link" type="button">Esqueci minha senha</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { supabase } from '/assets/js/supabase.js';
+    import { entrar, pedirNovaSenha, carregarPerfil, decidirDestino } from '/assets/js/auth.js';
+
+    const form = document.getElementById('form-login');
+    const aviso = document.getElementById('aviso');
+    const botao = form.querySelector('button[type=submit]');
+
+    function mostrar(texto, tipo = 'erro') {
+      aviso.textContent = texto;
+      aviso.className = 'aviso ' + tipo;
+      aviso.hidden = false;
+    }
+
+    // Já logado? Vai direto pra área certa.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const destino = decidirDestino(await carregarPerfil(session.user.id));
+      if (destino.rota) window.location.replace(destino.rota);
+      else await supabase.auth.signOut();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      aviso.hidden = true;
+      const email = form.email.value.trim();
+      const senha = form.senha.value;
+      if (!email || !senha) return mostrar('Preencha e-mail e senha.');
+
+      botao.disabled = true;
+      try {
+        window.location.replace(await entrar(email, senha));
+      } catch (err) {
+        mostrar(err.message);
+        botao.disabled = false;
+      }
+    });
+
+    document.getElementById('esqueci').addEventListener('click', async () => {
+      const email = form.email.value.trim();
+      if (!email) return mostrar('Digite seu e-mail acima e clique de novo.');
+      try {
+        await pedirNovaSenha(email);
+        mostrar('Se esse e-mail estiver cadastrado, você vai receber um link para criar uma nova senha.', 'ok');
+      } catch (err) {
+        mostrar(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
