@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
-import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
+import { SITUACOES, LIMITE_LEGENDA, dataHora, diaSemanaHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
@@ -74,7 +74,36 @@ async function carregarConteudo(id) {
   ]);
   if (nota.error) throw nota.error;
   temNotaInterna = Boolean(nota.data);
+  await carregarConversa();
   form.observacao_interna.value = nota.data?.observacao_interna ?? '';
+}
+
+// O que o cliente fez neste conteúdo (aprovou, pediu ajuste), do mais antigo ao mais novo.
+async function carregarConversa() {
+  const { data, error } = await supabase.from('mensagens')
+    .select('id, autor, tipo, texto, criado_em')
+    .eq('conteudo_id', conteudo.id).order('criado_em');
+  if (error) throw error;
+
+  document.getElementById('secao-conversa').hidden = data.length === 0;
+  document.getElementById('conversa').replaceChildren(...data.map((m) => {
+    const li = document.createElement('li');
+    li.className = `cc-mensagem cc-mensagem-${m.autor}`;
+    const quem = document.createElement('p');
+    quem.className = 'cc-mensagem-quem';
+    const acao = m.tipo === 'aprovacao'
+      ? (m.autor === 'bea' ? 'Você aprovou' : 'Cliente aprovou')
+      : (m.autor === 'bea' ? 'Você escreveu' : 'Cliente pediu ajuste');
+    quem.textContent = `${acao} em ${diaSemanaHora(m.criado_em)}`;
+    li.append(quem);
+    if (m.texto) {
+      const texto = document.createElement('p');
+      texto.className = 'cc-mensagem-texto';
+      texto.textContent = m.texto;
+      li.append(texto);
+    }
+    return li;
+  }));
 }
 
 // ---------------------------------------------------------------- tela

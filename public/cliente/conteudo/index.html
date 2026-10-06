@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/previa.css">
+  <title>Conteúdo · BeaCreative</title>
+</head>
+<body>
+  <div id="carregando" class="carregando">Carregando…</div>
+
+  <div id="app" hidden>
+    <header class="topo">
+      <a class="titulo titulo-link" href="/cliente/">BeaCreative</a>
+      <button id="sair" class="botao-link" type="button">Sair</button>
+    </header>
+
+    <main class="conteudo-pagina cliente-conteudo">
+      <a class="voltar" href="/cliente/">Seus conteúdos</a>
+
+      <div class="cc-grade">
+        <div class="cc-cabecalho">
+          <h1 id="titulo"></h1>
+          <p id="situacao" class="situacao"></p>
+          <p id="detalhes" class="subtitulo"></p>
+        </div>
+
+        <div id="previa" class="cc-previa"></div>
+
+        <div class="cc-lado">
+          <p id="prazo" class="cc-prazo" hidden></p>
+          <a id="drive" class="cc-drive" target="_blank" rel="noopener" hidden>Ver os arquivos originais no Drive</a>
+
+          <div id="aviso" class="aviso erro" role="alert" hidden></div>
+
+          <section id="decisao" class="cc-decisao" aria-label="Sua decisão" hidden>
+            <div class="cc-decisao-botoes">
+              <button id="aprovar" class="botao cc-aprovar" type="button">✦ Aprovado</button>
+              <button id="abrir-ajuste" class="botao-secundario" type="button">Pedir ajuste</button>
+            </div>
+
+            <form id="form-ajuste" class="cc-ajuste" novalidate hidden>
+              <div class="campo">
+                <label for="texto-ajuste">O que você quer mudar?</label>
+                <textarea id="texto-ajuste" rows="4" maxlength="2000"
+                  placeholder="Ex.: trocar a foto 2 e deixar a legenda mais curta"></textarea>
+                <small class="dica">A Bea recebe seu pedido e prepara uma nova versão para você aprovar.</small>
+              </div>
+              <div class="cc-ajuste-acoes">
+                <button id="enviar-ajuste" class="botao botao-compacto" type="submit">Enviar pedido</button>
+                <button id="cancelar-ajuste" class="botao-link" type="button">Cancelar</button>
+              </div>
+            </form>
+          </section>
+
+          <p id="resultado" class="cc-resultado" hidden></p>
+
+          <section id="secao-historico" class="cc-historico" aria-labelledby="titulo-historico" hidden>
+            <h2 id="titulo-historico">Histórico</h2>
+            <ol id="historico"></ol>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/assets/js/cliente-conteudo.js"></script>
+</body>
+</html>

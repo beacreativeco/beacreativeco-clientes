@@ -62,6 +62,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Vitrine não é situação: é a coluna booleana `na_vitrine`. O conteúdo continua `aprovado` e a vitrine é um extra.
 - Nova versão preserva as anteriores no histórico.
 - Bea pode retirar um conteúdo de `em_aprovacao` (volta a `rascunho`).
+- O cliente aprova ou pede ajuste só pelas funções `aprovar_conteudo(p_conteudo_id)` e `pedir_ajuste(p_conteudo_id, p_texto)` (security definer; só conteúdo dele em `em_aprovacao`). Cada uma grava uma linha em `mensagens` (`aprovacao` ou `texto`), que vira o histórico no editor e na página do cliente. Erros pensados para o cliente usam `P0001`.
+- Página do cliente: `/cliente/` (lista) e `/cliente/conteudo/?id=` (prévia + decisão). Aprovar pede confirmação (dois toques).
 
 ## Modelo de dados (base)
 

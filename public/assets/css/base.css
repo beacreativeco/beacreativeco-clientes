@@ -1007,3 +1007,199 @@ a.cliente-nome:hover {
 .envio .botao-link {
   grid-area: cancelar;
 }
+
+/* ---------- Página do cliente ---------- */
+.cliente-boas-vindas {
+  margin: 24px 0 32px;
+}
+
+.cliente-boas-vindas h1 {
+  font-size: clamp(2.25rem, 9vw, 3.25rem);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cliente-boas-vindas .subtitulo {
+  max-width: 46ch;
+  margin-top: 8px;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.cliente-grupo {
+  margin-bottom: 40px;
+}
+
+.cliente-grupo h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.situacao.ajuste-cliente { color: var(--espresso); opacity: 0.75; }
+
+/* Um conteúdo: título, prévia (o destaque) e a decisão.
+   Celular: uma coluna, decisão presa no pé da tela. Computador: prévia à esquerda. */
+.cliente-conteudo {
+  max-width: 1000px;
+}
+
+.cc-grade {
+  display: grid;
+  grid-template-areas:
+    "cabecalho"
+    "previa"
+    "lado";
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.cc-cabecalho { grid-area: cabecalho; }
+.cc-previa { grid-area: previa; }
+.cc-lado { grid-area: lado; min-width: 0; }
+
+.cc-cabecalho h1 {
+  font-size: clamp(2rem, 8vw, 2.75rem);
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.cc-cabecalho .situacao { margin: 0; }
+
+.cc-cabecalho .subtitulo::first-letter { text-transform: uppercase; }
+
+.cc-prazo {
+  margin: 0 0 12px;
+  font-weight: 500;
+}
+
+.cc-drive {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+}
+
+.cc-decisao {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 calc(var(--espaco) * -1) 24px;
+  padding: 12px var(--espaco) calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--espresso);
+  background: var(--creme);
+}
+
+/* Escrevendo o pedido: a barra solta do pé para o teclado do celular não cobrir o texto. */
+.cc-decisao.escrevendo { position: static; }
+
+.cc-decisao-botoes {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 10px;
+}
+
+.cc-decisao-botoes .botao-secundario {
+  font-size: 1rem;
+  padding: 12px 16px;
+}
+
+.cc-aprovar[data-confirmar] {
+  background: var(--espresso);
+}
+
+.cc-ajuste {
+  margin-top: 16px;
+}
+
+.cc-ajuste .campo { margin-bottom: 12px; }
+
+.cc-ajuste-acoes {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cc-resultado {
+  margin: 0 0 24px;
+  font-size: 1.125rem;
+}
+
+.cc-estrela {
+  display: inline-block;
+  color: var(--periwinkle);
+}
+
+/* O único momento animado da página: o ✦ gira e assenta quando o cliente aprova. */
+.acabou-de-aprovar .cc-estrela {
+  animation: cc-estrela 0.9s cubic-bezier(0.2, 0.8, 0.2, 1.2);
+}
+
+@keyframes cc-estrela {
+  from { transform: scale(0.2) rotate(-180deg); opacity: 0; }
+  to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acabou-de-aprovar .cc-estrela { animation: none; }
+}
+
+.cc-historico h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+/* Histórico em ordem de tempo: a linha à esquerda liga os acontecimentos. */
+.cc-historico ol {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border-left: 1px solid var(--espresso);
+}
+
+.cc-mensagem + .cc-mensagem { margin-top: 16px; }
+
+.cc-mensagem-quem {
+  margin: 0;
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+.cc-mensagem-texto {
+  margin: 4px 0 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 900px) {
+  .cc-grade {
+    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-areas:
+      "previa cabecalho"
+      "previa lado";
+    grid-template-rows: auto 1fr;
+    column-gap: 56px;
+    row-gap: 20px;
+  }
+
+  .cc-previa {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+  }
+
+  .cc-decisao {
+    position: static;
+    margin: 0 0 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .cc-decisao-botoes {
+    max-width: 420px;
+  }
+}
+
+/* No editor, o histórico com o cliente aparece logo abaixo do título. */
+.editor-conversa {
+  margin: 0 0 32px;
+}

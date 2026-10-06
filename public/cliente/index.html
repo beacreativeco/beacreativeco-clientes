@@ -19,20 +19,46 @@
       <span class="titulo">BeaCreative</span>
       <button id="sair" class="botao-link" type="button">Sair</button>
     </header>
-    <main class="conteudo-pagina">
-      <h2 id="saudacao">Seus conteúdos</h2>
-      <!-- Próxima etapa: lista de conteúdos com preview estilo Instagram -->
+
+    <main class="conteudo-pagina cliente-pagina">
+      <div class="cliente-boas-vindas">
+        <h1 id="saudacao">Olá</h1>
+        <p id="resumo" class="subtitulo"></p>
+      </div>
+
+      <section id="secao-aprovar" class="cliente-grupo" aria-labelledby="titulo-aprovar" hidden>
+        <h2 id="titulo-aprovar">Esperando você</h2>
+        <ol class="agenda" data-grupo="em_aprovacao"></ol>
+      </section>
+
+      <section id="secao-ajuste" class="cliente-grupo" aria-labelledby="titulo-ajuste" hidden>
+        <h2 id="titulo-ajuste">Em ajuste com a Bea</h2>
+        <ol class="agenda" data-grupo="ajuste_solicitado"></ol>
+      </section>
+
+      <section id="secao-aprovados" class="cliente-grupo" aria-labelledby="titulo-aprovados" hidden>
+        <h2 id="titulo-aprovados">Aprovados</h2>
+        <ol class="agenda" data-grupo="aprovado"></ol>
+      </section>
     </main>
   </div>
 
-  <script type="module">
-    import { sair } from '/assets/js/auth.js';
-    import { iniciarPagina } from '/assets/js/ui.js';
+  <template id="modelo-conteudo">
+    <li class="agenda-item">
+      <a class="agenda-link">
+        <span class="agenda-data">
+          <span class="agenda-dia"></span>
+          <span class="agenda-mes"></span>
+        </span>
+        <span class="agenda-info">
+          <span class="agenda-titulo"></span>
+          <span class="agenda-formato"></span>
+        </span>
+        <span class="situacao"></span>
+      </a>
+    </li>
+  </template>
 
-    iniciarPagina('cliente', ({ perfil }) => {
-      document.getElementById('saudacao').textContent = 'Olá, ' + perfil.cliente.nome;
-      document.getElementById('sair').addEventListener('click', sair);
-    });
-  </script>
+  <script type="module" src="/assets/js/cliente-lista.js"></script>
 </body>
 </html>

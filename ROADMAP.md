@@ -10,7 +10,12 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - Prévia estilo Instagram (Reels, Story, post e carrossel), com "Ocultar interface" e "Áreas cobertas"
    - Legenda ao vivo, cortada em 2 linhas com "… mais", com quebras de linha, emojis e #tags/@menções na cor de link
    - Carrossel: deslizar com encaixe, setinhas no computador, teclado, contador e bolinhas; mudar a ordem mantém a posição
-2. [ ] **Página do cliente:** lista de conteúdos liberados, prévia estilo Instagram, aprovar e pedir ajuste
+2. [x] **Página do cliente:** lista de conteúdos liberados, prévia estilo Instagram, aprovar e pedir ajuste
+   - Lista agrupada em "Esperando você" (prazo mais próximo em cima), "Em ajuste com a Bea" e "Aprovados"
+   - Conteúdo: prévia (a mesma do editor, sem "Áreas cobertas"), prazo, Drive, "✦ Aprovado" com confirmação e "Pedir ajuste" com texto
+   - Histórico nas duas pontas: no editor da Bea aparece logo abaixo do título
+   - Banco: funções `aprovar_conteudo` e `pedir_ajuste` (migração `20261007000000`)
+   - Fica para depois: anexar referências (imagens ou links) no pedido de ajuste
 3. [ ] **Identidade:** logo original da BeaCreative e acabamento visual
 4. [ ] **Exclusão automática das mídias e espaço usado no painel**
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"

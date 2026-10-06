@@ -15,6 +15,13 @@ export const SITUACOES = {
   aprovado: { texto: '✦ Aprovado', classe: 'aprovado' },
 };
 
+// Como o cliente lê cada situação (rascunho ele nunca vê).
+export const SITUACOES_CLIENTE = {
+  em_aprovacao: { texto: 'Para aprovar', classe: 'aguardando' },
+  ajuste_solicitado: { texto: 'Em ajuste com a Bea', classe: 'ajuste-cliente' },
+  aprovado: { texto: '✦ Aprovado', classe: 'aprovado' },
+};
+
 export const LIMITE_LEGENDA = 2200; // limite do Instagram
 
 // "2026-10-14" vira Date local (sem o fuso empurrar para o dia anterior).
@@ -39,6 +46,15 @@ export function dataHora(isoTimestamp) {
   return new Date(isoTimestamp).toLocaleString('pt-BR', {
     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   });
+}
+
+// "qui., 08/10 às 15:00"
+export function diaSemanaHora(isoTimestamp) {
+  if (!isoTimestamp) return '';
+  const d = new Date(isoTimestamp);
+  const dia = d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return `${dia} às ${hora}`;
 }
 
 export function parametro(nome) {
