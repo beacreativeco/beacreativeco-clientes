@@ -18,10 +18,11 @@ export function cabecalhosServidor(env) {
 }
 
 // GET/POST/PATCH/DELETE no PostgREST com a chave secreta. Devolve o JSON ou null.
-export async function rest(env, caminho, { metodo = 'GET', corpo, retornar = true } = {}) {
+// `prefer` soma ao Prefer (ex.: 'resolution=merge-duplicates' para inserir ou atualizar).
+export async function rest(env, caminho, { metodo = 'GET', corpo, retornar = true, prefer } = {}) {
   const headers = { ...cabecalhosServidor(env) };
   if (corpo !== undefined) headers['Content-Type'] = 'application/json';
-  if (metodo !== 'GET') headers.Prefer = retornar ? 'return=representation' : 'return=minimal';
+  if (metodo !== 'GET') headers.Prefer = [retornar ? 'return=representation' : 'return=minimal', prefer].filter(Boolean).join(',');
 
   const resp = await fetch(`${env.SUPABASE_URL}/rest/v1/${caminho}`, {
     method: metodo,

@@ -1,4 +1,4 @@
-import { supabase } from './supabase.js';
+import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
@@ -71,13 +71,44 @@ async function carregarConteudo(id) {
   conteudo = data;
 
   const [nota] = await Promise.all([
-    supabase.from('conteudos_internos').select('observacao_interna').eq('conteudo_id', id).maybeSingle(),
+    supabase.from('conteudos_internos')
+      .select('observacao_interna, trello_url, trello_etiquetas, trello_aviso').eq('conteudo_id', id).maybeSingle(),
     carregarMidias(data),
     carregarCliente(data.cliente_id),
   ]);
   if (nota.error) throw nota.error;
-  temNotaInterna = Boolean(nota.data);
+  temNotaInterna = Boolean(nota.data?.observacao_interna);
   form.observacao_interna.value = nota.data?.observacao_interna ?? '';
+  mostrarTrello(nota.data);
+}
+
+// Já postado (etiqueta POSTADO no Trello, de antes do sistema): fica só como registro no
+// calendário, sem envio ao cliente.
+let postadoNoTrello = false;
+
+// "Trello: Gravado · Abrir no Trello", e o aviso da sincronização quando houver.
+function mostrarTrello(internos) {
+  postadoNoTrello = Boolean(internos?.trello_etiquetas?.includes('POSTADO'));
+  const info = document.getElementById('trello-info');
+  const etapa = internos?.trello_etiquetas?.at(-1);
+  const partes = [];
+  if (etapa) partes.push(`Trello: ${etapa.charAt(0)}${etapa.slice(1).toLowerCase()}`);
+  if (internos?.trello_url) {
+    const link = document.createElement('a');
+    link.href = internos.trello_url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Abrir no Trello';
+    partes.push(link);
+  }
+  info.replaceChildren(...partes.flatMap((p, i) => (i ? [' · ', p] : [p])));
+  if (internos?.trello_aviso) {
+    const aviso = document.createElement('span');
+    aviso.className = 'editor-trello-aviso';
+    aviso.textContent = internos.trello_aviso;
+    info.append(aviso);
+  }
+  info.hidden = !info.childNodes.length;
 }
 
 // Conversa com o cliente (mesmo componente da página dele). Se o cliente aprovar ou pedir
@@ -157,7 +188,7 @@ function atualizarSituacao() {
   }
 
   botoes.salvar.textContent = conteudo ? 'Salvar alterações' : 'Criar rascunho';
-  botoes.enviar.hidden = !['rascunho', 'ajuste_solicitado'].includes(status);
+  botoes.enviar.hidden = !['rascunho', 'ajuste_solicitado'].includes(status) || (postadoNoTrello && status === 'rascunho');
   botoes.enviar.textContent = status === 'ajuste_solicitado' ? 'Reenviar para aprovação' : 'Enviar para aprovação';
   botoes.retirar.hidden = status !== 'em_aprovacao';
   botoes.excluir.hidden = status !== 'rascunho';
@@ -165,6 +196,10 @@ function atualizarSituacao() {
   prazo.hidden = true;
   if (status === 'em_aprovacao' && conteudo.prazo_aprovacao) {
     prazo.textContent = `O cliente tem até ${dataHora(conteudo.prazo_aprovacao)} para aprovar. Alterações salvas aparecem para ele na hora.`;
+    prazo.hidden = false;
+  }
+  if (postadoNoTrello && status === 'rascunho') {
+    prazo.textContent = 'Já está como postado no Trello: fica no calendário como registro e não vai para o cliente.';
     prazo.hidden = false;
   }
   if (status === 'aprovado') {
@@ -251,7 +286,9 @@ async function salvarNotaInterna() {
     if (error) throw new Error('O conteúdo foi salvo, mas a observação interna não.');
     temNotaInterna = true;
   } else if (temNotaInterna) {
-    const { error } = await supabase.from('conteudos_internos').delete().eq('conteudo_id', conteudo.id);
+    // Só limpa a observação: a mesma linha guarda o vínculo com o Trello.
+    const { error } = await supabase.from('conteudos_internos')
+      .update({ observacao_interna: null }).eq('conteudo_id', conteudo.id);
     if (error) throw new Error('O conteúdo foi salvo, mas a observação interna não foi apagada.');
     temNotaInterna = false;
   }
@@ -272,6 +309,7 @@ async function enviarParaAprovacao() {
   conteudo = data;
   atualizarSituacao();
   avisar('Enviado para aprovação.');
+  refletirNoTrello(conteudo.id);
 }
 
 async function voltarParaRascunho() {
@@ -282,7 +320,15 @@ async function voltarParaRascunho() {
   conteudo = data;
   atualizarSituacao();
   avisar('Voltou para rascunho. O cliente não vê mais este conteúdo.');
+  refletirNoTrello(conteudo.id);
 }
+
+// Leva ao cartão do Trello o que acabou de acontecer (etiquetas e comentário). Não trava
+// a tela: se o Trello falhar, a ação no sistema já valeu e a próxima chamada acerta o cartão.
+function refletirNoTrello(id) {
+  chamarServidor('/api/trello/refletir', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
+}
+
 
 // Dois cliques: o primeiro pede confirmação, o segundo exclui.
 let timerExcluir;

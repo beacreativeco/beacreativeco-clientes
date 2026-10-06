@@ -1,5 +1,5 @@
 // Um conteúdo visto pelo cliente: prévia estilo Instagram, aprovar ou pedir ajuste, histórico.
-import { supabase } from './supabase.js';
+import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { FORMATOS, SITUACOES_CLIENTE, lerData, diaSemanaHora, parametro } from './conteudos.js';
@@ -56,6 +56,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
       conteudo = data;
       desenhar();
       avisar('Pedido de ajuste enviado para a Bea.');
+      refletirNoTrello(conteudo.id);
     },
   });
   await conversa.carregar();
@@ -156,7 +157,15 @@ async function decidir(botao, chamada, sucesso) {
   desenhar();
   if (conteudo.status === 'aprovado') $('resultado').classList.add('acabou-de-aprovar');
   avisar(sucesso);
+  refletirNoTrello(conteudo.id);
 }
+
+// Leva ao cartão do Trello o que acabou de acontecer (etiquetas e comentário). Não trava
+// a tela: se o Trello falhar, a ação no sistema já valeu e a próxima chamada acerta o cartão.
+function refletirNoTrello(id) {
+  chamarServidor('/api/trello/refletir', { metodo: 'POST', corpo: { conteudo_id: id } }).catch(console.error);
+}
+
 
 function mostrarErro(texto) {
   const aviso = $('aviso');

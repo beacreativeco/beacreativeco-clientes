@@ -43,6 +43,16 @@
         <ul id="resumo-clientes" class="cal-clientes"></ul>
       </section>
 
+      <!-- Trello → sistema: sincroniza sozinho ao abrir; o botão força de novo. -->
+      <div id="trello" class="cal-trello" hidden>
+        <button id="sincronizar" class="botao-secundario" type="button">Sincronizar com o Trello</button>
+        <p id="trello-status" class="cal-trello-status" role="status"></p>
+      </div>
+      <details id="trello-avisos" class="cal-trello-avisos" hidden>
+        <summary></summary>
+        <ul id="trello-avisos-lista"></ul>
+      </details>
+
       <div id="cal-vazio" class="vazio" hidden>
         <img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256">
         <p>Nenhuma entrega com data neste mês.</p>

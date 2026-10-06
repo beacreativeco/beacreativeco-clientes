@@ -1,8 +1,8 @@
-import { supabase } from './supabase.js';
+import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 
-const CAMPOS = 'id, nome, slug, email, instagram, whatsapp, drive_pasta_url, prazo_padrao_dias, contrato_inicio, login_ativo, user_id';
+const CAMPOS = 'id, nome, slug, email, instagram, whatsapp, drive_pasta_url, prazo_padrao_dias, contrato_inicio, login_ativo, user_id, trello_board_id';
 
 const lista = document.getElementById('lista-clientes');
 const listaVazia = document.getElementById('lista-vazia');
@@ -129,8 +129,32 @@ function abrirFormulario(cliente = null) {
     if (cliente.instagram) form.instagram.value = '@' + cliente.instagram;
   }
 
+  preencherQuadros(cliente?.trello_board_id ?? '');
   dialogo.showModal();
   form.nome.focus();
+}
+
+// Quadros do Trello da Bea (busca uma vez). Se o Trello não responder, o quadro
+// atual continua escolhido, para salvar o formulário não desligar o cliente dele.
+let quadros;
+async function preencherQuadros(atual) {
+  const select = form.trello_board_id;
+  const opcoes = (lista) => [
+    new Option('Nenhum', ''),
+    ...lista.map((q) => new Option(q.nome, q.id)),
+    ...(atual && !lista.some((q) => q.id === atual) ? [new Option('Quadro atual (não carregou)', atual)] : []),
+  ];
+  select.replaceChildren(...opcoes(quadros ?? []));
+  select.value = atual;
+  if (quadros) return;
+  try {
+    quadros = (await chamarServidor('/api/trello/quadros')).quadros;
+    if (!dialogo.open) return;
+    select.replaceChildren(...opcoes(quadros));
+    select.value = atual;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function mostrarErroForm(texto) {
@@ -149,6 +173,7 @@ function lerFormulario() {
     drive_pasta_url: texto('drive_pasta_url'),
     prazo_padrao_dias: Number.isNaN(prazo) ? 2 : prazo,
     contrato_inicio: texto('contrato_inicio'),
+    trello_board_id: form.trello_board_id.value || null,
   };
 }
 

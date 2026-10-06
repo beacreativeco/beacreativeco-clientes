@@ -19,6 +19,21 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [0.8.0] — 06/10/2026
+
+### Novidades
+
+- O sistema agora conversa com o Trello: as entregas dos quadros das clientes (listas "[FEED]") aparecem sozinhas no calendário, como rascunho, com a data e o formato do título do cartão (ex.: "13/10 · Reels · Título").
+- O calendário mostra a etapa de cada entrega no Trello (gravado, editar, postado...), e o conteúdo tem o link "Abrir no Trello".
+- Botão "Sincronizar com o Trello" no calendário, que também atualiza sozinho ao abrir, e avisos dos cartões que não viraram entrega.
+- No cadastro do cliente, dá para escolher o quadro do Trello dele.
+- O Trello também fica sabendo do sistema: enviado ao cliente, o cartão ganha a etiqueta "AGUARDANDO APROVAÇÃO"; aprovado, ganha "APROVADO" e um comentário; pedido de ajuste vira comentário no cartão.
+- Entregas que já estavam como postadas no Trello aparecem no calendário só como registro, sem envio ao cliente.
+
+### Melhorias
+
+- Apagar a observação interna de um conteúdo não apaga mais as outras informações internas dele.
+
 ## [0.7.0] — 06/10/2026
 
 ### Novidades

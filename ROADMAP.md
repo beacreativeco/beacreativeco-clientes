@@ -48,6 +48,14 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
 4. [ ] **Página da Bea: clientes, calendário e Trello** (o sistema complementa o Trello, não substitui: conversa nos dois sentidos)
    - [x] 4a. Calendário (versão 0.7.0): `/admin/calendario/`, entregas do mês de todos os clientes com cor por cliente, total e aprovadas por cliente (filtra ao tocar), grade no computador e lista por dia no celular, "Sem data"; navegação Clientes · Calendário · Mensagens no painel
    - [ ] 4b. Trello ↔ sistema
+     - [x] Trello → sistema (versão 0.8.0, migração `20261011000000`): cadastro do cliente escolhe o quadro; `/api/trello/sincronizar` cria rascunhos dos cartões das listas de entregas, atualiza título/data (formato só em rascunho), etapa e link do cartão em `conteudos_internos`; rascunho vazio some quando o cartão sai, o resto fica com aviso; sincroniza ao abrir o calendário e pelo botão
+     - [ ] Sistema → Trello (escrito na versão 0.8.0, migração `20261012000000`; **falta testar** num quadro de teste na conta da Bea, para não escrever nos quadros das clientes)
+       - Enviar ao cliente: etiqueta AGUARDANDO APROVAÇÃO (sai quando o cliente decide ou a Bea retira)
+       - Aprovado: etiqueta APROVADO e comentário "Sistema de aprovação: ✦ Aprovado por …"
+       - Pedido de ajuste: comentário com o texto (áudio/imagem: aviso para ver no sistema)
+       - Link "Abrir no sistema de aprovação" anexado ao cartão só com `SITE_URL` (site publicado)
+       - Disparado pela página depois da ação (`/api/trello/refletir`), que lê o estado no banco; sem repetir comentário
+     - [x] Cartões com POSTADO (de antes do sistema): só registro no calendário, sem envio ao cliente
      - Quadros das clientes (vistos em 06/10/2026): "comunicação - casa coelho", "comunicação | j.franco", "comunicação | le bel"; listas por mês e "[FEED] semana um…cinco"; cartão sem título com capa = separador de semana
      - Padrão combinado: data e formato no título do cartão ("13/10 · Reels · Título", como já faz o Casa Coelho); a "Data de entrega" do Trello fica livre para os prazos internos da Bea
      - Etiquetas de etapa (GRAVAR, GRAVADO, EDITAR, CRIAR ARTE, AGUARDANDO APROVAÇÃO, PROGRAMAR, PROGRAMADO, POSTADO) viram a etapa no sistema, só para a Bea (em `conteudos_internos`)
@@ -59,6 +67,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"
 6. [ ] **Avisos por e-mail**
 7. [ ] **Publicação (versão 1.0.0):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
+   - Variáveis no Pages: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TRELLO_API_KEY`, `TRELLO_API_SECRET`, `TRELLO_TOKEN` e `SITE_URL` (`https://clientes.beacreativeco.com.br`, liga o link do sistema nos cartões do Trello)
 
 ## Já pronto antes deste roadmap
 
