@@ -546,6 +546,11 @@
 
 .ig-post-trilho::-webkit-scrollbar { display: none; }
 
+.ig-post-trilho:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: -2px;
+}
+
 .ig-post-item {
   position: relative;
   display: grid;
@@ -555,6 +560,7 @@
   aspect-ratio: 4 / 5;
   overflow: hidden;
   scroll-snap-align: start;
+  scroll-snap-stop: always; /* um deslize = uma imagem, como no app */
   background: #000;
 }
 
@@ -581,6 +587,39 @@
 }
 
 .ig-post-contador[hidden] { display: none; }
+
+/* Setinhas do carrossel: só em telas com mouse (no celular, desliza com o dedo). */
+.ig-seta {
+  position: absolute;
+  top: 50%;
+  display: none;
+  place-items: center;
+  width: calc(var(--u) * 26);
+  height: calc(var(--u) * 26);
+  margin-top: calc(var(--u) * -13);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  color: #262626;
+  cursor: pointer;
+}
+
+.ig-seta-anterior { left: calc(var(--u) * 10); }
+.ig-seta-proxima { right: calc(var(--u) * 10); }
+
+.ig-seta .ig-icone {
+  width: calc(var(--u) * 16);
+  height: calc(var(--u) * 16);
+}
+
+.ig-seta .ig-icone svg { stroke-width: 2.6; }
+
+@media (hover: hover) and (pointer: fine) {
+  .ig-seta { display: grid; }
+  .ig-seta[hidden] { display: none; }
+}
 
 .ig-botao-som-feed {
   position: absolute;

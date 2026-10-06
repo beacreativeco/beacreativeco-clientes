@@ -2,7 +2,8 @@
 
 Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos para os clientes aprovarem, com pré-visualização igual ao Instagram, prazos, calendário e conversa por conteúdo.
 
-- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`)
+- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). **Ainda não publicado:** por enquanto tudo roda só no localhost; a publicação é o último item do `ROADMAP.md`.
+- Ordem das entregas em `ROADMAP.md`: ao fim de cada uma, atualizar o arquivo e dizer qual é a próxima. Não fazer push sem pedido.
 - Site institucional (outro repositório, não mexer daqui): `beacreativeco/beacreativeco` em `beacreativeco.com.br`
 - Documento de escopo completo: https://claude.ai/code/artifact/7e520d1f-902d-4adc-ac15-e2529fa60c38
 
@@ -79,7 +80,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Símbolo: ✦ (botão "✦ Aprovado", selo "novo")
 - Exceção: a pré-visualização do Instagram usa o visual do próprio app, fiel ao que vai ao ar.
   - Componente `public/assets/js/previa-instagram.js` + `public/assets/css/previa.css` (usado no editor e, depois, na página do cliente). Estilo da "Prévia de mídia social" do CapCut.
-  - Reels e Story em 9:16 com a interface nas posições reais; post e carrossel no feed em 4:5. Ícones desenhados por nós, sem logo do Instagram.
+  - Reels e Story em 9:16 com a interface nas posições reais; post e carrossel no feed em 4:5.
+  - Carrossel: deslizar com encaixe (uma imagem por vez), setinhas nas laterais só em telas com mouse (somem na primeira/última) e setas do teclado com a prévia em foco; contador e bolinhas acompanham; mudar a ordem no editor mantém a posição. Ícones desenhados por nós, sem logo do Instagram.
   - Legenda em tempo real, como no app: no feed começa com o @ em negrito e fica acima de "Ver todos os comentários"; no Reels fica por cima do vídeo, embaixo. Corte medido de verdade em 2 linhas com "… mais" (clicar abre inteira), mantendo quebras de linha e emojis; #hashtags e @menções na cor de link. Story não tem legenda no Instagram: o texto aparece embaixo da tela, com esse aviso.
   - A página do cliente usa este mesmo componente (sem as "Áreas cobertas").
   - Botão "Ocultar interface" para ver o vídeo limpo. "Áreas cobertas" (só no editor da Bea) destaca as faixas da interface, em pixels de 1080 × 1920: Reels 250 em cima, 420 embaixo e 230 à direita (a partir de 960); Story 250 em cima e 340 embaixo.

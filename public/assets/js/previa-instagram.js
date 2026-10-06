@@ -32,6 +32,8 @@ const ICONES = {
   somDesligado: '<path d="M4 9.4h3.4L12 5.6v12.8l-4.6-3.8H4z"/><path d="m15.6 9.5 5 5"/><path d="m20.6 9.5-5 5"/>',
   fechar: '<path d="m5.5 5.5 13 13"/><path d="m18.5 5.5-13 13"/>',
   abrir: '<path d="m6.5 9.5 5.5 5.5 5.5-5.5"/>',
+  anterior: '<path d="m14.5 6-6 6 6 6"/>',
+  proxima: '<path d="m9.5 6 6 6-6 6"/>',
 };
 
 // ---------------------------------------------------------------- ajudantes
@@ -414,24 +416,59 @@ function montarFeed(estado, tela) {
     trilho.append(item);
   }
 
+  // Navegação do carrossel: deslizar com encaixe (CSS), setinhas no computador e teclado.
+  const seta = (nome, rotulo) => {
+    const b = el('button', `ig-seta ig-seta-${nome}`, icone(nome));
+    b.type = 'button';
+    b.setAttribute('aria-label', rotulo);
+    return b;
+  };
+  const setaAnterior = seta('anterior', 'Imagem anterior');
+  const setaProxima = seta('proxima', 'Próxima imagem');
+  const midia = el('div', 'ig-post-midia', trilho, contador, setaAnterior, setaProxima);
+  const atual = () => (trilho.clientWidth ? Math.round(trilho.scrollLeft / trilho.clientWidth) : 0);
+  let marcar = () => {};
+  // Marca o destino na hora (não espera a animação): se a ordem mudar no meio, a posição vale.
+  const irPara = (i, suave = true) => {
+    const alvo = Math.max(0, Math.min(itens.length - 1, i));
+    marcar(alvo);
+    trilho.scrollTo({ left: alvo * trilho.clientWidth, behavior: suave ? 'smooth' : 'instant' });
+  };
+
   if (itens.length > 1) {
     itens.forEach(() => pontos.append(el('span', 'ig-ponto')));
-    const marcar = () => {
-      const i = trilho.clientWidth ? Math.round(trilho.scrollLeft / trilho.clientWidth) : 0;
+    marcar = (i = atual()) => {
+      estado.posicaoCarrossel = i;
       contador.textContent = `${i + 1}/${itens.length}`;
       [...pontos.children].forEach((p, n) => p.classList.toggle('ativo', n === i));
+      setaAnterior.hidden = i === 0;
+      setaProxima.hidden = i === itens.length - 1;
     };
-    trilho.addEventListener('scroll', marcar, { passive: true });
-    marcar();
+    // Deslizar com o dedo: o encaixe decide a imagem, marcada quando a rolagem termina.
+    trilho.addEventListener('scrollend', () => marcar());
+    trilho.addEventListener('scroll', () => { if (!('onscrollend' in trilho)) marcar(); }, { passive: true });
+    // Depois do clique o foco vai para as imagens: a seta some na ponta e o teclado continua.
+    setaAnterior.addEventListener('click', () => { irPara(atual() - 1); trilho.focus({ preventScroll: true }); });
+    setaProxima.addEventListener('click', () => { irPara(atual() + 1); trilho.focus({ preventScroll: true }); });
+    // Teclado só com a prévia em foco: na legenda, as setas continuam movendo o cursor.
+    trilho.tabIndex = 0;
+    trilho.setAttribute('aria-label', `Carrossel com ${itens.length} itens. Use as setas para navegar.`);
+    midia.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      irPara(atual() + (e.key === 'ArrowRight' ? 1 : -1));
+    });
   } else {
     contador.hidden = true;
+    setaAnterior.hidden = true;
+    setaProxima.hidden = true;
   }
 
   const legenda = criarLegenda('ig-post-legenda', { prefixo: nome });
 
   const post = el('article', 'ig-post',
     el('header', 'ig-post-topo', avatar(estado.cliente), el('strong', null, nome), el('span', 'ig-espaco'), icone('mais')),
-    el('div', 'ig-post-midia', trilho, contador),
+    midia,
     itens.length > 1 && pontos,
     el('div', 'ig-post-acoes',
       el('span', 'ig-acao-linha', icone('coracao'), el('small', null, '1.024')),
@@ -445,6 +482,8 @@ function montarFeed(estado, tela) {
       el('p', 'ig-post-data', dataDoFeed(estado.data))));
 
   tela.append(post);
+  // Mudou a ordem ou um arquivo: continua na mesma posição, sem animar.
+  if (itens.length > 1) irPara(estado.posicaoCarrossel ?? 0, false);
 
   return {
     atualizarTexto() { legenda.definir(estado.legenda.trim()); },
