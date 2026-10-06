@@ -35,12 +35,12 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - A Bea responde pelo painel, também com áudio
    - Tempo real (Supabase Realtime) e contador de não lidas nas listas, dos dois lados
    - Segurança: cliente só nas conversas dos próprios conteúdos; arquivos com as mesmas regras de armazenamento e exclusão
-3. [ ] **Identidade:** logo original da BeaCreative e acabamento visual
+3. [x] **Identidade:** logo original da BeaCreative e acabamento visual
    - [x] Logo original em SVG no topo de todas as páginas, no login e no "definir senha"
    - [x] Ícones (favicon, iPhone e Android) com o monograma b✦, iguais aos do site
    - [x] Monograma b✦ no "Carregando…", na falha ao carregar e nas telas vazias
    - [x] Painel da Bea: botões dos cabeçalhos não quebram mais em duas linhas no celular
-   - [ ] Revisar as páginas do cliente no celular (precisa de um login de cliente)
+   - [x] Páginas do cliente revisadas (360, 390 e computador): "Pedir ajuste" não quebra mais em duas linhas
 4. [ ] **Página da Bea: clientes, calendário e Trello**
    - Visão de todos os clientes e calendário com as entregas (quantas por cliente, datas)
    - Trello manda: cada cartão vira um conteúdo (cliente, data, formato); mexer no Trello atualiza o sistema

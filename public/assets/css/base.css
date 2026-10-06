@@ -1153,13 +1153,14 @@ a.cliente-nome:hover {
 
 .cc-decisao-botoes {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr auto; /* "✦ Aprovado" fica com o que sobrar; "Pedir ajuste" nunca quebra */
   gap: 10px;
 }
 
 .cc-decisao-botoes .botao-secundario {
   font-size: 1rem;
-  padding: 12px 16px;
+  padding: 12px 18px;
+  white-space: nowrap;
 }
 
 .cc-aprovar[data-confirmar] {
