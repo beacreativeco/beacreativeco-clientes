@@ -80,11 +80,15 @@ a {
   margin: 0;
 }
 
-.marca h1 .estrela {
-  color: var(--periwinkle);
-  font-size: 0.45em;
-  vertical-align: 0.9em;
-  margin-left: 0.08em;
+/* Logo original em vetor (SVG, 883 × 153). */
+.logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+.marca h1 .logo {
+  height: clamp(44px, 12vw, 72px);
 }
 
 .marca p {
@@ -226,8 +230,12 @@ a:focus-visible {
 }
 
 .topo .titulo {
-  font-family: var(--fonte-titulo);
-  font-size: 1.25rem;
+  display: block;
+  line-height: 0;
+}
+
+.topo .titulo .logo {
+  height: 24px;
 }
 
 .conteudo-pagina {
@@ -236,10 +244,42 @@ a:focus-visible {
   margin: 0 auto;
 }
 
+/* Carregando: o monograma b✦ respirando no meio da tela. */
 .carregando {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   min-height: 100vh;
+}
+
+.marca-monograma {
+  display: block;
+  width: auto;
+  height: 64px;
+}
+
+.carregando .marca-monograma {
+  animation: respirar 1.6s ease-in-out infinite;
+}
+
+.carregando.falha .marca-monograma {
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes respirar {
+  50% { opacity: 0.35; transform: scale(0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carregando .marca-monograma { animation: none; }
+}
+
+.carregando-texto {
+  font-size: 0.8125rem;
+  opacity: 0.6;
 }
 
 /* ---------- Falha ao carregar ---------- */
@@ -294,10 +334,17 @@ a:focus-visible {
 /* ---------- Painel: lista de clientes ---------- */
 .cabecalho-secao {
   display: flex;
+  flex-wrap: wrap; /* sem espaço ao lado do título, o botão desce em vez de quebrar o texto */
   justify-content: space-between;
   align-items: center;
-  gap: var(--espaco);
+  gap: 12px var(--espaco);
   margin: 24px 0 8px;
+}
+
+.cabecalho-secao > .botao,
+.cabecalho-secao > .botao-secundario {
+  flex: none;
+  white-space: nowrap;
 }
 
 .cabecalho-secao h1 {
@@ -305,10 +352,23 @@ a:focus-visible {
   margin: 0;
 }
 
+/* Tela vazia: monograma e um texto curto, no centro. */
 .vazio {
-  max-width: 40ch;
-  margin: 32px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 36ch;
+  margin: 56px auto;
+  text-align: center;
 }
+
+.vazio .marca-monograma {
+  height: 56px;
+  opacity: 0.85;
+}
+
+.vazio p { margin: 0; }
 
 .lista-clientes {
   list-style: none;

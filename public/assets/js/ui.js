@@ -28,7 +28,8 @@ export async function iniciarPagina(area, montar) {
 }
 
 function mostrarFalhaAoCarregar(container) {
-  container.replaceChildren();
+  const monograma = container.querySelector('.marca-monograma');
+  container.replaceChildren(...(monograma ? [monograma] : []));
   container.classList.add('falha');
 
   const texto = document.createElement('p');

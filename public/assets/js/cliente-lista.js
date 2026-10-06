@@ -29,6 +29,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
   desenharGrupo('secao-ajuste', grupos.ajuste_solicitado);
   desenharGrupo('secao-aprovados', grupos.aprovado);
   document.getElementById('resumo').textContent = resumo(grupos.em_aprovacao.length, data.length);
+  document.getElementById('lista-vazia').hidden = data.length > 0;
 
   // Mensagens novas da Bea: número em cada conteúdo, atualizado na hora.
   await atualizarNaoLidas();
@@ -47,7 +48,7 @@ function resumo(paraAprovar, total) {
   if (paraAprovar === 1) return 'Tem 1 conteúdo esperando sua aprovação.';
   if (paraAprovar > 1) return `Tem ${paraAprovar} conteúdos esperando sua aprovação.`;
   if (total) return 'Nada para aprovar agora. Quando a Bea enviar um conteúdo novo, ele aparece aqui.';
-  return 'Ainda não tem conteúdo por aqui. Quando a Bea enviar o primeiro para você aprovar, ele aparece nesta página.';
+  return ''; // sem nenhum conteúdo: a tela vazia (com o monograma) explica
 }
 
 function textoDaSituacao(c) {
