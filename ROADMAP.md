@@ -24,7 +24,10 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Menu nos três pontinhos (computador) ou segurando o balão (celular), em tempo real
      - Regras no Supabase, não só na tela
    - [x] Entrega 3: imagens de referência (comprimidas no navegador, miniatura e tela cheia, também como pedido de ajuste; "Excluir rascunho" tira os arquivos da conversa do armazenamento)
-   - [ ] Entrega 4: áudio (até 3 min, gravar com toques) — gravação, envio e player funcionando; falta: conversão WEBM→M4A (fica em WEBM), testar Cancelar e celular/iPhone
+   - [ ] Entrega 4: áudio (até 3 min, gravar com toques) — gravação, envio e player funcionando; M4A no Chrome/Edge/Safari, WEBM só no Firefox (sem conversão: lá não há codificador AAC); testado no Android
+     - Ondas ao vivo gravando (volume do microfone) e onda no balão preenchendo conforme toca (guardada em `mensagens.onda`, migração `20261010000000`)
+     - Conversa no celular: cabe na largura, minhas à direita na cor de destaque, balões compactos, sem caixa em volta
+     - Falta: testar no iPhone
    - Uma conversa por conteúdo, embaixo da prévia, balões dos dois lados com horário
    - Texto, áudio, imagens de referência e links
    - Áudio gravado no navegador (inclusive iPhone/Safari), com tempo correndo, cancelar e player no balão

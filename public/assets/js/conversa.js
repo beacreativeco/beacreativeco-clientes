@@ -4,7 +4,7 @@
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
 import { otimizarImagem } from './otimizar.js';
-import { gravar, gravacaoDisponivel, motivoDoErro, relogio, LIMITE_SEGUNDOS } from './gravador.js';
+import { gravar, gravacaoDisponivel, motivoDoErro, relogio, LIMITE_SEGUNDOS, BARRAS_ONDA } from './gravador.js';
 
 const LIMITE_TEXTO = 2000;
 // Os mesmos prazos das funções do banco (editar_mensagem e apagar_mensagem), que são quem decide.
@@ -35,30 +35,53 @@ const ICONE_PAUSA = '<path d="M8 5.5v13M16 5.5v13" stroke-width="3"/>';
 // Um áudio tocando por vez na página.
 let tocandoAgora = null;
 
-// Player do balão: play/pausa, barra que dá para arrastar e o tempo.
-function playerDeAudio(src, duracaoSalva) {
+// Áudios antigos (de antes da onda guardada): barras iguais, baixinhas.
+const ONDA_PADRAO = Array(BARRAS_ONDA).fill(22);
+
+// Player do balão: play/pausa, a onda do áudio (preenche conforme toca; tocar ou
+// arrastar nela pula) e o tempo. Por cima da onda fica um range invisível, que dá
+// arrastar, teclado e leitor de tela de graça.
+function playerDeAudio(src, duracaoSalva, ondaSalva) {
   const audio = el('audio');
   audio.preload = 'metadata';
   audio.src = src;
   const botao = el('button', 'audio-play', icone(ICONE_PLAY));
   botao.type = 'button';
   botao.setAttribute('aria-label', 'Tocar áudio');
+  const barras = (ondaSalva?.length ? ondaSalva : ONDA_PADRAO).map((altura) => {
+    const b = el('span');
+    b.style.setProperty('--altura', `${Math.max(12, altura)}%`);
+    return b;
+  });
   const barra = el('input', 'audio-barra');
   barra.type = 'range';
   barra.min = '0';
   barra.step = '0.1';
   barra.value = '0';
   barra.setAttribute('aria-label', 'Posição do áudio');
+  const onda = el('div', 'audio-onda', el('div', 'audio-barras', barras), barra);
   const tempo = el('span', 'audio-tempo');
-  const player = el('div', 'audio-player', botao, barra, tempo, audio);
+  const player = el('div', 'audio-player', botao, onda, tempo, audio);
 
   // WEBM gravado no navegador às vezes diz "Infinity" de duração: vale a que foi salva.
   const duracao = () => (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : Number(duracaoSalva) || 0);
+  let tocadas = -1;
   const mostrar = () => {
+    const fracao = Math.min(1, audio.currentTime / (duracao() || 1));
     barra.max = String(duracao() || 1);
     barra.value = String(audio.currentTime);
-    barra.style.setProperty('--progresso', `${(audio.currentTime / (duracao() || 1)) * 100}%`);
+    const agora = Math.round(fracao * barras.length);
+    if (agora !== tocadas) {
+      barras.forEach((b, i) => b.classList.toggle('tocada', i < agora));
+      tocadas = agora;
+    }
     tempo.textContent = relogio(audio.paused && audio.currentTime === 0 ? duracao() : audio.currentTime);
+  };
+  // timeupdate vem só ~4 vezes por segundo: tocando, a onda acompanha quadro a quadro.
+  let quadro = 0;
+  const acompanhar = () => {
+    mostrar();
+    if (!audio.paused) quadro = requestAnimationFrame(acompanhar);
   };
   mostrar();
   audio.addEventListener('loadedmetadata', mostrar);
@@ -68,10 +91,15 @@ function playerDeAudio(src, duracaoSalva) {
     tocandoAgora = audio;
     botao.replaceChildren(icone(ICONE_PAUSA));
     botao.setAttribute('aria-label', 'Pausar áudio');
+    player.classList.add('tocando');
+    cancelAnimationFrame(quadro);
+    quadro = requestAnimationFrame(acompanhar);
   });
   audio.addEventListener('pause', () => {
     botao.replaceChildren(icone(ICONE_PLAY));
     botao.setAttribute('aria-label', 'Tocar áudio');
+    player.classList.remove('tocando');
+    cancelAnimationFrame(quadro);
   });
   audio.addEventListener('ended', () => { audio.currentTime = 0; mostrar(); });
   audio.addEventListener('error', () => {
@@ -198,11 +226,14 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
   cancelarGravacao.setAttribute('aria-label', 'Cancelar gravação');
   const tempoGravacao = el('span', 'gravando-tempo', '0:00');
   const avisoGravacao = el('span', 'gravando-aviso');
+  avisoGravacao.setAttribute('aria-live', 'polite');
+  const ondaAoVivo = el('canvas', 'gravando-onda');
+  ondaAoVivo.setAttribute('aria-hidden', 'true');
   const enviarGravacao = el('button', 'conversa-enviar', icone(ICONE_ENVIAR));
   enviarGravacao.type = 'button';
   enviarGravacao.setAttribute('aria-label', 'Enviar áudio');
-  const barraGravando = el('div', 'conversa-gravando', cancelarGravacao,
-    el('span', 'gravando-ponto'), tempoGravacao, avisoGravacao, enviarGravacao);
+  const barraGravando = el('div', 'conversa-gravando', avisoGravacao, cancelarGravacao,
+    el('span', 'gravando-ponto'), tempoGravacao, ondaAoVivo, enviarGravacao);
   barraGravando.hidden = true;
 
   const form = el('form', 'conversa-escrever', anexar, seletor, campo, enviar, microfone);
@@ -245,7 +276,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     } else {
       if (m.pedido_ajuste) corpo.append(el('span', 'conversa-etiqueta', 'Pedido de ajuste'));
       if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
-      if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s));
+      if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s, m.onda));
       if (m.texto) corpo.append(el('p', 'conversa-texto', textoComLinks(m.texto)));
     }
     corpo.append(el('span', 'conversa-hora', `${m.editada_em && !m.apagada_em ? 'editada ' : ''}${hora(m.criado_em)}`));
@@ -465,13 +496,49 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     raiz.classList.toggle('gravando', ligado);
   }
 
+  // Ondas ao vivo: uma barra por medição (a cada 100 ms), a mais nova na direita,
+  // andando para a esquerda. Microfone sem captar nada = tracinhos parados.
+  const BARRA_PX = 3;
+  const VAO_PX = 2;
+  let niveisAoVivo = [];
+  function desenharOndaAoVivo() {
+    const largura = ondaAoVivo.clientWidth;
+    const altura = ondaAoVivo.clientHeight;
+    if (!largura || !altura) return; // ainda escondida
+    const dpr = window.devicePixelRatio || 1;
+    if (ondaAoVivo.width !== Math.round(largura * dpr)) {
+      ondaAoVivo.width = Math.round(largura * dpr);
+      ondaAoVivo.height = Math.round(altura * dpr);
+    }
+    const ctx = ondaAoVivo.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, largura, altura);
+    ctx.fillStyle = getComputedStyle(ondaAoVivo).color;
+    const cabem = Math.floor(largura / (BARRA_PX + VAO_PX));
+    if (niveisAoVivo.length > cabem) niveisAoVivo = niveisAoVivo.slice(-cabem);
+    niveisAoVivo.forEach((nivel, i) => {
+      const h = Math.max(3, nivel * altura);
+      const x = largura - (niveisAoVivo.length - i) * (BARRA_PX + VAO_PX);
+      ctx.beginPath();
+      ctx.roundRect(x, (altura - h) / 2, BARRA_PX, h, BARRA_PX / 2);
+      ctx.fill();
+    });
+  }
+
   microfone.addEventListener('click', async () => {
     mostrarErro('');
     if (!gravacaoDisponivel()) return mostrarErro(motivoDoErro());
+    if (microfone.disabled || gravacao) return; // dois toques enquanto pede permissão: uma gravação só
+    microfone.disabled = true;
     tempoGravacao.textContent = '0:00';
     avisoGravacao.textContent = '';
+    niveisAoVivo = [];
     try {
       gravacao = await gravar({
+        aoNivel: (nivel) => {
+          niveisAoVivo.push(nivel);
+          desenharOndaAoVivo();
+        },
         aoTempo: (s) => {
           tempoGravacao.textContent = relogio(s);
           const faltam = LIMITE_SEGUNDOS - s;
@@ -488,6 +555,8 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       console.error(err);
       gravacao = null;
       mostrarErro(motivoDoErro(err));
+    } finally {
+      microfone.disabled = false;
     }
   });
 
@@ -509,11 +578,11 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     vazia.remove();
     rolarProFim();
     try {
-      const { arquivo, duracao } = await atual.concluir();
+      const { arquivo, duracao, onda } = await atual.concluir();
       if (duracao < 1) throw Object.assign(new Error('Áudio curto demais. Toque no microfone, fale e depois envie.'), { code: 'P0001' });
       const arquivoUrl = await subirArquivo(arquivo);
       espera.remove();
-      await enviarComArquivo({ tipo: 'audio', arquivo_url: arquivoUrl, duracao_s: duracao });
+      await enviarComArquivo({ tipo: 'audio', arquivo_url: arquivoUrl, duracao_s: duracao, onda });
       rolarProFim();
       marcarLida(true);
     } catch (err) {
@@ -707,7 +776,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
 
   async function carregar() {
     const { data, error } = await supabase.from('mensagens')
-      .select('id, autor, tipo, texto, arquivo_url, duracao_s, pedido_ajuste, criado_em, editada_em, apagada_em')
+      .select('id, autor, tipo, texto, arquivo_url, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
       .eq('conteudo_id', conteudoId).order('criado_em');
     if (error) throw error;
     data.forEach(adicionar);
@@ -739,7 +808,8 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     /** "Pedir ajuste": a próxima mensagem vira o pedido. */
     pedirAjuste() {
       definirModoAjuste(true);
-      raiz.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Rola até o título da conversa (centralizar cortava o título com o celular deitado).
+      (alvo.closest('section') ?? raiz).scrollIntoView({ behavior: 'smooth', block: 'start' });
       campo.focus({ preventScroll: true });
     },
     sairDoModoAjuste: () => definirModoAjuste(false),

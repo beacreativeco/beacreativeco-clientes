@@ -1,9 +1,7 @@
 // Gravação de áudio no navegador para a conversa (estilo WhatsApp, com toques).
-// Grava em M4A (AAC) quando o navegador sabe (Safari/iPhone e Chrome atual); senão grava
-// WEBM e converte para M4A com a Mediabunny, para tocar em qualquer celular. Se a
-// conversão não for possível (ex.: Firefox), fica em WEBM, que os navegadores atuais tocam.
-
-const MEDIABUNNY = 'https://cdn.jsdelivr.net/npm/mediabunny@1.61.3/dist/bundles/mediabunny.min.mjs';
+// Grava em M4A (AAC) quando o navegador sabe (Safari/iPhone, Chrome e Edge atuais); senão
+// (Firefox) grava WEBM, que os navegadores atuais tocam. Não converte WEBM→M4A: onde o
+// navegador grava WEBM, ele também não tem codificador AAC (testado com a Mediabunny).
 
 export const LIMITE_SEGUNDOS = 180;
 
@@ -24,11 +22,57 @@ export function motivoDoErro(err) {
   return 'Não foi possível abrir o microfone. Tente de novo.';
 }
 
+// Quantas barras tem a onda guardada com a mensagem (a coluna aceita até 64).
+export const BARRAS_ONDA = 40;
+
+// Volume do microfone agora, de 0 a 1 (escala em decibéis, como o ouvido percebe).
+function medidorDeVolume(stream) {
+  try {
+    const ctx = new AudioContext();
+    ctx.resume().catch(() => {});
+    const analisador = ctx.createAnalyser();
+    analisador.fftSize = 1024;
+    // Ligado à saída com volume zero: o Safari só mede o que chega até o fim da cadeia.
+    const mudo = ctx.createGain();
+    mudo.gain.value = 0;
+    ctx.createMediaStreamSource(stream).connect(analisador).connect(mudo).connect(ctx.destination);
+    const amostras = new Float32Array(analisador.fftSize);
+    return {
+      medir() {
+        analisador.getFloatTimeDomainData(amostras);
+        let soma = 0;
+        for (const a of amostras) soma += a * a;
+        const db = 20 * Math.log10(Math.sqrt(soma / amostras.length) || 1e-8);
+        return Math.min(1, Math.max(0, (db + 55) / 45)); // -55 dB (silêncio) a -10 dB (voz alta)
+      },
+      fechar: () => ctx.close().catch(() => {}),
+    };
+  } catch (err) {
+    console.warn('Sem medidor de volume (as ondas ficam paradas).', err);
+    return { medir: () => 0, fechar() {} };
+  }
+}
+
+// Níveis medidos durante a gravação → BARRAS_ONDA alturas de 0 a 100.
+function formaDaOnda(niveis) {
+  if (!niveis.length) return null;
+  const barras = Array.from({ length: BARRAS_ONDA }, (_, i) => {
+    const de = Math.floor((i * niveis.length) / BARRAS_ONDA);
+    const ate = Math.max(de + 1, Math.floor(((i + 1) * niveis.length) / BARRAS_ONDA));
+    return Math.max(...niveis.slice(de, ate));
+  });
+  // Gravação baixa ainda mostra o desenho da fala; silêncio total fica reto (e mostra que algo deu errado).
+  const pico = Math.max(...barras);
+  const escala = pico > 0.08 ? 1 / pico : 1;
+  return barras.map((b) => Math.round(Math.min(1, b * escala) * 100));
+}
+
 /**
  * Começa a gravar. Devolve o controle da gravação.
- * @param {{ aoTempo?: (segundos: number) => void, aoLimite?: () => void }} opcoes
+ * @param {{ aoTempo?: (segundos: number) => void, aoLimite?: () => void, aoNivel?: (nivel: number) => void }} opcoes
+ *   aoNivel: volume do microfone (0 a 1) a cada 100 ms, para desenhar as ondas ao vivo.
  */
-export async function gravar({ aoTempo = () => {}, aoLimite = () => {} } = {}) {
+export async function gravar({ aoTempo = () => {}, aoLimite = () => {}, aoNivel = () => {} } = {}) {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 },
   });
@@ -37,61 +81,49 @@ export async function gravar({ aoTempo = () => {}, aoLimite = () => {} } = {}) {
   const partes = [];
   gravador.addEventListener('dataavailable', (e) => { if (e.data.size) partes.push(e.data); });
 
+  const volume = medidorDeVolume(stream);
+  const niveis = [];
+
   const inicio = performance.now();
   const segundos = () => Math.min(LIMITE_SEGUNDOS, (performance.now() - inicio) / 1000);
   let parouNoLimite = false;
   const relogio = setInterval(() => {
+    if (gravador.state !== 'recording') return;
+    const nivel = volume.medir();
+    niveis.push(nivel);
+    aoNivel(nivel);
     aoTempo(segundos());
-    if (segundos() >= LIMITE_SEGUNDOS && gravador.state === 'recording') {
+    if (segundos() >= LIMITE_SEGUNDOS) {
       parouNoLimite = true;
       gravador.stop();
       aoLimite();
     }
-  }, 200);
+  }, 100);
 
   const terminou = new Promise((resolve) => gravador.addEventListener('stop', resolve, { once: true }));
   gravador.start(1000);
 
   function soltarMicrofone() {
     clearInterval(relogio);
+    volume.fechar();
     stream.getTracks().forEach((t) => t.stop());
   }
 
   return {
-    /** Para e devolve { arquivo, duracao } pronto para enviar. */
+    /** Para e devolve { arquivo, duracao, onda } pronto para enviar. */
     async concluir() {
       const duracao = Math.round(segundos() * 10) / 10;
       if (gravador.state === 'recording') gravador.stop();
       await terminou;
       soltarMicrofone();
       const bruto = new Blob(partes, { type: (gravador.mimeType || tipo || 'audio/webm').split(';')[0] });
-      return { arquivo: await paraM4a(bruto), duracao: parouNoLimite ? LIMITE_SEGUNDOS : duracao };
+      return { arquivo: bruto, duracao: parouNoLimite ? LIMITE_SEGUNDOS : duracao, onda: formaDaOnda(niveis) };
     },
     cancelar() {
       if (gravador.state === 'recording') gravador.stop();
       soltarMicrofone();
     },
   };
-}
-
-// WEBM (Opus) → M4A (AAC). Já é M4A, ou não dá para converter: devolve como está.
-async function paraM4a(blob) {
-  if (blob.type === 'audio/mp4') return blob;
-  try {
-    const { Input, Output, Conversion, BlobSource, BufferTarget, Mp4OutputFormat, ALL_FORMATS, canEncodeAudio, Quality } =
-      await import(MEDIABUNNY);
-    if (!(await canEncodeAudio('aac'))) return blob;
-    const input = new Input({ source: new BlobSource(blob), formats: ALL_FORMATS });
-    const output = new Output({ format: new Mp4OutputFormat({ fastStart: 'in-memory' }), target: new BufferTarget() });
-    const conversao = await Conversion.init({ input, output, audio: { codec: 'aac', quality: new Quality({ bitrate: 64000 }) } });
-    if (!conversao.isValid) return blob;
-    await conversao.execute();
-    input.dispose();
-    return new Blob([output.target.buffer], { type: 'audio/mp4' });
-  } catch (err) {
-    console.warn('Áudio enviado em WEBM (não deu para converter para M4A).', err);
-    return blob;
-  }
 }
 
 export function relogio(segundos) {

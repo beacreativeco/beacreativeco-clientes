@@ -50,6 +50,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
         p_texto: mensagem.texto ?? null,
         p_arquivo_url: mensagem.arquivo_url ?? null,
         p_duracao_s: mensagem.duracao_s ?? null,
+        p_onda: mensagem.onda ?? null,
       });
       if (error) throw error;
       conteudo = data;

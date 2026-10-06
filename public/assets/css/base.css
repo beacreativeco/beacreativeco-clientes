@@ -1215,6 +1215,12 @@ a.cliente-nome:hover {
   margin-bottom: 12px;
 }
 
+/* "Pedir ajuste" rola até o título da conversa: um respiro em cima. */
+.cc-conversa,
+.editor-conversa {
+  scroll-margin-top: 12px;
+}
+
 .conversa {
   position: relative; /* o menu da mensagem se posiciona aqui */
   display: grid;
@@ -1229,8 +1235,10 @@ a.cliente-nome:hover {
   flex-direction: column;
   gap: 6px;
   max-height: min(60vh, 460px);
+  max-height: min(60dvh, 460px);
   min-height: 120px;
-  padding: 16px 12px;
+  padding: 12px 10px;
+  background: var(--creme);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -1260,27 +1268,33 @@ a.cliente-nome:hover {
 
 .conversa-balao {
   position: relative;
-  max-width: min(85%, 420px);
-  padding: 8px 12px 6px;
-  border-radius: 14px;
-  font-size: 0.9375rem;
-  line-height: 1.4;
+  max-width: min(80%, 420px);
+  padding: 5px 9px 3px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  box-shadow: 0 1px 1px rgba(77, 59, 49, 0.12);
 }
 
-/* As suas à direita (lilás claro), as da outra pessoa à esquerda (branco). */
+/* Como no WhatsApp: as suas à direita, na cor de destaque; as da outra pessoa à esquerda, em branco. */
 .conversa-meu {
-  --fundo-balao: #E4E6F6;
+  --fundo-balao: #D3D7F4;
   align-self: flex-end;
-  border-bottom-right-radius: 4px;
+  border-top-right-radius: 3px;
   background: var(--fundo-balao);
 }
 
 .conversa-outro {
   --fundo-balao: var(--branco);
   align-self: flex-start;
-  border: 1px solid rgba(77, 59, 49, 0.18);
-  border-bottom-left-radius: 4px;
+  border-top-left-radius: 3px;
   background: var(--branco);
+}
+
+/* Mensagens seguidas da mesma pessoa ficam mais juntas. */
+.conversa-meu + .conversa-meu,
+.conversa-outro + .conversa-outro {
+  margin-top: -3px;
 }
 
 .conversa-etiqueta {
@@ -1297,10 +1311,21 @@ a.cliente-nome:hover {
   overflow-wrap: anywhere;
 }
 
+.conversa-balao.conversa-apagada {
+  --fundo-balao: transparent;
+  padding: 3px 9px 2px;
+  border: 1px solid rgba(77, 59, 49, 0.2);
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.8125rem;
+}
+
 .conversa-apagada .conversa-texto {
   font-style: italic;
-  opacity: 0.65;
+  opacity: 0.6;
 }
+
+.conversa-apagada .conversa-hora { margin-top: 0; }
 
 /* Três pontinhos: aparecem ao passar o mouse (ou com o teclado). No celular, segura-se o balão. */
 .conversa-mais {
@@ -1383,8 +1408,8 @@ a.cliente-nome:hover {
 
 .conversa-hora {
   display: block;
-  margin-top: 2px;
-  font-size: 0.6875rem;
+  margin-top: 1px;
+  font-size: 0.625rem;
   text-align: right;
   opacity: 0.6;
 }
@@ -1421,6 +1446,7 @@ a.cliente-nome:hover {
 
 .conversa-campo {
   flex: 1;
+  min-width: 0; /* sem isto a caixa não encolhe e empurra o microfone para fora da tela */
   min-height: 42px;
   max-height: 160px;
   padding: 10px 14px;
@@ -1656,8 +1682,9 @@ a.cliente-nome:hover {
 
 .conversa-gravando {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 8px;
   border-top: 1px solid var(--espresso);
   background: var(--creme);
@@ -1683,24 +1710,46 @@ a.cliente-nome:hover {
 .gravacao-no-limite .gravando-ponto { animation: none; background: var(--espresso); }
 
 .gravando-tempo {
+  flex: none;
+  min-width: 2.6em;
+  font-size: 0.9375rem;
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
 
-.gravando-aviso {
+/* Ondas ao vivo (desenhadas no canvas com esta cor). */
+.gravando-onda {
   flex: 1;
+  min-width: 0;
+  height: 30px;
+  color: var(--espresso);
+}
+
+.gravacao-no-limite .gravando-onda { opacity: 0.4; }
+
+/* "Faltam 10 s" / limite: linha própria em cima da barra. */
+.gravando-aviso {
+  flex-basis: 100%;
+  padding: 0 4px;
   font-size: 0.8125rem;
   opacity: 0.8;
 }
 
-.conversa-gravando .conversa-enviar { margin-left: auto; }
+.gravando-aviso:empty { display: none; }
 
 .audio-player {
+  --cor-tocada: var(--periwinkle-escuro);
+  --cor-play: var(--periwinkle);
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: min(260px, 62vw);
-  margin-bottom: 2px;
+  gap: 8px;
+  width: min(250px, 64vw);
+  padding-top: 2px;
+}
+
+.conversa-meu .audio-player {
+  --cor-tocada: var(--espresso);
+  --cor-play: var(--espresso);
 }
 
 .audio-player audio { display: none; }
@@ -1709,12 +1758,12 @@ a.cliente-nome:hover {
   display: grid;
   place-items: center;
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--periwinkle);
+  background: var(--cor-play);
   color: var(--branco);
   cursor: pointer;
 }
@@ -1726,43 +1775,75 @@ a.cliente-nome:hover {
 
 .audio-play .conversa-icone,
 .audio-play .conversa-icone svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
-.audio-barra {
-  --progresso: 0%;
+/* A onda do áudio; o range invisível por cima dá tocar/arrastar para pular. */
+.audio-onda {
+  position: relative;
   flex: 1;
   min-width: 0;
-  height: 4px;
+  height: 30px;
+}
+
+.audio-barras {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1px;
+  height: 100%;
+}
+
+.audio-barras span {
+  flex: 1;
+  max-width: 3px;
+  height: var(--altura);
+  border-radius: 2px;
+  background: rgba(77, 59, 49, 0.3);
+}
+
+.audio-barras span.tocada { background: var(--cor-tocada); }
+
+.audio-barra {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  border-radius: 999px;
   appearance: none;
-  background: linear-gradient(90deg, var(--periwinkle-escuro) var(--progresso), rgba(77, 59, 49, 0.25) var(--progresso));
+  background: none;
+  opacity: 0;
   cursor: pointer;
 }
 
-.audio-barra::-webkit-slider-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  appearance: none;
-  background: var(--periwinkle-escuro);
-}
-
-.audio-barra::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--periwinkle-escuro);
+.audio-onda:has(.audio-barra:focus-visible) {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .audio-tempo {
   flex: none;
-  min-width: 34px;
-  font-size: 0.75rem;
+  min-width: 30px;
+  font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
   opacity: 0.75;
+}
+
+/* Celular: a conversa ocupa a largura toda, sem a caixa em volta, e o título é menor. */
+@media (max-width: 599px) {
+  .cc-conversa h2,
+  .editor-conversa h2 {
+    font-size: 1.125rem;
+    margin-bottom: 8px;
+  }
+
+  .cc-conversa .conversa,
+  .editor-conversa .conversa {
+    margin: 0 calc(var(--espaco) * -1);
+    border: 0;
+    border-radius: 0;
+  }
 }
