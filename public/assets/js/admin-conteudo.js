@@ -1,0 +1,247 @@
+import { supabase } from './supabase.js';
+import { sair } from './auth.js';
+import { iniciarPagina, avisar } from './ui.js';
+import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro } from './conteudos.js';
+
+const form = document.getElementById('form-conteudo');
+const aviso = document.getElementById('aviso');
+const botoes = {
+  salvar: document.getElementById('salvar'),
+  enviar: document.getElementById('enviar'),
+  retirar: document.getElementById('retirar'),
+  excluir: document.getElementById('excluir'),
+};
+
+let conteudo = null;      // linha de `conteudos` (null enquanto é novo)
+let cliente = null;       // { id, nome, prazo_padrao_dias }
+let temNotaInterna = false;
+let qtdMidias = 0;
+
+iniciarPagina('admin', async () => {
+  document.getElementById('sair').addEventListener('click', sair);
+  form.addEventListener('submit', (e) => { e.preventDefault(); executar(botoes.salvar, salvar); });
+  botoes.enviar.addEventListener('click', () => executar(botoes.enviar, enviarParaAprovacao));
+  botoes.retirar.addEventListener('click', () => executar(botoes.retirar, voltarParaRascunho));
+  botoes.excluir.addEventListener('click', excluirRascunho);
+  form.legenda.addEventListener('input', atualizarContador);
+
+  const id = parametro('id');
+  const clienteId = parametro('cliente');
+  if (id) await carregarConteudo(id);
+  else if (clienteId) await carregarCliente(clienteId);
+  if (!cliente) {
+    window.location.replace('/admin/');
+    return;
+  }
+  desenhar();
+});
+
+// ---------------------------------------------------------------- carregar
+
+async function carregarCliente(id) {
+  const { data, error } = await supabase
+    .from('clientes').select('id, nome, prazo_padrao_dias').eq('id', id).maybeSingle();
+  if (error) throw error;
+  cliente = data;
+}
+
+async function carregarConteudo(id) {
+  const { data, error } = await supabase.from('conteudos').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!data) return;
+  conteudo = data;
+
+  const [nota, midias] = await Promise.all([
+    supabase.from('conteudos_internos').select('observacao_interna').eq('conteudo_id', id).maybeSingle(),
+    supabase.from('midias').select('id', { count: 'exact', head: true })
+      .eq('conteudo_id', id).eq('versao', data.versao_atual),
+    carregarCliente(data.cliente_id),
+  ]);
+  if (nota.error) throw nota.error;
+  if (midias.error) throw midias.error;
+  temNotaInterna = Boolean(nota.data);
+  form.observacao_interna.value = nota.data?.observacao_interna ?? '';
+  qtdMidias = midias.count ?? 0;
+}
+
+// ---------------------------------------------------------------- tela
+
+function desenhar() {
+  const voltar = document.getElementById('voltar');
+  voltar.href = `/admin/cliente/?id=${cliente.id}`;
+  voltar.textContent = `Conteúdos de ${cliente.nome}`;
+
+  if (conteudo) {
+    document.title = `${conteudo.titulo} · BeaCreative`;
+    document.getElementById('titulo-pagina').textContent = conteudo.titulo;
+    form.formato.value = conteudo.formato;
+    form.titulo.value = conteudo.titulo;
+    form.data_prevista.value = conteudo.data_prevista ?? '';
+    form.drive_url.value = conteudo.drive_url ?? '';
+    form.legenda.value = conteudo.legenda ?? '';
+  } else {
+    document.title = `Novo conteúdo · ${cliente.nome}`;
+  }
+
+  atualizarContador();
+  atualizarSituacao();
+}
+
+function atualizarSituacao() {
+  const status = conteudo?.status;
+  const situacao = document.getElementById('situacao-atual');
+  const prazo = document.getElementById('prazo-info');
+
+  situacao.className = 'situacao';
+  situacao.hidden = !status;
+  if (status) {
+    situacao.textContent = SITUACOES[status].texto;
+    situacao.classList.add(SITUACOES[status].classe);
+  }
+
+  botoes.salvar.textContent = conteudo ? 'Salvar alterações' : 'Criar rascunho';
+  botoes.enviar.hidden = !['rascunho', 'ajuste_solicitado'].includes(status);
+  botoes.enviar.textContent = status === 'ajuste_solicitado' ? 'Reenviar para aprovação' : 'Enviar para aprovação';
+  botoes.retirar.hidden = status !== 'em_aprovacao';
+  botoes.excluir.hidden = status !== 'rascunho';
+
+  prazo.hidden = true;
+  if (status === 'em_aprovacao' && conteudo.prazo_aprovacao) {
+    prazo.textContent = `O cliente tem até ${dataHora(conteudo.prazo_aprovacao)} para aprovar. Alterações salvas aparecem para ele na hora.`;
+    prazo.hidden = false;
+  }
+  if (status === 'aprovado') {
+    const quem = conteudo.aprovado_por === 'prazo' ? 'pelo prazo' : 'pelo cliente';
+    prazo.textContent = `Aprovado ${quem} em ${dataHora(conteudo.aprovado_em)}.`;
+    prazo.hidden = false;
+  }
+}
+
+function atualizarContador() {
+  const total = form.legenda.value.length;
+  const contador = document.getElementById('contador-legenda');
+  contador.textContent = `${total.toLocaleString('pt-BR')} de ${LIMITE_LEGENDA.toLocaleString('pt-BR')}`;
+  contador.classList.toggle('passou', total > LIMITE_LEGENDA);
+}
+
+function mostrarErro(texto) {
+  aviso.textContent = texto;
+  aviso.hidden = false;
+  aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Desabilita o botão enquanto a ação roda e mostra erros de forma uniforme.
+async function executar(botao, acao) {
+  aviso.hidden = true;
+  botao.disabled = true;
+  try {
+    await acao();
+  } catch (err) {
+    console.error(err);
+    mostrarErro(err.message || 'Algo deu errado. Tente de novo.');
+  } finally {
+    botao.disabled = false;
+  }
+}
+
+// ---------------------------------------------------------------- ações
+
+function lerFormulario() {
+  const texto = (campo) => form[campo].value.trim() || null;
+  return {
+    formato: form.formato.value,
+    titulo: texto('titulo'),
+    data_prevista: texto('data_prevista'),
+    drive_url: texto('drive_url'),
+    legenda: form.legenda.value.trim() || null,
+  };
+}
+
+function validar(dados) {
+  if (!dados.titulo) return 'Dê um título para o conteúdo.';
+  if (dados.drive_url && !/^https:\/\//.test(dados.drive_url)) return 'O link do Drive precisa começar com https://';
+  if ((dados.legenda?.length ?? 0) > LIMITE_LEGENDA) return `A legenda passou do limite do Instagram (${LIMITE_LEGENDA.toLocaleString('pt-BR')} caracteres).`;
+  return null;
+}
+
+async function salvar({ silencioso = false } = {}) {
+  const dados = lerFormulario();
+  const problema = validar(dados);
+  if (problema) throw new Error(problema);
+
+  const consulta = conteudo
+    ? supabase.from('conteudos').update(dados).eq('id', conteudo.id)
+    : supabase.from('conteudos').insert({ ...dados, cliente_id: cliente.id });
+  const { data, error } = await consulta.select().single();
+  if (error) throw new Error('Não foi possível salvar o conteúdo.');
+  const eraNovo = !conteudo;
+  conteudo = data;
+
+  await salvarNotaInterna();
+
+  if (eraNovo) history.replaceState(null, '', `/admin/conteudo/?id=${conteudo.id}`);
+  document.title = `${conteudo.titulo} · BeaCreative`;
+  document.getElementById('titulo-pagina').textContent = conteudo.titulo;
+  atualizarSituacao();
+  if (!silencioso) avisar(eraNovo ? 'Rascunho criado.' : 'Alterações salvas.');
+}
+
+async function salvarNotaInterna() {
+  const texto = form.observacao_interna.value.trim();
+  if (texto) {
+    const { error } = await supabase.from('conteudos_internos')
+      .upsert({ conteudo_id: conteudo.id, observacao_interna: texto });
+    if (error) throw new Error('O conteúdo foi salvo, mas a observação interna não.');
+    temNotaInterna = true;
+  } else if (temNotaInterna) {
+    const { error } = await supabase.from('conteudos_internos').delete().eq('conteudo_id', conteudo.id);
+    if (error) throw new Error('O conteúdo foi salvo, mas a observação interna não foi apagada.');
+    temNotaInterna = false;
+  }
+}
+
+async function enviarParaAprovacao() {
+  await salvar({ silencioso: true });
+  if (qtdMidias === 0) throw new Error('Adicione pelo menos uma imagem antes de enviar para aprovação.');
+
+  const dias = cliente.prazo_padrao_dias ?? 2;
+  const prazo = new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase.from('conteudos')
+    .update({ status: 'em_aprovacao', prazo_aprovacao: prazo })
+    .eq('id', conteudo.id).select().single();
+  if (error) throw new Error('Não foi possível enviar para aprovação.');
+  conteudo = data;
+  atualizarSituacao();
+  avisar('Enviado para aprovação.');
+}
+
+async function voltarParaRascunho() {
+  const { data, error } = await supabase.from('conteudos')
+    .update({ status: 'rascunho', prazo_aprovacao: null })
+    .eq('id', conteudo.id).select().single();
+  if (error) throw new Error('Não foi possível voltar para rascunho.');
+  conteudo = data;
+  atualizarSituacao();
+  avisar('Voltou para rascunho. O cliente não vê mais este conteúdo.');
+}
+
+// Dois cliques: o primeiro pede confirmação, o segundo exclui.
+let timerExcluir;
+async function excluirRascunho() {
+  const botao = botoes.excluir;
+  if (!botao.dataset.confirmar) {
+    botao.dataset.confirmar = '1';
+    botao.textContent = 'Clique de novo para excluir';
+    timerExcluir = setTimeout(() => {
+      delete botao.dataset.confirmar;
+      botao.textContent = 'Excluir rascunho';
+    }, 4000);
+    return;
+  }
+  clearTimeout(timerExcluir);
+  await executar(botao, async () => {
+    const { error } = await supabase.from('conteudos').delete().eq('id', conteudo.id);
+    if (error) throw new Error('Não foi possível excluir.');
+    window.location.replace(`/admin/cliente/?id=${cliente.id}`);
+  });
+}

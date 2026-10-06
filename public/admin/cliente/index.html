@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Conteúdos · BeaCreative</title>
+</head>
+<body>
+  <div id="carregando" class="carregando">Carregando…</div>
+
+  <div id="app" hidden>
+    <header class="topo">
+      <a class="titulo titulo-link" href="/admin/">BeaCreative</a>
+      <button id="sair" class="botao-link" type="button">Sair</button>
+    </header>
+
+    <main class="conteudo-pagina">
+      <a class="voltar" href="/admin/">Todos os clientes</a>
+
+      <div class="cabecalho-secao">
+        <div>
+          <h1 id="nome-cliente"></h1>
+          <p id="contato-cliente" class="subtitulo"></p>
+        </div>
+        <a id="novo-conteudo" class="botao botao-compacto" href="#">Novo conteúdo</a>
+      </div>
+
+      <p id="agenda-vazia" class="vazio" hidden>
+        Nenhum conteúdo para este cliente ainda. Crie o primeiro para montar a agenda.
+      </p>
+      <ol id="agenda" class="agenda"></ol>
+    </main>
+  </div>
+
+  <template id="modelo-conteudo">
+    <li class="agenda-item">
+      <a class="agenda-link">
+        <span class="agenda-data">
+          <span class="agenda-dia"></span>
+          <span class="agenda-mes"></span>
+        </span>
+        <span class="agenda-info">
+          <span class="agenda-titulo"></span>
+          <span class="agenda-formato"></span>
+        </span>
+        <span class="situacao"></span>
+      </a>
+    </li>
+  </template>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/assets/js/admin-cliente.js"></script>
+</body>
+</html>

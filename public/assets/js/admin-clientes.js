@@ -46,7 +46,9 @@ function desenharLista() {
     const item = modelo.content.firstElementChild.cloneNode(true);
     const situacao = situacaoDoAcesso(c);
     item.dataset.id = c.id;
-    item.querySelector('.cliente-nome').textContent = c.nome;
+    const nome = item.querySelector('.cliente-nome');
+    nome.textContent = c.nome;
+    nome.href = `/admin/cliente/?id=${c.id}`;
     item.querySelector('.cliente-meta').textContent =
       (c.instagram ? '@' + c.instagram : c.email) || 'Sem contato cadastrado';
     const selo = item.querySelector('.situacao');

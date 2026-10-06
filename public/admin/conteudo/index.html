@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Conteúdo · BeaCreative</title>
+</head>
+<body>
+  <div id="carregando" class="carregando">Carregando…</div>
+
+  <div id="app" hidden>
+    <header class="topo">
+      <a class="titulo titulo-link" href="/admin/">BeaCreative</a>
+      <button id="sair" class="botao-link" type="button">Sair</button>
+    </header>
+
+    <main class="conteudo-pagina editor">
+      <a id="voltar" class="voltar" href="/admin/"></a>
+
+      <form id="form-conteudo" class="editor-form" novalidate>
+        <div class="editor-cabecalho">
+          <h1 id="titulo-pagina">Novo conteúdo</h1>
+          <p id="situacao-atual" class="situacao"></p>
+        </div>
+
+        <div id="aviso" class="aviso erro" role="alert" hidden></div>
+
+        <fieldset class="formatos">
+          <legend>Formato</legend>
+          <label class="formato">
+            <input type="radio" name="formato" value="post" checked>
+            <span class="formato-desenho formato-post" aria-hidden="true"></span>
+            <span class="formato-nome">Post</span>
+          </label>
+          <label class="formato">
+            <input type="radio" name="formato" value="carrossel">
+            <span class="formato-desenho formato-carrossel" aria-hidden="true"></span>
+            <span class="formato-nome">Carrossel</span>
+          </label>
+          <label class="formato">
+            <input type="radio" name="formato" value="story">
+            <span class="formato-desenho formato-story" aria-hidden="true"></span>
+            <span class="formato-nome">Story</span>
+          </label>
+        </fieldset>
+
+        <div class="campo">
+          <label for="titulo">Título</label>
+          <input id="titulo" name="titulo" type="text" required maxlength="120" autocomplete="off">
+          <small class="dica">Para você e o cliente identificarem o conteúdo. Não vai para o Instagram.</small>
+        </div>
+
+        <div class="campos-lado-a-lado">
+          <div class="campo">
+            <label for="data_prevista">Data de publicação</label>
+            <input id="data_prevista" name="data_prevista" type="date">
+          </div>
+          <div class="campo">
+            <label for="drive_url">Link do Drive</label>
+            <input id="drive_url" name="drive_url" type="url" placeholder="https://drive.google.com/…" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="campo">
+          <div class="campo-rotulo">
+            <label for="legenda">Legenda</label>
+            <span id="contador-legenda" class="contador" aria-live="polite"></span>
+          </div>
+          <textarea id="legenda" name="legenda" rows="8"></textarea>
+        </div>
+
+        <div class="campo nota-interna">
+          <div class="campo-rotulo">
+            <label for="observacao_interna">Observação interna</label>
+            <span class="dica">Só você vê</span>
+          </div>
+          <textarea id="observacao_interna" name="observacao_interna" rows="3"></textarea>
+        </div>
+
+        <section class="midias-secao">
+          <h2>Imagens</h2>
+          <p id="midias-aviso" class="dica">O envio de imagens entra na próxima etapa.</p>
+        </section>
+
+        <footer class="editor-acoes">
+          <button id="salvar" class="botao-secundario" type="submit">Salvar</button>
+          <button id="enviar" class="botao botao-compacto" type="button" hidden>Enviar para aprovação</button>
+          <button id="retirar" class="botao-link" type="button" hidden>Voltar para rascunho</button>
+          <button id="excluir" class="botao-link botao-perigo" type="button" hidden>Excluir rascunho</button>
+        </footer>
+        <p id="prazo-info" class="dica" hidden></p>
+      </form>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="/assets/js/admin-conteudo.js"></script>
+</body>
+</html>
