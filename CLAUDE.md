@@ -10,7 +10,11 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 - Front: HTML, CSS e JavaScript puro (sem framework, sem build obrigatório). Mobile-first.
 - Backend: Supabase (Postgres, Auth, Realtime). Cliente JS do Supabase via CDN ou ES module.
-- Arquivos (imagens, vídeos, áudios): Cloudflare R2.
+- Arquivos (imagens, vídeos, áudios): Cloudflare R2, acessado só pelo binding `MIDIAS` das Pages Functions (sem chaves de acesso do R2).
+  - Upload sempre em partes (multipart, 10 MiB por parte) pelas funções em `functions/api/midias/`, para passar do limite de corpo de requisição das Functions e aguentar vídeos grandes.
+  - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar o original com o nome do arquivo.
+  - Os links de arquivo não exigem login: a proteção é a chave impossível de adivinhar (`<conteudo_id>/<uuid>.<ext>`). Decisão consciente para prévias de agência.
+  - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/`. Em produção, o R2 ainda não está ativado na conta (a Bea vai decidir sobre o cartão); quando ativar, criar o bucket `beacreativeco-midias` e o binding `MIDIAS` no Pages.
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
 - E-mail transacional: Resend (ou similar), a definir na implementação.
@@ -63,8 +67,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Fases
 
-1. **MVP:** login (Bea e clientes) com suspensão; cadastro de clientes; conteúdos (post, carrossel, story); página do cliente com preview estilo Instagram e link do Drive; aprovar/pedir ajuste com texto e referências; prazo; envio do link (WhatsApp com mensagem pronta via `wa.me`, e-mail, Instagram, copiar); notificação por e-mail.
-2. Áudio e versões; reels e vídeos (versão otimizada, download, aviso de vídeo grande para ver no Drive); aprovação automática por prazo e lembretes; calendário de publicações; caixa de respostas; Trello; aviso no celular (PWA).
+1. **MVP:** login (Bea e clientes) com suspensão; cadastro de clientes; conteúdos (post, carrossel, story e reels) com imagens e vídeos (upload de arquivos grandes, story em vídeo, player na pré-visualização, botão de baixar o original); página do cliente com preview estilo Instagram e link do Drive; aprovar/pedir ajuste com texto e referências; prazo; envio do link (WhatsApp com mensagem pronta via `wa.me`, e-mail, Instagram, copiar); notificação por e-mail.
+2. Áudio e versões; versão otimizada dos vídeos (mais leve para assistir) e aviso de vídeo grande para ver no Drive; aprovação automática por prazo e lembretes; calendário de publicações; caixa de respostas; Trello; aviso no celular (PWA).
 3. Vitrine no site com logos e depoimentos; Drive via API; WhatsApp automático (ainda em pesquisa, não implementar sem decisão).
 
 ## Como trabalhar neste repositório

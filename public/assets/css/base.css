@@ -631,8 +631,8 @@ a.cliente-nome:hover {
 /* Seletor de formato: cada opção desenhada na proporção real. */
 .formatos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   margin: 0 0 24px;
   padding: 0;
   border: 0;
@@ -694,6 +694,28 @@ a.cliente-nome:hover {
 
 .formato-post { width: 40px; height: 50px; }        /* 4:5 */
 .formato-story { width: 30px; height: 53px; }       /* 9:16 */
+
+/* Reels: 9:16 com o triângulo de play no meio. */
+.formato-reels {
+  position: relative;
+  width: 30px;
+  height: 53px;
+}
+
+.formato-reels::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-35%, -50%);
+  border-style: solid;
+  border-width: 7px 0 7px 11px;
+  border-color: transparent transparent transparent var(--espresso);
+}
+
+.formato:has(input:checked) .formato-reels::after {
+  border-left-color: var(--periwinkle-escuro);
+}
 /* Carrossel: um segundo quadro atrás, desenhado com duas sombras (miolo + contorno). */
 .formato-carrossel {
   width: 40px;
@@ -742,4 +764,205 @@ a.cliente-nome:hover {
 
 #prazo-info {
   margin-top: 12px;
+}
+
+@media (min-width: 600px) {
+  .formatos { gap: 12px; }
+}
+
+/* ---------- Arquivos do conteúdo ---------- */
+.midias {
+  list-style: none;
+  margin: 12px 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 12px;
+}
+
+@media (min-width: 600px) {
+  .midias { grid-template-columns: repeat(3, 1fr); }
+}
+
+.midia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Quadro na proporção do formato: 4:5 no feed, 9:16 em story e reels. */
+.midia-quadro {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--espresso);
+  border-radius: 8px;
+  background: #EFE4D6;
+  display: grid;
+  place-items: center;
+}
+
+.midias[data-formato="story"] .midia-quadro,
+.midias[data-formato="reels"] .midia-quadro {
+  aspect-ratio: 9 / 16;
+}
+
+.midia-quadro img,
+.midia-quadro video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.midia-quadro img {
+  background: transparent;
+}
+
+.midia-falha {
+  margin: 0;
+  padding: 12px;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.midia-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+
+.midia-posicao {
+  font-family: var(--fonte-titulo);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.midia-tamanho {
+  opacity: 0.7;
+}
+
+.midia-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.midia-acoes .botao-link {
+  font-size: 0.8125rem;
+}
+
+.botao-icone {
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--espresso);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--espresso);
+  cursor: pointer;
+}
+
+.botao-icone:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.botao-icone:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 2px;
+}
+
+/* Área de soltar arquivos */
+.soltar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 24px 16px;
+  border: 1px solid var(--espresso);
+  border-radius: 10px;
+  background: var(--papel);
+  text-align: center;
+  cursor: pointer;
+}
+
+.soltar input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.soltar:focus-within {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 2px;
+}
+
+.soltar.arrastando {
+  border-color: var(--periwinkle);
+  background: #E6E8F7;
+}
+
+.soltar-acao {
+  color: var(--periwinkle-escuro);
+  text-decoration: underline;
+}
+
+/* Fila de envio */
+.fila {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.envio {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas:
+    "nome nome nome"
+    "barra porcentagem cancelar";
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(77, 59, 49, 0.25);
+  font-size: 0.875rem;
+}
+
+.envio-nome {
+  grid-area: nome;
+  overflow-wrap: anywhere;
+}
+
+.envio-barra {
+  grid-area: barra;
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: #EFE4D6;
+  overflow: hidden;
+}
+
+.envio-barra::-webkit-progress-bar { background: #EFE4D6; }
+.envio-barra::-webkit-progress-value { background: var(--periwinkle); }
+.envio-barra::-moz-progress-bar { background: var(--periwinkle); }
+
+.envio-porcentagem {
+  grid-area: porcentagem;
+  min-width: 3ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.envio .botao-link {
+  grid-area: cancelar;
 }

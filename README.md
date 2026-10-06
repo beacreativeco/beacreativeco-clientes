@@ -15,7 +15,8 @@ public/                     tudo que o navegador acessa
   assets/css/base.css       cores e estilos base
   assets/js/                config, cliente Supabase, login, painel
   _headers                  cabeçalhos de segurança do Cloudflare Pages
-functions/api/              Pages Functions (usam chave secreta)
+functions/api/              Pages Functions (convite, upload e entrega de mídias)
+functions/_lib/             código compartilhado das funções (não vira rota)
 supabase/migrations/        migrações do banco
 ```
 
@@ -41,7 +42,8 @@ Em **Settings → Environment variables** (Production): `SUPABASE_URL` e `SUPABA
 ## Rodar local
 
 ```
-npx wrangler pages dev public --port 8788
+npx wrangler pages dev public --port 8788 --r2 MIDIAS
 ```
 
 Abre em `http://localhost:8788`. Segredos locais em `.dev.vars` (copiar de `.dev.vars.example`).
+`--r2 MIDIAS` cria um bucket R2 simulado em `.wrangler/` (os arquivos enviados localmente ficam só nele).

@@ -1,7 +1,10 @@
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
-import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro } from './conteudos.js';
+import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
+import {
+  iniciarMidias, carregarMidias, definirFormato, midiasAtuais, enviandoArquivos, excluirTodas,
+} from './editor-midias.js';
 
 const form = document.getElementById('form-conteudo');
 const aviso = document.getElementById('aviso');
@@ -15,7 +18,6 @@ const botoes = {
 let conteudo = null;      // linha de `conteudos` (null enquanto é novo)
 let cliente = null;       // { id, nome, prazo_padrao_dias }
 let temNotaInterna = false;
-let qtdMidias = 0;
 
 iniciarPagina('admin', async () => {
   document.getElementById('sair').addEventListener('click', sair);
@@ -24,6 +26,16 @@ iniciarPagina('admin', async () => {
   botoes.retirar.addEventListener('click', () => executar(botoes.retirar, voltarParaRascunho));
   botoes.excluir.addEventListener('click', excluirRascunho);
   form.legenda.addEventListener('input', atualizarContador);
+  form.querySelectorAll('input[name="formato"]').forEach((r) =>
+    r.addEventListener('change', () => definirFormato(form.formato.value)));
+  iniciarMidias({
+    // Arquivo precisa de um conteúdo salvo: cria o rascunho na hora, se for novo.
+    garantirConteudo: async () => {
+      if (!conteudo) await salvar({ silencioso: true });
+      return conteudo.id;
+    },
+    aoErro: mostrarErro,
+  });
 
   const id = parametro('id');
   const clienteId = parametro('cliente');
@@ -51,17 +63,14 @@ async function carregarConteudo(id) {
   if (!data) return;
   conteudo = data;
 
-  const [nota, midias] = await Promise.all([
+  const [nota] = await Promise.all([
     supabase.from('conteudos_internos').select('observacao_interna').eq('conteudo_id', id).maybeSingle(),
-    supabase.from('midias').select('id', { count: 'exact', head: true })
-      .eq('conteudo_id', id).eq('versao', data.versao_atual),
+    carregarMidias(data),
     carregarCliente(data.cliente_id),
   ]);
   if (nota.error) throw nota.error;
-  if (midias.error) throw midias.error;
   temNotaInterna = Boolean(nota.data);
   form.observacao_interna.value = nota.data?.observacao_interna ?? '';
-  qtdMidias = midias.count ?? 0;
 }
 
 // ---------------------------------------------------------------- tela
@@ -83,6 +92,7 @@ function desenhar() {
     document.title = `Novo conteúdo · ${cliente.nome}`;
   }
 
+  definirFormato(form.formato.value);
   atualizarContador();
   atualizarSituacao();
 }
@@ -201,8 +211,10 @@ async function salvarNotaInterna() {
 }
 
 async function enviarParaAprovacao() {
+  if (enviandoArquivos()) throw new Error('Espere os arquivos terminarem de subir.');
   await salvar({ silencioso: true });
-  if (qtdMidias === 0) throw new Error('Adicione pelo menos uma imagem antes de enviar para aprovação.');
+  const problema = problemaDasMidias(conteudo.formato, midiasAtuais());
+  if (problema) throw new Error(problema);
 
   const dias = cliente.prazo_padrao_dias ?? 2;
   const prazo = new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString();
@@ -240,6 +252,8 @@ async function excluirRascunho() {
   }
   clearTimeout(timerExcluir);
   await executar(botao, async () => {
+    if (enviandoArquivos()) throw new Error('Espere os arquivos terminarem de subir.');
+    await excluirTodas(); // apaga os arquivos do R2 antes (o banco só apagaria as linhas)
     const { error } = await supabase.from('conteudos').delete().eq('id', conteudo.id);
     if (error) throw new Error('Não foi possível excluir.');
     window.location.replace(`/admin/cliente/?id=${cliente.id}`);

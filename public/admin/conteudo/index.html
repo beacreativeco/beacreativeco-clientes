@@ -48,6 +48,11 @@
             <span class="formato-desenho formato-story" aria-hidden="true"></span>
             <span class="formato-nome">Story</span>
           </label>
+          <label class="formato">
+            <input type="radio" name="formato" value="reels">
+            <span class="formato-desenho formato-reels" aria-hidden="true"></span>
+            <span class="formato-nome">Reels</span>
+          </label>
         </fieldset>
 
         <div class="campo">
@@ -83,9 +88,20 @@
           <textarea id="observacao_interna" name="observacao_interna" rows="3"></textarea>
         </div>
 
-        <section class="midias-secao">
-          <h2>Imagens</h2>
-          <p id="midias-aviso" class="dica">O envio de imagens entra na próxima etapa.</p>
+        <section class="midias-secao" aria-labelledby="titulo-midias">
+          <div class="campo-rotulo">
+            <h2 id="titulo-midias">Arquivos</h2>
+            <span id="regra-midias" class="dica"></span>
+          </div>
+
+          <ol id="lista-midias" class="midias" hidden></ol>
+          <ul id="fila-envio" class="fila" hidden></ul>
+
+          <label id="area-soltar" class="soltar">
+            <input id="arquivos" type="file" multiple>
+            <span>Arraste os arquivos aqui ou <span class="soltar-acao">escolha no computador</span></span>
+            <span class="dica">Imagens até 30 MB. Vídeos até 2 GB.</span>
+          </label>
         </section>
 
         <footer class="editor-acoes">
@@ -98,6 +114,31 @@
       </form>
     </main>
   </div>
+
+  <template id="modelo-midia">
+    <li class="midia">
+      <div class="midia-quadro"></div>
+      <div class="midia-info">
+        <span class="midia-posicao"></span>
+        <span class="midia-tamanho"></span>
+      </div>
+      <div class="midia-acoes">
+        <button class="botao-icone" type="button" data-acao="antes" aria-label="Mover para antes">‹</button>
+        <button class="botao-icone" type="button" data-acao="depois" aria-label="Mover para depois">›</button>
+        <a class="botao-link" data-acao="baixar">Baixar</a>
+        <button class="botao-link botao-perigo" type="button" data-acao="remover">Remover</button>
+      </div>
+    </li>
+  </template>
+
+  <template id="modelo-envio">
+    <li class="envio">
+      <span class="envio-nome"></span>
+      <progress class="envio-barra" max="1" value="0"></progress>
+      <span class="envio-porcentagem">0%</span>
+      <button class="botao-link" type="button" data-acao="cancelar">Cancelar</button>
+    </li>
+  </template>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
