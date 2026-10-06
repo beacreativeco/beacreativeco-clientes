@@ -24,7 +24,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Menu nos três pontinhos (computador) ou segurando o balão (celular), em tempo real
      - Regras no Supabase, não só na tela
    - [x] Entrega 3: imagens de referência (comprimidas no navegador, miniatura e tela cheia, também como pedido de ajuste; "Excluir rascunho" tira os arquivos da conversa do armazenamento)
-   - [ ] Entrega 4: áudio (até 3 min, gravar com toques)
+   - [ ] Entrega 4: áudio (até 3 min, gravar com toques) — gravação, envio e player funcionando; falta: conversão WEBM→M4A (fica em WEBM), testar Cancelar e celular/iPhone
    - Uma conversa por conteúdo, embaixo da prévia, balões dos dois lados com horário
    - Texto, áudio, imagens de referência e links
    - Áudio gravado no navegador (inclusive iPhone/Safari), com tempo correndo, cancelar e player no balão

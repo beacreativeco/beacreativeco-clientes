@@ -1649,3 +1649,120 @@ a.cliente-nome:hover {
   line-height: 1;
   cursor: pointer;
 }
+
+/* Áudio na conversa: microfone, barra de gravação e player no balão */
+.conversa-microfone { background: var(--espresso); }
+.conversa-microfone:hover { background: #3A2C24; }
+
+.conversa-gravando {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-top: 1px solid var(--espresso);
+  background: var(--creme);
+}
+
+.gravando-ponto {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #D0453A;
+  animation: gravando 1.2s ease-in-out infinite;
+}
+
+@keyframes gravando {
+  50% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gravando-ponto { animation: none; }
+}
+
+.gravacao-no-limite .gravando-ponto { animation: none; background: var(--espresso); }
+
+.gravando-tempo {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.gravando-aviso {
+  flex: 1;
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}
+
+.conversa-gravando .conversa-enviar { margin-left: auto; }
+
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(260px, 62vw);
+  margin-bottom: 2px;
+}
+
+.audio-player audio { display: none; }
+
+.audio-play {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--periwinkle);
+  color: var(--branco);
+  cursor: pointer;
+}
+
+.audio-play:focus-visible {
+  outline: 2px solid var(--espresso);
+  outline-offset: 2px;
+}
+
+.audio-play .conversa-icone,
+.audio-play .conversa-icone svg {
+  width: 18px;
+  height: 18px;
+}
+
+.audio-barra {
+  --progresso: 0%;
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  margin: 0;
+  border-radius: 999px;
+  appearance: none;
+  background: linear-gradient(90deg, var(--periwinkle-escuro) var(--progresso), rgba(77, 59, 49, 0.25) var(--progresso));
+  cursor: pointer;
+}
+
+.audio-barra::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  appearance: none;
+  background: var(--periwinkle-escuro);
+}
+
+.audio-barra::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--periwinkle-escuro);
+}
+
+.audio-tempo {
+  flex: none;
+  min-width: 34px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.75;
+}

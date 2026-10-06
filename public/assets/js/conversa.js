@@ -4,6 +4,7 @@
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
 import { otimizarImagem } from './otimizar.js';
+import { gravar, gravacaoDisponivel, motivoDoErro, relogio, LIMITE_SEGUNDOS } from './gravador.js';
 
 const LIMITE_TEXTO = 2000;
 // Os mesmos prazos das funções do banco (editar_mensagem e apagar_mensagem), que são quem decide.
@@ -26,6 +27,64 @@ function icone(caminho) {
   return s;
 }
 const ICONE_ENVIAR = '<path d="M4 12 20 4l-4.5 16-3.7-6.8z"/><path d="m11.8 13.2 3.9-4.4"/>';
+const ICONE_MICROFONE = '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>';
+const ICONE_LIXEIRA = '<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="m6.5 7 1 13h9l1-13"/>';
+const ICONE_PLAY = '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>';
+const ICONE_PAUSA = '<path d="M8 5.5v13M16 5.5v13" stroke-width="3"/>';
+
+// Um áudio tocando por vez na página.
+let tocandoAgora = null;
+
+// Player do balão: play/pausa, barra que dá para arrastar e o tempo.
+function playerDeAudio(src, duracaoSalva) {
+  const audio = el('audio');
+  audio.preload = 'metadata';
+  audio.src = src;
+  const botao = el('button', 'audio-play', icone(ICONE_PLAY));
+  botao.type = 'button';
+  botao.setAttribute('aria-label', 'Tocar áudio');
+  const barra = el('input', 'audio-barra');
+  barra.type = 'range';
+  barra.min = '0';
+  barra.step = '0.1';
+  barra.value = '0';
+  barra.setAttribute('aria-label', 'Posição do áudio');
+  const tempo = el('span', 'audio-tempo');
+  const player = el('div', 'audio-player', botao, barra, tempo, audio);
+
+  // WEBM gravado no navegador às vezes diz "Infinity" de duração: vale a que foi salva.
+  const duracao = () => (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : Number(duracaoSalva) || 0);
+  const mostrar = () => {
+    barra.max = String(duracao() || 1);
+    barra.value = String(audio.currentTime);
+    barra.style.setProperty('--progresso', `${(audio.currentTime / (duracao() || 1)) * 100}%`);
+    tempo.textContent = relogio(audio.paused && audio.currentTime === 0 ? duracao() : audio.currentTime);
+  };
+  mostrar();
+  audio.addEventListener('loadedmetadata', mostrar);
+  audio.addEventListener('timeupdate', mostrar);
+  audio.addEventListener('play', () => {
+    if (tocandoAgora && tocandoAgora !== audio) tocandoAgora.pause();
+    tocandoAgora = audio;
+    botao.replaceChildren(icone(ICONE_PAUSA));
+    botao.setAttribute('aria-label', 'Pausar áudio');
+  });
+  audio.addEventListener('pause', () => {
+    botao.replaceChildren(icone(ICONE_PLAY));
+    botao.setAttribute('aria-label', 'Tocar áudio');
+  });
+  audio.addEventListener('ended', () => { audio.currentTime = 0; mostrar(); });
+  audio.addEventListener('error', () => {
+    player.replaceWith(el('p', 'conversa-expirado', 'Áudio expirado'));
+  }, { once: true });
+  botao.addEventListener('click', () => (audio.paused ? audio.play().catch(console.error) : audio.pause()));
+  barra.addEventListener('input', () => {
+    audio.currentTime = Number(barra.value);
+    mostrar();
+  });
+  return player;
+}
+
 const ICONE_ANEXAR = '<path d="m20.2 11.4-8 8a5 5 0 0 1-7.1-7.1l8.4-8.4a3.3 3.3 0 0 1 4.7 4.7l-8.4 8.4a1.7 1.7 0 0 1-2.4-2.4l7.7-7.7"/>';
 
 // Imagem aberta em tela cheia (uma para a página toda).
@@ -129,13 +188,30 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
   seletor.accept = 'image/*';
   seletor.multiple = true;
   seletor.hidden = true;
-  const form = el('form', 'conversa-escrever', anexar, seletor, campo, enviar);
+  const microfone = el('button', 'conversa-enviar conversa-microfone', icone(ICONE_MICROFONE));
+  microfone.type = 'button';
+  microfone.setAttribute('aria-label', 'Gravar áudio');
+
+  // Barra de gravação (no lugar da caixa de escrever enquanto grava).
+  const cancelarGravacao = el('button', 'conversa-anexar', icone(ICONE_LIXEIRA));
+  cancelarGravacao.type = 'button';
+  cancelarGravacao.setAttribute('aria-label', 'Cancelar gravação');
+  const tempoGravacao = el('span', 'gravando-tempo', '0:00');
+  const avisoGravacao = el('span', 'gravando-aviso');
+  const enviarGravacao = el('button', 'conversa-enviar', icone(ICONE_ENVIAR));
+  enviarGravacao.type = 'button';
+  enviarGravacao.setAttribute('aria-label', 'Enviar áudio');
+  const barraGravando = el('div', 'conversa-gravando', cancelarGravacao,
+    el('span', 'gravando-ponto'), tempoGravacao, avisoGravacao, enviarGravacao);
+  barraGravando.hidden = true;
+
+  const form = el('form', 'conversa-escrever', anexar, seletor, campo, enviar, microfone);
 
   const menu = el('div', 'conversa-menu');
   menu.setAttribute('role', 'menu');
   menu.hidden = true;
 
-  const raiz = el('div', 'conversa', lista, avisoAjuste, avisoEdicao, erro, form, menu);
+  const raiz = el('div', 'conversa', lista, avisoAjuste, avisoEdicao, erro, form, barraGravando, menu);
   alvo.replaceChildren(raiz);
 
   // id → { m, no }: a própria mensagem volta pelo Realtime (não duplica) e
@@ -169,6 +245,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     } else {
       if (m.pedido_ajuste) corpo.append(el('span', 'conversa-etiqueta', 'Pedido de ajuste'));
       if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
+      if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s));
       if (m.texto) corpo.append(el('p', 'conversa-texto', textoComLinks(m.texto)));
     }
     corpo.append(el('span', 'conversa-hora', `${m.editada_em && !m.apagada_em ? 'editada ' : ''}${hora(m.criado_em)}`));
@@ -271,7 +348,13 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     campo.style.height = `${Math.min(campo.scrollHeight, 160)}px`;
     campo.style.overflowY = campo.scrollHeight > 160 ? 'auto' : 'hidden'; // barra só quando passa do limite
   }
-  campo.addEventListener('input', ajustarAltura);
+  // Caixa vazia: microfone. Com texto (ou editando): enviar. Como no WhatsApp.
+  function trocarBotao() {
+    const comTexto = campo.value.trim() !== '' || Boolean(editando);
+    enviar.hidden = !comTexto;
+    microfone.hidden = comTexto;
+  }
+  campo.addEventListener('input', () => { ajustarAltura(); trocarBotao(); });
 
   // Computador: Enter envia e Shift+Enter quebra linha. No celular, Enter quebra linha.
   const temTeclado = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -309,6 +392,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       }
       campo.value = '';
       ajustarAltura();
+      trocarBotao();
       rolarProFim();
       marcarLida(true);
     } catch (err) {
@@ -371,6 +455,74 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     }
   }
 
+  // ------------------------------------------------------------ áudio (tocar para gravar, tocar para enviar)
+
+  let gravacao = null;
+
+  function mostrarGravando(ligado) {
+    form.hidden = ligado;
+    barraGravando.hidden = !ligado;
+    raiz.classList.toggle('gravando', ligado);
+  }
+
+  microfone.addEventListener('click', async () => {
+    mostrarErro('');
+    if (!gravacaoDisponivel()) return mostrarErro(motivoDoErro());
+    tempoGravacao.textContent = '0:00';
+    avisoGravacao.textContent = '';
+    try {
+      gravacao = await gravar({
+        aoTempo: (s) => {
+          tempoGravacao.textContent = relogio(s);
+          const faltam = LIMITE_SEGUNDOS - s;
+          avisoGravacao.textContent = faltam <= 15 && faltam > 0 ? `Faltam ${Math.ceil(faltam)} s` : '';
+        },
+        aoLimite: () => {
+          avisoGravacao.textContent = 'Limite de 3 minutos. Envie ou cancele.';
+          raiz.classList.add('gravacao-no-limite');
+        },
+      });
+      mostrarGravando(true);
+      enviarGravacao.focus();
+    } catch (err) {
+      console.error(err);
+      gravacao = null;
+      mostrarErro(motivoDoErro(err));
+    }
+  });
+
+  cancelarGravacao.addEventListener('click', () => {
+    gravacao?.cancelar();
+    gravacao = null;
+    raiz.classList.remove('gravacao-no-limite');
+    mostrarGravando(false);
+  });
+
+  enviarGravacao.addEventListener('click', async () => {
+    if (!gravacao) return;
+    const atual = gravacao;
+    gravacao = null;
+    raiz.classList.remove('gravacao-no-limite');
+    mostrarGravando(false);
+    const espera = el('div', 'conversa-balao conversa-meu conversa-enviando', el('p', 'conversa-texto', 'Enviando áudio…'));
+    lista.append(espera);
+    vazia.remove();
+    rolarProFim();
+    try {
+      const { arquivo, duracao } = await atual.concluir();
+      if (duracao < 1) throw Object.assign(new Error('Áudio curto demais. Toque no microfone, fale e depois envie.'), { code: 'P0001' });
+      const arquivoUrl = await subirArquivo(arquivo);
+      espera.remove();
+      await enviarComArquivo({ tipo: 'audio', arquivo_url: arquivoUrl, duracao_s: duracao });
+      rolarProFim();
+      marcarLida(true);
+    } catch (err) {
+      console.error(err);
+      espera.remove();
+      mostrarErro(err.code === 'P0001' && err.message ? err.message : 'O áudio não foi enviado. Tente de novo.');
+    }
+  });
+
   anexar.addEventListener('click', () => seletor.click());
   seletor.addEventListener('change', () => {
     const arquivos = [...seletor.files];
@@ -394,6 +546,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     raiz.classList.add('editando');
     campo.value = m.texto;
     ajustarAltura();
+    trocarBotao();
     campo.focus();
   }
 
@@ -404,6 +557,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     raiz.classList.remove('editando');
     campo.value = '';
     ajustarAltura();
+    trocarBotao();
   }
   cancelarEdicao.addEventListener('click', sairDaEdicao);
 
@@ -546,6 +700,8 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     if (!menu.hidden) fecharMenu();
     else if (editando) sairDaEdicao();
   });
+
+  trocarBotao();
 
   // ------------------------------------------------------------ carregar e tempo real
 
