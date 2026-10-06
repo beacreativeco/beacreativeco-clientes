@@ -13,6 +13,9 @@ export const LIMITE_MB = { imagem: 8, video: 300 };
 // <conteudo_id>/<uuid>.<ext>: impossível de adivinhar e sempre amarrada a um conteúdo.
 export const CHAVE = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|png|webp|mp4|mov)$/;
 
+// Arquivos da conversa (áudio, imagem de referência): <conteudo_id>/conversa/<uuid>.<ext>
+export const CHAVE_CONVERSA = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/conversa\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpg|m4a|webm|mp4)$/;
+
 export function conteudoDaChave(chave) {
   return CHAVE.exec(chave || '')?.[1] ?? null;
 }

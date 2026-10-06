@@ -39,6 +39,7 @@ async function carregar() {
 
 function previa(c) {
   const voce = c.autor === 'bea' ? 'Você: ' : '';
+  if (c.apagada) return `${voce}Mensagem apagada`;
   if (c.tipo === 'aprovacao') return c.autor === 'bea' ? 'Você aprovou' : '✦ Aprovou o conteúdo';
   if (c.tipo === 'audio') return `${voce}Áudio`;
   if (c.tipo === 'referencia') return `${voce}Imagem`;

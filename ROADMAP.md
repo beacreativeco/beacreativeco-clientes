@@ -18,8 +18,13 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - A conversa por conteúdo (2b) substitui o campo de texto do "Pedir ajuste"
 2b. [ ] **Conversa por conteúdo, estilo WhatsApp**
    - [x] Entrega 1: conversa de texto, tempo real, não lidas nas listas, "Pedir ajuste" vira a primeira mensagem, Caixa de mensagens e avisos da Bea (migração `20261008000000`)
-   - [ ] Entrega 2: imagens de referência
-   - [ ] Entrega 3: áudio (até 3 min, gravar com toques)
+   - [x] Entrega 2: editar e apagar as próprias mensagens (migração `20261009000000`; apagar até 48 h; "Copiar texto" no menu)
+     - Editar só texto, até 15 min, com "editada"; apagar vira "Mensagem apagada" (arquivo sai do armazenamento)
+     - Aprovação e pedido de ajuste não podem ser editados nem apagados
+     - Menu nos três pontinhos (computador) ou segurando o balão (celular), em tempo real
+     - Regras no Supabase, não só na tela
+   - [ ] Entrega 3: imagens de referência
+   - [ ] Entrega 4: áudio (até 3 min, gravar com toques)
    - Uma conversa por conteúdo, embaixo da prévia, balões dos dois lados com horário
    - Texto, áudio, imagens de referência e links
    - Áudio gravado no navegador (inclusive iPhone/Safari), com tempo correndo, cancelar e player no balão
