@@ -15,7 +15,18 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - Conteúdo: prévia (a mesma do editor, sem "Áreas cobertas"), prazo, Drive, "✦ Aprovado" com confirmação e "Pedir ajuste" com texto
    - Histórico nas duas pontas: no editor da Bea aparece logo abaixo do título
    - Banco: funções `aprovar_conteudo` e `pedir_ajuste` (migração `20261007000000`)
-   - Fica para depois: anexar referências (imagens ou links) no pedido de ajuste
+   - A conversa por conteúdo (2b) substitui o campo de texto do "Pedir ajuste"
+2b. [ ] **Conversa por conteúdo, estilo WhatsApp**
+   - [x] Entrega 1: conversa de texto, tempo real, não lidas nas listas, "Pedir ajuste" vira a primeira mensagem, Caixa de mensagens e avisos da Bea (migração `20261008000000`)
+   - [ ] Entrega 2: imagens de referência
+   - [ ] Entrega 3: áudio (até 3 min, gravar com toques)
+   - Uma conversa por conteúdo, embaixo da prévia, balões dos dois lados com horário
+   - Texto, áudio, imagens de referência e links
+   - Áudio gravado no navegador (inclusive iPhone/Safari), com tempo correndo, cancelar e player no balão
+   - "Pedir ajuste" abre a conversa e o pedido vira a primeira mensagem
+   - A Bea responde pelo painel, também com áudio
+   - Tempo real (Supabase Realtime) e contador de não lidas nas listas, dos dois lados
+   - Segurança: cliente só nas conversas dos próprios conteúdos; arquivos com as mesmas regras de armazenamento e exclusão
 3. [ ] **Identidade:** logo original da BeaCreative e acabamento visual
 4. [ ] **Exclusão automática das mídias e espaço usado no painel**
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"

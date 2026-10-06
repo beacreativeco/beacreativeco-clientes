@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/base.css">
-  <title>Conteúdos · BeaCreative</title>
+  <title>Mensagens · BeaCreative</title>
 </head>
 <body>
   <div id="carregando" class="carregando">Carregando…</div>
@@ -25,38 +25,38 @@
 
       <div class="cabecalho-secao">
         <div>
-          <h1 id="nome-cliente"></h1>
-          <p id="contato-cliente" class="subtitulo"></p>
+          <h1>Mensagens</h1>
+          <p id="resumo" class="subtitulo"></p>
         </div>
-        <a id="novo-conteudo" class="botao botao-compacto" href="#">Novo conteúdo</a>
+        <button id="ativar-notificacoes" class="botao-secundario" type="button" hidden>Avisar no navegador</button>
       </div>
+      <p id="notificacoes-info" class="dica" hidden></p>
 
-      <p id="agenda-vazia" class="vazio" hidden>
-        Nenhum conteúdo para este cliente ainda. Crie o primeiro para montar a agenda.
+      <p id="caixa-vazia" class="vazio" hidden>
+        Nenhuma conversa ainda. Quando um cliente escrever, aprovar ou pedir ajuste, aparece aqui.
       </p>
-      <ol id="agenda" class="agenda"></ol>
+      <ol id="caixa" class="caixa"></ol>
     </main>
   </div>
 
-  <template id="modelo-conteudo">
-    <li class="agenda-item">
-      <a class="agenda-link">
-        <span class="agenda-data">
-          <span class="agenda-dia"></span>
-          <span class="agenda-mes"></span>
+  <template id="modelo-conversa">
+    <li class="caixa-item">
+      <a class="caixa-link">
+        <span class="caixa-topo">
+          <span class="caixa-cliente"></span>
+          <span class="caixa-quando"></span>
         </span>
-        <span class="agenda-info">
-          <span class="agenda-titulo"></span>
-            <span class="nao-lidas" hidden></span>
-          <span class="agenda-formato"></span>
+        <span class="caixa-titulo"></span>
+        <span class="caixa-rodape">
+          <span class="caixa-previa"></span>
+          <span class="nao-lidas" hidden></span>
         </span>
-        <span class="situacao"></span>
       </a>
     </li>
   </template>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <script type="module" src="/assets/js/admin-cliente.js"></script>
+  <script type="module" src="/assets/js/admin-mensagens.js"></script>
 </body>
 </html>

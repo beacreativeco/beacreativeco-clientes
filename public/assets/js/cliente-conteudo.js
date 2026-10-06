@@ -4,10 +4,12 @@ import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { FORMATOS, SITUACOES_CLIENTE, lerData, diaSemanaHora, parametro } from './conteudos.js';
 import { criarPrevia } from './previa-instagram.js';
+import { criarConversa } from './conversa.js';
 
 const $ = (id) => document.getElementById(id);
 let conteudo;
 let cliente;
+let conversa;
 
 iniciarPagina('cliente', async ({ perfil }) => {
   $('sair').addEventListener('click', sair);
@@ -25,11 +27,8 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conteudo = c.data;
   cliente = cad.data;
 
-  const [midias, mensagens] = await Promise.all([
-    supabase.from('midias').select('id, tipo, arquivo_url, ordem')
-      .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem'),
-    carregarMensagens(),
-  ]);
+  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem')
+    .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem');
   if (midias.error) throw midias.error;
 
   criarPrevia($('previa')).atualizar({
@@ -40,21 +39,32 @@ iniciarPagina('cliente', async ({ perfil }) => {
     cliente,
   });
 
+  // "Pedir ajuste" abre a conversa: a próxima mensagem do cliente vira o pedido.
+  conversa = criarConversa($('conversa'), {
+    conteudoId: conteudo.id,
+    eu: 'cliente',
+    pedirAjuste: async (mensagem) => {
+      const { data, error } = await supabase.rpc('pedir_ajuste', {
+        p_conteudo_id: conteudo.id,
+        p_tipo: mensagem.tipo,
+        p_texto: mensagem.texto ?? null,
+        p_arquivo_url: mensagem.arquivo_url ?? null,
+        p_duracao_s: mensagem.duracao_s ?? null,
+      });
+      if (error) throw error;
+      conteudo = data;
+      desenhar();
+      avisar('Pedido de ajuste enviado para a Bea.');
+    },
+  });
+  await conversa.carregar();
+
   ligarDecisao();
   desenhar();
-  desenharHistorico(mensagens);
 });
 
 function voltarParaLista() {
   window.location.replace('/cliente/');
-}
-
-async function carregarMensagens() {
-  const { data, error } = await supabase.from('mensagens')
-    .select('id, autor, tipo, texto, criado_em')
-    .eq('conteudo_id', conteudo.id).order('criado_em');
-  if (error) throw error;
-  return data;
 }
 
 // ---------------------------------------------------------------- tela
@@ -105,26 +115,10 @@ function el(tag, classe, texto) {
   return n;
 }
 
-function desenharHistorico(mensagens) {
-  $('secao-historico').hidden = mensagens.length === 0;
-  $('historico').replaceChildren(...mensagens.map((m) => {
-    const li = el('li', `cc-mensagem cc-mensagem-${m.autor}`);
-    const quem = m.autor === 'bea' ? 'Bea' : 'Você';
-    const acao = m.tipo === 'aprovacao' ? `${quem} aprovou` : m.autor === 'bea' ? 'Bea escreveu' : 'Você pediu ajuste';
-    li.append(
-      el('p', 'cc-mensagem-quem', `${acao} em ${diaSemanaHora(m.criado_em)}`),
-      m.texto ? el('p', 'cc-mensagem-texto', m.texto) : '',
-    );
-    return li;
-  }));
-}
-
 // ---------------------------------------------------------------- decisão
 
 function ligarDecisao() {
   const aprovar = $('aprovar');
-  const form = $('form-ajuste');
-  const texto = $('texto-ajuste');
 
   // Aprovar não tem volta: pede um segundo toque, como o "Remover" do editor.
   let timer;
@@ -142,26 +136,7 @@ function ligarDecisao() {
     await decidir(aprovar, () => supabase.rpc('aprovar_conteudo', { p_conteudo_id: conteudo.id }), 'Conteúdo aprovado.');
   });
 
-  $('abrir-ajuste').addEventListener('click', () => {
-    form.hidden = false;
-    $('decisao').classList.add('escrevendo');
-    texto.focus();
-  });
-  $('cancelar-ajuste').addEventListener('click', () => {
-    form.hidden = true;
-    $('decisao').classList.remove('escrevendo');
-  });
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!texto.value.trim()) {
-      mostrarErro('Escreva o que você quer mudar.');
-      texto.focus();
-      return;
-    }
-    await decidir($('enviar-ajuste'),
-      () => supabase.rpc('pedir_ajuste', { p_conteudo_id: conteudo.id, p_texto: texto.value }),
-      'Pedido de ajuste enviado para a Bea.');
-  });
+  $('abrir-ajuste').addEventListener('click', () => conversa.pedirAjuste());
 }
 
 async function decidir(botao, chamada, sucesso) {
@@ -176,8 +151,8 @@ async function decidir(botao, chamada, sucesso) {
     return;
   }
   conteudo = data;
+  conversa.sairDoModoAjuste();
   desenhar();
-  desenharHistorico(await carregarMensagens());
   if (conteudo.status === 'aprovado') $('resultado').classList.add('acabou-de-aprovar');
   avisar(sucesso);
 }

@@ -1,11 +1,12 @@
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
-import { SITUACOES, LIMITE_LEGENDA, dataHora, diaSemanaHora, parametro, problemaDasMidias } from './conteudos.js';
+import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
+import { criarConversa } from './conversa.js';
 
 const form = document.getElementById('form-conteudo');
 const aviso = document.getElementById('aviso');
@@ -50,6 +51,7 @@ iniciarPagina('admin', async () => {
     return;
   }
   desenhar();
+  if (conteudo) await abrirConversa();
 });
 
 // ---------------------------------------------------------------- carregar
@@ -74,36 +76,30 @@ async function carregarConteudo(id) {
   ]);
   if (nota.error) throw nota.error;
   temNotaInterna = Boolean(nota.data);
-  await carregarConversa();
   form.observacao_interna.value = nota.data?.observacao_interna ?? '';
 }
 
-// O que o cliente fez neste conteúdo (aprovou, pediu ajuste), do mais antigo ao mais novo.
-async function carregarConversa() {
-  const { data, error } = await supabase.from('mensagens')
-    .select('id, autor, tipo, texto, criado_em')
-    .eq('conteudo_id', conteudo.id).order('criado_em');
-  if (error) throw error;
-
-  document.getElementById('secao-conversa').hidden = data.length === 0;
-  document.getElementById('conversa').replaceChildren(...data.map((m) => {
-    const li = document.createElement('li');
-    li.className = `cc-mensagem cc-mensagem-${m.autor}`;
-    const quem = document.createElement('p');
-    quem.className = 'cc-mensagem-quem';
-    const acao = m.tipo === 'aprovacao'
-      ? (m.autor === 'bea' ? 'Você aprovou' : 'Cliente aprovou')
-      : (m.autor === 'bea' ? 'Você escreveu' : 'Cliente pediu ajuste');
-    quem.textContent = `${acao} em ${diaSemanaHora(m.criado_em)}`;
-    li.append(quem);
-    if (m.texto) {
-      const texto = document.createElement('p');
-      texto.className = 'cc-mensagem-texto';
-      texto.textContent = m.texto;
-      li.append(texto);
-    }
-    return li;
-  }));
+// Conversa com o cliente (mesmo componente da página dele). Se o cliente aprovar ou pedir
+// ajuste com o editor aberto, a situação atualiza sozinha.
+async function abrirConversa() {
+  document.getElementById('secao-conversa').hidden = false;
+  const conversa = criarConversa(document.getElementById('conversa'), {
+    conteudoId: conteudo.id,
+    eu: 'bea',
+    aoChegar: async (m) => {
+      if (m.tipo !== 'aprovacao' && !m.pedido_ajuste) return;
+      const { data, error } = await supabase.from('conteudos').select('*').eq('id', conteudo.id).single();
+      if (error) return console.error(error);
+      conteudo = data;
+      atualizarSituacao();
+      avisar(m.tipo === 'aprovacao' ? 'O cliente aprovou este conteúdo.' : 'O cliente pediu ajuste.');
+    },
+  });
+  await conversa.carregar();
+  // Veio da Caixa de mensagens ou de um aviso: vai direto para a conversa.
+  if (location.hash === '#conversa') {
+    document.getElementById('secao-conversa').scrollIntoView({ block: 'start' });
+  }
 }
 
 // ---------------------------------------------------------------- tela

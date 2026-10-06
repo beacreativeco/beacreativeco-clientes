@@ -1199,7 +1199,279 @@ a.cliente-nome:hover {
   }
 }
 
-/* No editor, o histórico com o cliente aparece logo abaixo do título. */
+/* No editor, a conversa com o cliente aparece logo abaixo do título. */
 .editor-conversa {
   margin: 0 0 32px;
 }
+
+.editor-conversa h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+/* ---------- Conversa por conteúdo (estilo WhatsApp) ---------- */
+.cc-conversa h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.conversa {
+  display: grid;
+  border: 1px solid var(--espresso);
+  border-radius: var(--raio);
+  background: var(--papel);
+  overflow: hidden;
+}
+
+.conversa-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: min(60vh, 460px);
+  min-height: 120px;
+  padding: 16px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.conversa-vazia {
+  margin: auto;
+  max-width: 32ch;
+  font-size: 0.875rem;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.conversa-dia,
+.conversa-evento {
+  align-self: center;
+  margin: 8px 0 4px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: var(--creme);
+  font-size: 0.75rem;
+}
+
+.conversa-evento {
+  color: var(--periwinkle-escuro);
+  font-weight: 500;
+}
+
+.conversa-balao {
+  position: relative;
+  max-width: min(85%, 420px);
+  padding: 8px 12px 6px;
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+/* As suas à direita (lilás claro), as da outra pessoa à esquerda (branco). */
+.conversa-meu {
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  background: #E4E6F6;
+}
+
+.conversa-outro {
+  align-self: flex-start;
+  border: 1px solid rgba(77, 59, 49, 0.18);
+  border-bottom-left-radius: 4px;
+  background: var(--branco);
+}
+
+.conversa-etiqueta {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--erro);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.conversa-texto {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.conversa-hora {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.6875rem;
+  text-align: right;
+  opacity: 0.6;
+}
+
+.conversa-aviso-ajuste {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--espresso);
+  background: #F6E9E4;
+  font-size: 0.875rem;
+}
+
+.conversa-aviso-ajuste p { margin: 0; }
+
+.conversa-erro {
+  margin: 0;
+  padding: 8px 12px;
+  border-top: 1px solid var(--erro);
+  color: var(--erro);
+  font-size: 0.875rem;
+}
+
+.conversa-escrever {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid var(--espresso);
+  background: var(--creme);
+}
+
+.conversa-campo {
+  flex: 1;
+  min-height: 42px;
+  max-height: 160px;
+  padding: 10px 14px;
+  border: 1px solid rgba(77, 59, 49, 0.4);
+  border-radius: 21px;
+  background: var(--branco);
+  color: var(--espresso);
+  font: inherit;
+  font-size: 1rem; /* 16px: o iPhone não dá zoom ao tocar */
+  line-height: 1.3;
+  resize: none;
+  overflow-y: hidden;
+}
+
+.conversa-campo:focus {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 0;
+}
+
+.pedindo-ajuste .conversa-campo { border-color: var(--erro); }
+
+.conversa-enviar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--periwinkle);
+  color: var(--branco);
+  cursor: pointer;
+}
+
+.conversa-enviar:hover { background: var(--periwinkle-escuro); }
+
+.conversa-enviar:focus-visible {
+  outline: 2px solid var(--espresso);
+  outline-offset: 2px;
+}
+
+.conversa-enviar:disabled { opacity: 0.6; cursor: wait; }
+
+.conversa-icone,
+.conversa-icone svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.conversa-icone svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Não lidas ---------- */
+.nao-lidas {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--periwinkle);
+  color: var(--branco);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.agenda-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
+  align-items: center;
+}
+
+.agenda-info .agenda-formato { grid-column: 1; }
+
+.topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topo-mensagens {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.toast-link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* ---------- Caixa de mensagens (Bea) ---------- */
+.caixa {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--espresso);
+}
+
+.caixa-item { border-bottom: 1px solid var(--espresso); }
+
+.caixa-link {
+  display: grid;
+  gap: 2px;
+  padding: 14px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.caixa-link:hover .caixa-titulo { text-decoration: underline; }
+
+.caixa-topo,
+.caixa-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.caixa-cliente { font-weight: 600; }
+
+.caixa-quando,
+.caixa-titulo { font-size: 0.875rem; opacity: 0.75; }
+
+.caixa-previa {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.caixa-item.tem-novas .caixa-previa { font-weight: 600; }

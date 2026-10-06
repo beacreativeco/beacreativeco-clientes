@@ -2,7 +2,7 @@
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina } from './ui.js';
-import { FORMATOS, SITUACOES_CLIENTE, diaEMes, diaSemanaHora, dataHora } from './conteudos.js';
+import { FORMATOS, SITUACOES_CLIENTE, diaEMes, diaSemanaHora, dataHora, marcarNaoLidas } from './conteudos.js';
 
 iniciarPagina('cliente', async ({ perfil }) => {
   document.getElementById('sair').addEventListener('click', sair);
@@ -29,7 +29,19 @@ iniciarPagina('cliente', async ({ perfil }) => {
   desenharGrupo('secao-ajuste', grupos.ajuste_solicitado);
   desenharGrupo('secao-aprovados', grupos.aprovado);
   document.getElementById('resumo').textContent = resumo(grupos.em_aprovacao.length, data.length);
+
+  // Mensagens novas da Bea: número em cada conteúdo, atualizado na hora.
+  await atualizarNaoLidas();
+  supabase.channel('lista-cliente')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, () => atualizarNaoLidas())
+    .subscribe();
 });
+
+async function atualizarNaoLidas() {
+  const { data, error } = await supabase.rpc('conversas_nao_lidas');
+  if (error) return console.error(error);
+  document.querySelectorAll('.agenda').forEach((agenda) => marcarNaoLidas(agenda, data));
+}
 
 function resumo(paraAprovar, total) {
   if (paraAprovar === 1) return 'Tem 1 conteúdo esperando sua aprovação.';
@@ -55,6 +67,7 @@ function desenharGrupo(idSecao, conteudos) {
 
   secao.querySelector('.agenda').replaceChildren(...conteudos.map((c) => {
     const li = modelo.content.firstElementChild.cloneNode(true);
+    li.dataset.id = c.id;
     const data = diaEMes(c.data_prevista);
     li.querySelector('.agenda-link').href = `/cliente/conteudo/?id=${c.id}`;
     li.querySelector('.agenda-dia').textContent = data ? data.dia : '–';

@@ -64,6 +64,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Bea pode retirar um conteúdo de `em_aprovacao` (volta a `rascunho`).
 - O cliente aprova ou pede ajuste só pelas funções `aprovar_conteudo(p_conteudo_id)` e `pedir_ajuste(p_conteudo_id, p_texto)` (security definer; só conteúdo dele em `em_aprovacao`). Cada uma grava uma linha em `mensagens` (`aprovacao` ou `texto`), que vira o histórico no editor e na página do cliente. Erros pensados para o cliente usam `P0001`.
 - Página do cliente: `/cliente/` (lista) e `/cliente/conteudo/?id=` (prévia + decisão). Aprovar pede confirmação (dois toques).
+- Conversa por conteúdo (`public/assets/js/conversa.js`, igual nos dois lados): balões, tempo real (Realtime em `mensagens`, respeita o RLS), lida via `marcar_conversa_lida` (sem setTimeout: aba de fundo segura timers). "Pedir ajuste" põe a conversa em modo pedido: a próxima mensagem vai por `pedir_ajuste` com `pedido_ajuste = true`. Cliente só insere mensagem válida (`mensagem_valida`) nos próprios conteúdos; arquivos da conversa ficam em `<conteudo_id>/conversa/`.
+- Bea: "Mensagens" no topo de todo o painel (`avisos-admin.js`, ligado por `ui.js`), Caixa de mensagens em `/admin/mensagens/` (`caixa_de_mensagens`), aviso clicável e notificação do navegador (permissão pedida na Caixa). Listas recebem o evento `mensagens-mudaram`.
 
 ## Modelo de dados (base)
 

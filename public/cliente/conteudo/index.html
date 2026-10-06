@@ -45,25 +45,13 @@
               <button id="abrir-ajuste" class="botao-secundario" type="button">Pedir ajuste</button>
             </div>
 
-            <form id="form-ajuste" class="cc-ajuste" novalidate hidden>
-              <div class="campo">
-                <label for="texto-ajuste">O que você quer mudar?</label>
-                <textarea id="texto-ajuste" rows="4" maxlength="2000"
-                  placeholder="Ex.: trocar a foto 2 e deixar a legenda mais curta"></textarea>
-                <small class="dica">A Bea recebe seu pedido e prepara uma nova versão para você aprovar.</small>
-              </div>
-              <div class="cc-ajuste-acoes">
-                <button id="enviar-ajuste" class="botao botao-compacto" type="submit">Enviar pedido</button>
-                <button id="cancelar-ajuste" class="botao-link" type="button">Cancelar</button>
-              </div>
-            </form>
           </section>
 
           <p id="resultado" class="cc-resultado" hidden></p>
 
-          <section id="secao-historico" class="cc-historico" aria-labelledby="titulo-historico" hidden>
-            <h2 id="titulo-historico">Histórico</h2>
-            <ol id="historico"></ol>
+          <section id="secao-conversa" class="cc-conversa" aria-labelledby="titulo-conversa">
+            <h2 id="titulo-conversa">Conversa com a Bea</h2>
+            <div id="conversa"></div>
           </section>
         </div>
       </div>

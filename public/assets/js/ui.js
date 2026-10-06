@@ -17,6 +17,10 @@ export async function iniciarPagina(area, montar) {
     await montar(acesso);
     carregando.hidden = true;
     app.hidden = false;
+    // Painel da Bea: "Mensagens" no topo, avisos e notificação de mensagens novas.
+    if (area === 'admin') {
+      import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);
+    }
   } catch (err) {
     console.error(err);
     mostrarFalhaAoCarregar(carregando);
@@ -42,13 +46,24 @@ function mostrarFalhaAoCarregar(container) {
 
 /**
  * Aviso rápido no rodapé da tela (salvo, convite enviado, erro...).
- * Precisa de um <div id="toast" class="toast" role="status" hidden> na página.
+ * Usa o <div id="toast" class="toast" role="status" hidden> da página (ou cria um).
+ * Com `link`, o aviso inteiro leva até lá (ex.: mensagem nova de um cliente).
  */
 let timerToast;
-export function avisar(texto, tipo = 'ok') {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.textContent = texto;
+export function avisar(texto, tipo = 'ok', link = null) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = Object.assign(document.createElement('div'), { id: 'toast', className: 'toast', hidden: true });
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.append(toast);
+  }
+  if (link) {
+    const a = Object.assign(document.createElement('a'), { href: link, textContent: texto, className: 'toast-link' });
+    toast.replaceChildren(a);
+  } else {
+    toast.textContent = texto;
+  }
   toast.className = 'toast ' + tipo;
   toast.hidden = false;
   clearTimeout(timerToast);

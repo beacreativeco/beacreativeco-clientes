@@ -57,6 +57,18 @@ export function diaSemanaHora(isoTimestamp) {
   return `${dia} às ${hora}`;
 }
 
+// Coloca o número de mensagens não lidas em cada item da agenda (li[data-id]).
+export function marcarNaoLidas(agenda, contagens) {
+  const porConteudo = new Map(contagens.map((c) => [c.conteudo_id, c.quantidade]));
+  agenda.querySelectorAll('li[data-id]').forEach((li) => {
+    const n = porConteudo.get(li.dataset.id) ?? 0;
+    const badge = li.querySelector('.nao-lidas');
+    badge.hidden = n === 0;
+    badge.textContent = String(n);
+    badge.setAttribute('aria-label', `${n} ${n === 1 ? 'mensagem nova' : 'mensagens novas'}`);
+  });
+}
+
 export function parametro(nome) {
   return new URLSearchParams(window.location.search).get(nome);
 }

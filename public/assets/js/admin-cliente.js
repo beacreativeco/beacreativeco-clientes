@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina } from './ui.js';
-import { FORMATOS, SITUACOES, diaEMes, parametro } from './conteudos.js';
+import { FORMATOS, SITUACOES, diaEMes, parametro, marcarNaoLidas } from './conteudos.js';
 
 const clienteId = parametro('id');
 
@@ -35,6 +35,9 @@ iniciarPagina('admin', async () => {
   document.getElementById('novo-conteudo').href = `/admin/conteudo/?cliente=${c.id}`;
 
   desenharAgenda(conteudos.data);
+  // avisos-admin.js conta as não lidas (e reconta a cada mensagem nova).
+  window.addEventListener('mensagens-mudaram', (e) =>
+    marcarNaoLidas(document.getElementById('agenda'), e.detail));
 });
 
 function desenharAgenda(conteudos) {
@@ -45,6 +48,7 @@ function desenharAgenda(conteudos) {
 
   agenda.replaceChildren(...conteudos.map((item) => {
     const li = modelo.content.firstElementChild.cloneNode(true);
+    li.dataset.id = item.id;
     const data = diaEMes(item.data_prevista);
     const situacao = SITUACOES[item.status];
 
