@@ -60,6 +60,7 @@ a {
   min-height: 100vh;
   padding: 48px var(--espaco) 32px;
   display: flex;
+  flex-direction: column; /* o crédito de desenvolvimento fica embaixo do cartão */
   align-items: center;
   justify-content: center;
 }
@@ -1908,3 +1909,221 @@ a.cliente-nome:hover {
     border-radius: 0;
   }
 }
+
+/* ---------- Crédito de desenvolvimento (rodapé do login), igual ao do LAEG-BIO ---------- */
+.credito-dev {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 40px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--espresso);
+  font-size: 0.75rem;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+.credito-dev-simbolo { display: block; flex: none; width: 17px; height: 17px; }
+.credito-dev-quadrado { fill: var(--espresso); transition: fill 0.2s; }
+.credito-dev-v { fill: var(--creme); transition: fill 0.2s; }
+
+/* No hover, o símbolo ganha as cores originais dele. */
+.credito-dev:hover,
+.credito-dev:focus-visible { opacity: 1; }
+.credito-dev:hover .credito-dev-quadrado,
+.credito-dev:focus-visible .credito-dev-quadrado { fill: #233DFF; }
+.credito-dev:hover .credito-dev-v,
+.credito-dev:focus-visible .credito-dev-v { fill: #F4EFE6; }
+.credito-dev:hover span:last-child { text-decoration: underline; text-underline-offset: 2px; }
+.credito-dev:focus-visible { outline: 2px solid var(--periwinkle); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .credito-dev-quadrado, .credito-dev-v { transition: none; }
+}
+
+/* Só para leitor de tela. */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Rodapé das páginas logadas e janela "Sobre o sistema" ---------- */
+.rodape-sistema {
+  display: flex;
+  justify-content: center;
+  padding: 32px var(--espaco) calc(24px + env(safe-area-inset-bottom));
+}
+
+.rodape-sobre {
+  padding: 6px 10px;
+  border: 0;
+  background: none;
+  color: var(--espresso);
+  font: inherit;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.rodape-sobre:hover,
+.rodape-sobre:focus-visible { opacity: 1; }
+.rodape-sobre:focus-visible { outline: 2px solid var(--periwinkle); outline-offset: 2px; border-radius: 4px; }
+
+.sobre {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid var(--espresso);
+  border-radius: var(--raio);
+  background: var(--creme);
+  color: var(--espresso);
+  overflow-y: auto;
+}
+
+.sobre::backdrop { background: rgba(40, 30, 24, 0.55); }
+
+.sobre-marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.sobre-monograma { display: block; flex: none; width: auto; height: 56px; }
+
+.sobre h2 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.sobre-logo { display: block; width: auto; height: 20px; }
+
+.sobre-versao {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.sobre-novidades-botao {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--periwinkle-escuro);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.sobre-novidades-botao::after {
+  content: " ▾";
+  display: inline-block;
+  margin-left: 2px;
+}
+
+.sobre-novidades-botao[aria-expanded="true"]::after { transform: rotate(180deg); }
+.sobre-novidades-botao:focus-visible { outline: 2px solid var(--periwinkle); outline-offset: 2px; border-radius: 2px; }
+
+/* Todas as versões, da mais nova para a mais antiga, rolando dentro do bloco. */
+.sobre-novidades {
+  max-height: 40vh;
+  margin: 0 0 16px;
+  padding: 4px 0 12px;
+  border-top: 1px solid rgba(77, 59, 49, 0.25);
+  border-bottom: 1px solid rgba(77, 59, 49, 0.25);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sobre-versao-item + .sobre-versao-item {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(77, 59, 49, 0.2);
+}
+
+.sobre-novidades h3 {
+  margin: 10px 0 2px;
+  font-family: var(--fonte-texto);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.sobre-novidades h4,
+.sobre-bloco dt {
+  margin: 8px 0 4px;
+  font-family: var(--fonte-texto);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.sobre-novidades ul { margin: 0; padding-left: 18px; }
+
+.sobre-novidades li {
+  margin-bottom: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.sobre-descricao {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.sobre-lista { margin: 0 0 20px; }
+
+.sobre-bloco {
+  padding: 12px 0;
+  border-top: 1px solid rgba(77, 59, 49, 0.25);
+}
+
+.sobre-bloco dt { margin-top: 0; }
+
+.sobre-bloco dd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.sobre-bloco dd.sobre-dev {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.sobre-dev > span { display: flex; flex-direction: column; gap: 2px; }
+.sobre-dev-logo { display: block; flex: none; width: 48px; height: auto; }
+.sobre-bloco strong { font-weight: 600; }
+
+.sobre-bloco a {
+  color: var(--periwinkle-escuro);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  text-underline-offset: 2px;
+}
+
+.sobre-fechar { width: 100%; }

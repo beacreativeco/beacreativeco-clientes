@@ -99,6 +99,20 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 2. Áudio e versões; versão otimizada dos vídeos (mais leve para assistir) e aviso de vídeo grande para ver no Drive; aprovação automática por prazo e lembretes; calendário de publicações; caixa de respostas; Trello; aviso no celular (PWA).
 3. Vitrine no site com logos e depoimentos; Drive via API; WhatsApp automático (ainda em pesquisa, não implementar sem decisão).
 
+## Versão
+
+Versionamento semântico (MAJOR.MINOR.PATCH), igual ao do sistema do LAEG-BIO. Histórico em `public/CHANGELOG.md` (fica em `public/` porque a janela "Sobre o sistema" lê o arquivo; a primeira entrada é a versão atual).
+
+- **PATCH:** só correções. **MINOR:** algo novo ou mudança visível na tela. **MAJOR:** muda o jeito de usar ou exige migrar dados.
+- **Na dúvida entre MAJOR, MINOR e PATCH, perguntar ao Victor antes.** MAJOR sempre pergunta.
+- Até a publicação o sistema fica em **0.x** (cada entrega do `ROADMAP.md` sobe o MINOR, sem tag nem Release). **Na publicação vira 1.0.0.**
+- A partir do 1.0.0, a cada entrega:
+  1. Adicionar a entrada no topo do `public/CHANGELOG.md`: `## [X.Y.Z] — dd/mm/aaaa`, seções `### Novidades` / `### Melhorias` / `### Correções` (só as que tiverem itens), um item por linha, sem formatação markdown, em português simples (quem lê é a Bea e os clientes, não quem programa).
+  2. Commit `Versão X.Y.Z`.
+  3. `git tag vX.Y.Z` e, com autorização para push, `git push origin vX.Y.Z`.
+  4. Release no GitHub com a tag e o mesmo texto da entrada do CHANGELOG (`gh release create vX.Y.Z --title "X.Y.Z" --notes "..."`).
+- Créditos e manutenção da janela "Sobre": `public/assets/js/sobre.js` (`MANUTENCAO` muda se outra pessoa assumir; `DESENVOLVIMENTO` não muda). O crédito do login fica em `public/index.html` (`.credito-dev`).
+
 ## Como trabalhar neste repositório
 
 - Comunicação em português, informal.

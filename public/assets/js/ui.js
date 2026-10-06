@@ -17,6 +17,8 @@ export async function iniciarPagina(area, montar) {
     await montar(acesso);
     carregando.hidden = true;
     app.hidden = false;
+    // Rodapé com "Sobre o sistema" (versão, novidades e créditos), nos dois lados.
+    import('./sobre.js').then((m) => m.ligarRodapeSobre(app)).catch(console.error);
     // Painel da Bea: "Mensagens" no topo, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);

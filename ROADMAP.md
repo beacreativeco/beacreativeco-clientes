@@ -35,6 +35,10 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - A Bea responde pelo painel, também com áudio
    - Tempo real (Supabase Realtime) e contador de não lidas nas listas, dos dois lados
    - Segurança: cliente só nas conversas dos próprios conteúdos; arquivos com as mesmas regras de armazenamento e exclusão
+2c. [x] **Sobre o sistema e crédito** (igual ao do LAEG-BIO, versão 0.6.0)
+   - Janela "Sobre o sistema" no rodapé do painel da Bea e da página do cliente: nome, versão, "O que há de novo" com todas as versões (lido do `public/CHANGELOG.md`), descrição, "Desenvolvido por" com a logo vict.<OR> e o portfólio, e o responsável pela manutenção
+   - Crédito "Desenvolvido por Victor Carvalho" no rodapé do login
+   - Versionamento semântico: regras no `CLAUDE.md`, seção "Versão"
 3. [x] **Identidade:** logo original da BeaCreative e acabamento visual
    - [x] Logo original em SVG no topo de todas as páginas, no login e no "definir senha"
    - [x] Ícones (favicon, iPhone e Android) com o monograma b✦, iguais aos do site
@@ -49,7 +53,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
 5. [ ] **Exclusão automática das mídias e espaço usado no painel**
    - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"
 6. [ ] **Avisos por e-mail**
-7. [ ] **Publicação:** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase
+7. [ ] **Publicação (versão 1.0.0):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
 
 ## Já pronto antes deste roadmap
 
