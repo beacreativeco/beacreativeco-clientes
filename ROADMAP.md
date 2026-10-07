@@ -165,6 +165,25 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Testado com dados de exemplo em 375px. **Falta:** testar tudo no Preview com o victordev e num celular de verdade; regra `apagar-conversa` no R2
    - Na subida para produção: MINOR (1.6.0), mudança visível sem mudar o jeito de aprovar
 
+10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano aprovado antes de implementar
+   - Quando avisa:
+     - Bea: mensagem nova de cliente (título = nome do cliente), pedido de ajuste e aprovação
+     - Cliente: mensagem nova da Bea (título "BeaCreative"), conteúdo liberado para aprovação (novo ou nova versão) e prazo de aprovação vencendo amanhã
+     - Prévia curta no corpo; tocar abre direto a conversa (`/admin/mensagens/?cliente=`, `/cliente/mensagens/`) ou o conteúdo
+     - Conversa aberta e em foco na tela: não avisa de novo; avisos da mesma conversa se substituem (não empilham)
+   - Disparo sempre no servidor, mesmo quando a mensagem é gravada direto no Supabase:
+     - Gatilhos no banco (`pg_net`) em `mensagens` (INSERT) e `conteudos` (situação mudando para `em_aprovacao`) chamam `POST /api/push/evento` com um segredo no cabeçalho; o endereço e o segredo ficam no Vault do Supabase (fora do Git)
+     - O banco chama só a produção (o Preview usa o mesmo banco): nada dispara duas vezes, e `/api/push/evento` recusa fora da produção (`ehProducao`)
+     - Prazo: `pg_cron` todo dia às 9h (Brasília) chama `POST /api/push/prazos`; `conteudos.prazo_avisado_em` evita aviso repetido
+   - Envio: Web Push feito à mão com WebCrypto nas Functions (criptografia `aes128gcm` e assinatura VAPID ES256; sem pacote npm, porque as Functions não têm build). Aparelho que responde 404/410 é apagado sozinho
+   - Banco: tabela `push_aparelhos` (user_id, endpoint, chaves, nome do aparelho, criado/último uso), RLS: cada um vê e apaga só os seus
+   - Permissão: só no botão "Ativar notificações", nunca sozinha. iPhone: só com o sistema instalado na tela de início (iOS 16.4+); fora dele, explica como instalar
+   - Perfil (Bea e cliente): seção "Notificações" com ligar/desligar neste aparelho, "Enviar notificação de teste" e a lista dos aparelhos com "Remover". Na aba Mensagens da Bea, "Avisar no navegador" vira o mesmo "Ativar notificações"
+   - Segredos: `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` como Secret no Cloudflare (Production e Preview) e no `.dev.vars`; a chave pública VAPID vai em `config.js`
+   - [ ] Entrega 1: chaves, tabela, envio, service worker, seção Notificações e teste (só o "Enviar notificação de teste" dispara)
+   - [ ] Entrega 2: avisos automáticos de mensagem, aprovação, pedido de ajuste e conteúdo liberado (gatilhos + `/api/push/evento`)
+   - [ ] Entrega 3: prazo vencendo amanhã (`pg_cron` + `/api/push/prazos`)
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão
