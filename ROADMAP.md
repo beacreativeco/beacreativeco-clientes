@@ -138,6 +138,9 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - 8.3 [x] Estados: esqueleto da própria tela no carregamento (lista, agenda, editor, calendário, perfil), telas vazias com ação (`data-aciona`), falha ao abrir com "Tentar de novo" (diz quando é falta de internet), avisos com ícone
      - **Falta:** ver a tela de falha de verdade (só aparece com erro de conexão)
    - 8.4 [x] Formulários e janelas: moldura do Estúdio nas janelas (cabeçalho espresso com a inicial, ✦ no canto, fio periwinkle; corpo que rola; rodapé fixo; folha no celular); "Editar cliente" em seções (Marca e contato, Acesso, Drive e Trello, Combinado); "Excluir cliente" com a mesma moldura em vermelho; campos de 48px com anel no foco em todos os formulários
+   - 8.4b [x] Revisão de contraste (WCAG AA) nas páginas do cliente, nos dois modos: menu do perfil, bordas de campos (3:1), 28 textos esmaecidos com opacidade passaram a `--cor-texto-2`, botões desativados com cor própria, placeholders; "Adicionar seu nome" no menu. **Falta:** rodar a auditoria nas telas da Bea
+   - 8.4c [x] Ações dos arquivos no editor: ordem/baixar/remover em botões de ícone 44px com dica, Remover com confirmação; Trello e Drive com ícones oficiais (`assets/img/marcas/`) e estados normal/enviando/enviado/erro; Sincronizar com o Trello com ícone girando
+   - 8.4d [x] Etiquetas de situação coloridas em todo o sistema; trilha de navegação (`montarTrilha`, "‹ Voltar para …" no celular); "Abrir no Trello / Drive" no editor; prévia vazia com "Enviar arquivos"; formato escolhido com ✓. **Proposta pendente:** nova ordem do editor
    - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
    - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
 
