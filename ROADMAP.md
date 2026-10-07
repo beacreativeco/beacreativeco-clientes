@@ -45,7 +45,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - [x] Monograma b✦ no "Carregando…", na falha ao carregar e nas telas vazias
    - [x] Painel da Bea: botões dos cabeçalhos não quebram mais em duas linhas no celular
    - [x] Páginas do cliente revisadas (360, 390 e computador): "Pedir ajuste" não quebra mais em duas linhas
-4. [ ] **Página da Bea: clientes, calendário e Trello** (o sistema complementa o Trello, não substitui: conversa nos dois sentidos)
+4. [x] **Página da Bea: clientes, calendário e Trello** (o sistema complementa o Trello, não substitui: conversa nos dois sentidos)
    - [x] 4a. Calendário (versão 0.7.0): `/admin/calendario/`, entregas do mês de todos os clientes com cor por cliente, total e aprovadas por cliente (filtra ao tocar), grade no computador e lista por dia no celular, "Sem data"; navegação Clientes · Calendário · Mensagens no painel
    - [x] 4b. Trello ↔ sistema
      - [x] Trello → sistema (versão 0.8.0, migração `20261011000000`): cadastro do cliente escolhe o quadro; `/api/trello/sincronizar` cria rascunhos dos cartões das listas de entregas, atualiza título/data (formato só em rascunho), etapa e link do cartão em `conteudos_internos`; rascunho vazio some quando o cartão sai, o resto fica com aviso; sincroniza ao abrir o calendário e pelo botão
@@ -62,7 +62,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Trello → sistema: título, data, formato e etapa; nunca mexe em situação, mídias e legenda
      - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
      - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
-   - [ ] 4c. Tempo real com o webhook do Trello (versão 1.1.0; **falta testar no ar**)
+   - [x] 4c. Tempo real com o webhook do Trello (versões 1.1.0 e 1.1.1; testado no ar em 06/10/2026: cartão renomeado no "quadro - teste" chegou ao sistema em segundos, com o sistema fechado)
      - O Trello avisa `/api/trello/webhook` a cada mudança num quadro ligado e o sistema sincroniza só aquele quadro (título, data, formato, lista, etapa, cartão saindo); comentários, anexos, descrição e arrastar na mesma lista não disparam
      - Assinatura de cada aviso conferida com `TRELLO_API_SECRET` (precisa estar nas variáveis do Pages); responde na hora e sincroniza em seguida
      - Webhooks criados/removidos por `/api/trello/webhooks`: depois de salvar um cliente com o quadro mudado e depois de cada sincronização do Calendário; quadro desligado responde 410 e o Trello apaga o webhook sozinho
