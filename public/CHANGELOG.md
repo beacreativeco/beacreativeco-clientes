@@ -19,6 +19,31 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.5.0] — 07/10/2026
+
+### Novidades
+
+- Visual novo do sistema, com o topo em marrom espresso e o periwinkle nos botões e destaques.
+- Modo escuro: em "Aparência", no menu do perfil, dá para escolher Claro, Escuro ou Do aparelho (o padrão segue o celular ou o computador).
+- No celular, a navegação fica numa barra embaixo, como num aplicativo.
+- Os clientes ganharam navegação própria: Para aprovar, Aprovados e Perfil.
+- Trilha no alto das páginas (por exemplo, Clientes › Casa Coelho › Dia do Médico); no celular, um botão "Voltar".
+- As situações (Rascunho, Aguardando cliente, Aprovado…) aparecem como etiquetas coloridas, iguais em todo o sistema.
+- No editor, botões para abrir o cartão no Trello e a pasta no Google Drive, com os ícones oficiais.
+- Botões de enviar pro Trello e pro Google Drive mostram o andamento, o "✓ enviado" com o atalho para abrir, e "Tentar de novo" se der erro.
+
+### Melhorias
+
+- Janela de editar cliente organizada em seções, com os botões de salvar sempre à vista.
+- Enquanto a página carrega, aparece o desenho da própria tela, sem a tela vazia.
+- Telas vazias com uma ação para começar, e mensagens de erro mais claras.
+- Ações de cada arquivo (mudar a ordem, baixar, remover) em botões do mesmo tamanho, com dica ao passar o mouse; remover pede confirmação.
+- Prévia sem arquivos com um atalho para enviar.
+- O formato escolhido no editor fica em destaque, com um ✓.
+- Transições suaves entre as telas.
+- Textos, bordas e botões com contraste melhor, fáceis de ler nos dois modos.
+- Quem ainda não pôs o nome vê "Adicionar seu nome" no menu do perfil.
+
 ## [1.4.0] — 07/10/2026
 
 ### Novidades
