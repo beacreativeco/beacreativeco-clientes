@@ -3,13 +3,13 @@
 Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos para os clientes aprovarem, com pré-visualização igual ao Instagram, prazos, calendário e conversa por conteúdo.
 
 - Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). No ar desde 06/10/2026 (versão 1.0.0). Teste: `https://dev.beacreativeco-clientes.pages.dev` (branch `dev`, ver "Branches e ambientes"). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
-- Ordem das entregas em `ROADMAP.md`: ao fim de cada uma, atualizar o arquivo e dizer qual é a próxima. Não fazer push sem pedido.
+- Ordem das entregas em `ROADMAP.md`: ao fim de cada uma, atualizar o arquivo e dizer qual é a próxima. Push: ver "Branches e ambientes".
 - Site institucional (outro repositório, não mexer daqui): `beacreativeco/beacreativeco` em `beacreativeco.com.br`
 - Documento de escopo completo: https://claude.ai/code/artifact/7e520d1f-902d-4adc-ac15-e2529fa60c38
 
 ## Branches e ambientes (igual ao LAEG-BIO)
 
-- **Todo trabalho novo vai na branch `dev`. Nada direto na `main`.** Commits na `dev`; o push publica no Preview.
+- **Todo trabalho novo vai na branch `dev`. Nada direto na `main`.** Commits na `dev`; **sempre que uma entrega ficar pronta, push na `dev` sem perguntar** (o push publica no Preview). Na `main`, nunca, a não ser com "pode subir pra produção".
 - A Cloudflare publica a `dev` (Preview) em `https://dev.beacreativeco-clientes.pages.dev`, onde o Victor testa.
 - **Só juntar a `dev` na `main` quando o Victor disser "pode subir pra produção".** Aí, na `main`: subir a versão, entrada no `public/CHANGELOG.md`, commit `Versão X.Y.Z`, tag e Release (ver "Versão"). Depois, trazer a `main` de volta para a `dev`.
 - Na `dev`, o `ROADMAP.md` é atualizado a cada entrega, mas a versão e o CHANGELOG só mudam na subida para produção.
