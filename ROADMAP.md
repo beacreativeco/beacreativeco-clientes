@@ -165,7 +165,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Testado com dados de exemplo em 375px. **Falta:** testar tudo no Preview com o victordev e num celular de verdade; regra `apagar-conversa` no R2
    - Na subida para produção: MINOR (1.6.0), mudança visível sem mudar o jeito de aprovar
 
-10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano aprovado antes de implementar
+10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano esperando aprovação do Victor
    - Quando avisa:
      - Bea: mensagem nova de cliente (título = nome do cliente), pedido de ajuste e aprovação
      - Cliente: mensagem nova da Bea (título "BeaCreative"), conteúdo liberado para aprovação (novo ou nova versão) e prazo de aprovação vencendo amanhã
