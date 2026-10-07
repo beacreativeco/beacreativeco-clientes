@@ -19,6 +19,23 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.7.0] — 07/10/2026
+
+### Novidades
+
+- Notificações no celular e no computador, que chegam mesmo com o sistema fechado.
+- Clientes recebem aviso de mensagem nova da Bea, de conteúdo novo ou nova versão para aprovar e do prazo de aprovação vencendo no dia seguinte (às 9h).
+- A Bea recebe aviso de mensagem nova, pedido de ajuste e aprovação, com o nome do cliente.
+- Tocar no aviso abre direto a conversa ou o conteúdo.
+- Nova seção "Notificações" no Meu perfil: ativar, enviar uma notificação de teste, desligar e ver os aparelhos que recebem avisos.
+
+### Melhorias
+
+- A mesma conta pode receber avisos em vários aparelhos, e os que deixam de existir saem da lista sozinhos.
+- No iPhone, as notificações funcionam com o sistema instalado na tela de início; o perfil explica como instalar.
+- Na aba Mensagens da Bea, "Avisar no navegador" virou "Ativar notificações".
+- Ao sair da conta, o aparelho para de receber os avisos dela.
+
 ## [1.6.0] — 07/10/2026
 
 ### Novidades
