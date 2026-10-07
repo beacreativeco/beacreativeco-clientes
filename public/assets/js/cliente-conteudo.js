@@ -1,7 +1,7 @@
 // Um conteúdo visto pelo cliente: prévia estilo Instagram, aprovar ou pedir ajuste, histórico.
 import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
-import { iniciarPagina, avisar } from './ui.js';
+import { iniciarPagina, avisar, montarTrilha } from './ui.js';
 import { FORMATOS, SITUACOES_CLIENTE, lerData, diaSemanaHora, parametro } from './conteudos.js';
 import { criarPrevia } from './previa-instagram.js';
 import { criarConversa } from './conversa.js';
@@ -81,6 +81,11 @@ function voltarParaLista() {
 function desenhar() {
   document.title = `${conteudo.titulo} · BeaCreative`;
   $('titulo').textContent = conteudo.titulo;
+  const aprovado = conteudo.status === 'aprovado';
+  montarTrilha([
+    { texto: aprovado ? 'Aprovados' : 'Para aprovar', href: aprovado ? '/cliente/?ver=aprovados' : '/cliente/' },
+    { texto: conteudo.titulo },
+  ]);
 
   const situacao = $('situacao');
   situacao.className = `situacao ${SITUACOES_CLIENTE[conteudo.status].classe}`;

@@ -120,6 +120,60 @@ async function montarPerfilCliente({ session, perfil }) {
   }, { linkPerfil: '/cliente/perfil/' });
 }
 
+const SETA = {
+  frente: '<svg viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></svg>',
+  tras: '<svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg>',
+};
+
+/**
+ * Trilha de navegação no alto da página: "Clientes › Casa Coelho › Dia do Médico".
+ * Cada parte com href é um link; a última é a tela atual (sem link, cortada com "…" se for
+ * longa). No celular vira um único "‹ Voltar para <tela anterior>".
+ * @param {{ texto: string, href?: string }[]} partes
+ */
+export function montarTrilha(partes) {
+  const nav = document.getElementById('trilha');
+  if (!nav || !partes.length) return;
+  const seta = (qual) => {
+    const span = document.createElement('span');
+    span.className = 'trilha-seta';
+    span.setAttribute('aria-hidden', 'true');
+    span.innerHTML = SETA[qual]; // desenho fixo deste arquivo
+    return span;
+  };
+
+  const lista = document.createElement('ol');
+  lista.className = 'trilha-lista';
+  partes.forEach((parte, i) => {
+    const li = document.createElement('li');
+    const ultima = i === partes.length - 1;
+    if (i) li.append(seta('frente'));
+    const item = document.createElement(ultima || !parte.href ? 'span' : 'a');
+    item.className = ultima ? 'trilha-atual' : 'trilha-link';
+    item.textContent = parte.texto;
+    item.title = parte.texto; // o texto inteiro, quando cortado com "…"
+    if (ultima) item.setAttribute('aria-current', 'page');
+    else if (parte.href) item.href = parte.href;
+    li.append(item);
+    lista.append(li);
+  });
+
+  const anterior = [...partes].reverse().find((p, i) => i > 0 && p.href);
+  const voltar = document.createElement('a');
+  voltar.className = 'trilha-voltar';
+  if (anterior) {
+    voltar.href = anterior.href;
+    const texto = document.createElement('span');
+    texto.textContent = `Voltar para ${anterior.texto}`;
+    voltar.append(seta('tras'), texto);
+  } else {
+    voltar.hidden = true;
+  }
+
+  nav.replaceChildren(lista, voltar);
+  nav.hidden = false;
+}
+
 // Erro ao abrir a página: diz o que aconteceu e o que fazer, no lugar do esqueleto.
 function mostrarFalhaAoCarregar(container) {
   const semInternet = !navigator.onLine;

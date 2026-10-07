@@ -1,6 +1,6 @@
 import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
-import { iniciarPagina, avisar } from './ui.js';
+import { iniciarPagina, avisar, montarTrilha } from './ui.js';
 import { FORMATOS, SITUACOES, diaEMes, parametro, marcarNaoLidas } from './conteudos.js';
 
 const clienteId = parametro('id');
@@ -31,6 +31,7 @@ iniciarPagina('admin', async () => {
   const c = cliente.data;
   document.title = `${c.nome} · BeaCreative`;
   document.getElementById('nome-cliente').textContent = c.nome;
+  montarTrilha([{ texto: 'Clientes', href: '/admin/' }, { texto: c.nome }]);
   document.getElementById('contato-cliente').textContent = c.instagram ? '@' + c.instagram : (c.email ?? '');
   document.getElementById('novo-conteudo').href = `/admin/conteudo/?cliente=${c.id}`;
 

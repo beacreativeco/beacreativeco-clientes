@@ -32,7 +32,7 @@
 
   <div id="app" hidden>
     <main class="conteudo-pagina editor">
-      <a id="voltar" class="voltar" href="/admin/"></a>
+      <nav id="trilha" class="trilha" aria-label="Você está aqui" hidden></nav>
 
       <form id="form-conteudo" class="editor-form" novalidate>
         <div class="editor-cabecalho">
@@ -40,6 +40,7 @@
           <p id="situacao-atual" class="situacao"></p>
           <!-- Vindo do Trello (só a Bea vê): etapa pelas etiquetas, link do cartão e avisos. -->
           <p id="trello-info" class="editor-trello" hidden></p>
+          <div id="editor-links" class="editor-links" hidden></div>
         </div>
 
         <div id="aviso" class="aviso erro" role="alert" hidden></div>

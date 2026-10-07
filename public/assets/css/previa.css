@@ -856,3 +856,56 @@
 }
 
 .previa-legenda-story .ig-tag { color: var(--periwinkle-escuro); }
+
+/* ---------- Prévia sem nenhum arquivo: estado vazio leve ---------- */
+.previa[data-vazia] .previa-tela {
+  width: min(100%, 420px);
+  border: 1px dashed var(--cor-borda-forte);
+  background: transparent;
+  box-shadow: none;
+}
+
+.previa-vazia {
+  display: grid;
+  justify-items: center;
+  gap: var(--esp-2);
+  padding: var(--esp-12) var(--esp-6);
+  color: var(--cor-texto);
+  font-family: var(--fonte-texto);
+  text-align: center;
+}
+
+.previa-vazia-icone {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--esp-1);
+  border-radius: var(--raio-g);
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+}
+
+.previa-vazia-icone svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.previa-vazia-titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 1.35rem;
+  color: var(--cor-titulo);
+}
+
+.previa-vazia-dica {
+  max-width: 30ch;
+  margin: 0 0 var(--esp-2);
+  color: var(--cor-texto-2);
+  font-size: var(--fs-legenda);
+}

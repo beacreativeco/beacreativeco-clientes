@@ -690,15 +690,65 @@ textarea:focus-visible {
   overflow-wrap: anywhere;
 }
 
+/* Situação (de conteúdo ou de acesso): etiqueta colorida, a mesma cor para a mesma situação
+   em todo o sistema. Cores em par (fundo + texto) dos tokens, AA nos dois modos. */
 .situacao {
   grid-area: situacao;
-  font-size: 0.875rem;
-  font-weight: 500;
+  justify-self: start;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
+  font-size: var(--fs-legenda);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
-.situacao.ativo { color: var(--periwinkle-escuro); }
-.situacao.sem-acesso { color: var(--cor-texto-2); }
-.situacao.suspenso { color: var(--erro); }
+/* Bolinha da cor da situação (o "Aprovado" já tem o ✦ no texto). */
+.situacao::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.situacao.aprovado::before { content: none; }
+.situacao.aprovado { padding-left: 10px; }
+
+.situacao:empty { display: none; }
+
+.situacao.ativo,
+.situacao.aprovado {
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+}
+
+.situacao.aguardando {
+  background: var(--cor-aviso-fundo);
+  color: var(--cor-aviso-texto);
+}
+
+.situacao.suspenso,
+.situacao.ajuste,
+.situacao.ajuste-cliente {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro-texto);
+}
+
+.situacao.sem-acesso,
+.situacao.rascunho,
+.situacao.postado {
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
+}
 
 .cliente-acoes {
   grid-area: acoes;
@@ -973,10 +1023,106 @@ textarea:focus-visible {
   text-decoration: none;
 }
 
-.voltar {
-  display: inline-block;
-  margin-top: 16px;
-  font-size: 0.875rem;
+/* Trilha de navegação (ui.js montarTrilha): "Clientes › Casa Coelho › Dia do Médico".
+   Discreta: cor secundária, setinhas, sem sublinhado fixo; destaque ao passar o mouse.
+   No celular vira um único "‹ Voltar para …" de 44px. */
+.trilha {
+  margin: var(--esp-4) 0 var(--esp-1);
+  font-size: var(--fs-pequeno);
+}
+
+.trilha-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trilha-lista li {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.trilha-seta {
+  display: inline-flex;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 2px;
+  color: var(--cor-texto-2);
+}
+
+.trilha-seta svg,
+.trilha-voltar svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trilha-link,
+.trilha-atual {
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trilha-link {
+  padding: 4px 6px;
+  border-radius: var(--raio-p);
+  color: var(--cor-texto-2);
+  text-decoration: none;
+  transition: color var(--dur) var(--curva), background-color var(--dur) var(--curva);
+}
+
+.trilha-link:hover {
+  color: var(--cor-link);
+  background: var(--cor-superficie-hover);
+}
+
+.trilha-atual {
+  padding: 4px 6px;
+  color: var(--cor-texto);
+  font-weight: 600;
+}
+
+.trilha-voltar { display: none; }
+
+@media (max-width: 719px) {
+  .trilha { margin: var(--esp-3) 0 0; }
+  .trilha-lista { display: none; }
+
+  .trilha-voltar:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    min-height: 44px;
+    margin-left: -10px;
+    padding: 0 12px 0 6px;
+    border-radius: var(--raio-m);
+    color: var(--cor-texto-2);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .trilha-voltar svg { flex: none; width: 20px; height: 20px; }
+
+  .trilha-voltar span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .trilha-voltar:active { background: var(--cor-superficie-hover); color: var(--cor-link); }
 }
 
 .subtitulo {
@@ -996,12 +1142,6 @@ a.cliente-nome:hover {
   text-underline-offset: 4px;
 }
 
-/* ---------- Situação de um conteúdo ---------- */
-.situacao.rascunho { color: var(--cor-texto-2); }
-.situacao.aguardando { color: var(--espresso); }
-.situacao.ajuste { color: var(--erro); }
-.situacao.postado { color: var(--cor-texto-2); }
-.situacao.aprovado { color: var(--periwinkle-escuro); }
 
 /* ---------- Agenda do cliente ---------- */
 .agenda {
@@ -1115,7 +1255,7 @@ a.cliente-nome:hover {
     max-width: 1100px;
   }
 
-  .editor > .voltar,
+  .editor > .trilha,
   .editor > .editor-form { grid-column: 1; }
 
   .previa-painel {
@@ -1191,10 +1331,39 @@ a.cliente-nome:hover {
   gap: 10px;
   min-height: 112px;
   padding: 14px 8px 12px;
-  border: 1px solid var(--espresso);
-  border-radius: 10px;
-  background: var(--papel);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
   cursor: pointer;
+  transition: background-color var(--dur) var(--curva), border-color var(--dur) var(--curva),
+    box-shadow var(--dur) var(--curva), transform var(--dur) var(--curva-mola);
+}
+
+.formato:hover { border-color: var(--cor-texto-2); }
+
+/* ✓ no canto do formato escolhido */
+.formato::after {
+  content: "¹3";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cor-acao);
+  color: var(--cor-acao-texto);
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--dur) var(--curva), transform var(--dur) var(--curva-mola);
+}
+
+.formato:has(input:checked)::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .formato input {
@@ -1204,18 +1373,30 @@ a.cliente-nome:hover {
 }
 
 .formato:has(input:checked) {
-  border-color: var(--periwinkle);
-  box-shadow: inset 0 0 0 1px var(--periwinkle);
+  border-color: var(--cor-acao);
+  background: var(--cor-destaque-fundo);
+  box-shadow: inset 0 0 0 1px var(--cor-acao);
+  animation: formato-escolhido var(--dur-lenta) var(--curva-mola);
+}
+
+@keyframes formato-escolhido {
+  40% { transform: scale(1.03); }
 }
 
 .formato:has(input:focus-visible) {
-  outline: 2px solid var(--espresso);
+  outline: 2px solid var(--cor-foco);
   outline-offset: 2px;
 }
 
 .formato-nome {
   font-size: 0.875rem;
   font-weight: 500;
+  transition: color var(--dur) var(--curva);
+}
+
+.formato:has(input:checked) .formato-nome {
+  color: var(--cor-destaque-texto);
+  font-weight: 600;
 }
 
 .formato-desenho {
@@ -1224,9 +1405,11 @@ a.cliente-nome:hover {
   border-radius: 3px;
 }
 
+.formato-desenho { transition: border-color var(--dur) var(--curva), background-color var(--dur) var(--curva); }
+
 .formato:has(input:checked) .formato-desenho {
-  border-color: var(--periwinkle-escuro);
-  background: var(--cor-destaque-fundo);
+  border-color: var(--cor-destaque-texto);
+  background: var(--cor-superficie);
 }
 
 .formato-post { width: 40px; height: 50px; }        /* 4:5 */
@@ -1251,7 +1434,11 @@ a.cliente-nome:hover {
 }
 
 .formato:has(input:checked) .formato-reels::after {
-  border-left-color: var(--periwinkle-escuro);
+  border-left-color: var(--cor-destaque-texto);
+}
+
+.formato:has(input:checked) .formato-carrossel {
+  box-shadow: 7px -7px 0 -1.5px var(--cor-superficie), 7px -7px 0 0 var(--cor-destaque-texto);
 }
 /* Carrossel: um segundo quadro atrás, desenhado com duas sombras (miolo + contorno). */
 .formato-carrossel {
@@ -1812,7 +1999,7 @@ a.cliente-nome:hover {
   margin-bottom: 12px;
 }
 
-.situacao.ajuste-cliente { color: var(--cor-texto-2); }
+
 
 /* Um conteúdo: título, prévia (o destaque) e a decisão.
    Celular: uma coluna, decisão presa no pé da tela. Computador: prévia à esquerda. */
@@ -3145,8 +3332,8 @@ a.cliente-nome:hover {
 
 .cal-linha .situacao {
   grid-area: auto; /* a regra geral de .situacao mandaria para outra área da grade */
+  justify-self: end;
   font-size: 0.75rem;
-  text-align: right;
 }
 
 .cal-linha.situacao-rascunho .cal-linha-titulo,
@@ -3165,6 +3352,16 @@ a.cliente-nome:hover {
   flex-basis: 100%;
   color: var(--erro);
 }
+
+/* Abrir no Trello / Abrir no Drive no cabeçalho do editor */
+.editor-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  margin-top: var(--esp-3);
+}
+
+.editor-links .botao-integracao { flex: 0 1 auto; }
 
 .cal-linha-aviso {
   font-size: 0.75rem;

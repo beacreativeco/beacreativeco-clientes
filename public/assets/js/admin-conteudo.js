@@ -1,6 +1,6 @@
 import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
-import { iniciarPagina, avisar } from './ui.js';
+import { iniciarPagina, avisar, montarTrilha } from './ui.js';
 import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, definirDestinoDrive, midiasAtuais, enviandoArquivos, excluirTodas,
@@ -32,7 +32,7 @@ iniciarPagina('admin', async () => {
   form.data_prevista.addEventListener('change', () => atualizarPrevia());
   form.querySelectorAll('input[name="formato"]').forEach((r) =>
     r.addEventListener('change', () => definirFormato(form.formato.value)));
-  form.drive_url.addEventListener('input', () => definirDrive(form.drive_url.value.trim()));
+  form.drive_url.addEventListener('input', () => { definirDrive(form.drive_url.value.trim()); mostrarLinksExternos(); });
   form.titulo.addEventListener('input', () => definirDestinoDrive({ titulo: form.titulo.value.trim() }));
   iniciarMidias({
     // Arquivo precisa de um conteúdo salvo: cria o rascunho na hora, se for novo.
@@ -88,23 +88,16 @@ async function carregarConteudo(id) {
 let postadoNoTrello = false;
 
 // "Trello: Gravado · Abrir no Trello", e o aviso da sincronização quando houver.
+let urlDoTrello = null; // cartão do conteúdo, para o botão "Abrir no Trello"
+
 function mostrarTrello(internos) {
   postadoNoTrello = Boolean(internos?.trello_etiquetas?.includes('POSTADO'));
   // "Enviar pro Trello" nos arquivos só aparece com o conteúdo ligado a um cartão.
   definirTrello({ cartao: conteudo?.trello_card_id, url: internos?.trello_url });
+  urlDoTrello = internos?.trello_url ?? null;
   const info = document.getElementById('trello-info');
   const etapa = internos?.trello_etiquetas?.at(-1);
-  const partes = [];
-  if (etapa) partes.push(`Trello: ${etapa.charAt(0)}${etapa.slice(1).toLowerCase()}`);
-  if (internos?.trello_url) {
-    const link = document.createElement('a');
-    link.href = internos.trello_url;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.textContent = 'Abrir no Trello';
-    partes.push(link);
-  }
-  info.replaceChildren(...partes.flatMap((p, i) => (i ? [' · ', p] : [p])));
+  info.replaceChildren(...(etapa ? [`Etapa no Trello: ${etapa.charAt(0)}${etapa.slice(1).toLowerCase()}`] : []));
   if (internos?.trello_aviso) {
     const aviso = document.createElement('span');
     aviso.className = 'editor-trello-aviso';
@@ -112,6 +105,26 @@ function mostrarTrello(internos) {
     info.append(aviso);
   }
   info.hidden = !info.childNodes.length;
+  mostrarLinksExternos();
+}
+
+// "Abrir no Trello" (cartão ligado) e "Abrir no Drive" (link do Drive do conteúdo), com os
+// ícones oficiais, no mesmo estilo dos botões de integração dos arquivos.
+function mostrarLinksExternos() {
+  const caixa = document.getElementById('editor-links');
+  const drive = form.drive_url.value.trim();
+  const botao = (href, icone, texto) => {
+    const a = Object.assign(document.createElement('a'), { href, target: '_blank', rel: 'noopener', className: 'botao-integracao' });
+    const img = Object.assign(document.createElement('img'), { src: icone, alt: '', width: 20, height: 20, className: 'integ-icone' });
+    const span = Object.assign(document.createElement('span'), { className: 'integ-texto', textContent: texto });
+    a.append(img, span);
+    return a;
+  };
+  caixa.replaceChildren(
+    ...(urlDoTrello ? [botao(urlDoTrello, '/assets/img/marcas/trello.svg', 'Abrir no Trello')] : []),
+    ...(/^https:\/\//.test(drive) ? [botao(drive, '/assets/img/marcas/google-drive.png', 'Abrir no Drive')] : []),
+  );
+  caixa.hidden = !caixa.childElementCount;
 }
 
 // Conversa com o cliente (mesmo componente da página dele). Se o cliente aprovar ou pedir
@@ -142,9 +155,11 @@ async function abrirConversa() {
 // ---------------------------------------------------------------- tela
 
 function desenhar() {
-  const voltar = document.getElementById('voltar');
-  voltar.href = `/admin/cliente/?id=${cliente.id}`;
-  voltar.textContent = `Conteúdos de ${cliente.nome}`;
+  montarTrilha([
+    { texto: 'Clientes', href: '/admin/' },
+    { texto: cliente.nome, href: `/admin/cliente/?id=${cliente.id}` },
+    { texto: conteudo?.titulo || 'Novo conteúdo' },
+  ]);
 
   if (conteudo) {
     document.title = `${conteudo.titulo} · BeaCreative`;
@@ -160,6 +175,7 @@ function desenhar() {
 
   definirFormato(form.formato.value);
   definirDrive(form.drive_url.value.trim());
+  mostrarLinksExternos();
   // "Enviar pro Drive": pasta do cadastro do cliente; o título vira o nome do arquivo.
   definirDestinoDrive({ pastaUrl: cliente.drive_pasta_url ?? '', nomeCliente: cliente.nome, titulo: form.titulo.value.trim() });
   atualizarContador();
@@ -172,7 +188,10 @@ function desenhar() {
 let previa;
 function atualizarPrevia() {
   if (!cliente) return; // a lista de mídias pode avisar antes do cliente carregar
-  previa ??= criarPrevia(document.getElementById('previa'), { guias: true });
+  previa ??= criarPrevia(document.getElementById('previa'), {
+    guias: true,
+    aoPedirArquivos: () => document.getElementById('arquivos').click(), // mesma escolha da área de arquivos
+  });
   previa.atualizar({
     formato: form.formato.value,
     midias: midiasAtuais(),

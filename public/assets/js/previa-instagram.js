@@ -553,6 +553,27 @@ function montarArquivos(estado, tela) {
   };
 }
 
+// Sem nenhum arquivo: estado vazio leve (ícone, texto e, no editor, o atalho para enviar).
+function montarSemArquivos(tela, aoPedirArquivos) {
+  const icone = el('span', 'previa-vazia-icone');
+  icone.setAttribute('aria-hidden', 'true');
+  // Desenho fixo deste arquivo (nunca dado de usuário).
+  icone.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="9.5" r="1.8"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg>';
+  const caixa = el('div', 'previa-vazia', icone,
+    el('p', 'previa-vazia-titulo', 'Nenhum arquivo ainda'),
+    el('p', 'previa-vazia-dica', aoPedirArquivos
+      ? 'Imagens e vídeos aparecem aqui assim que subirem.'
+      : 'Quando a Bea enviar os arquivos, eles aparecem aqui.'));
+  if (aoPedirArquivos) {
+    const enviar = el('button', 'botao-secundario', 'Enviar arquivos');
+    enviar.type = 'button';
+    enviar.addEventListener('click', aoPedirArquivos);
+    caixa.append(enviar);
+  }
+  tela.append(caixa);
+  return { atualizarTexto() {}, recortar() {}, parar() {} };
+}
+
 // ---------------------------------------------------------------- formatos possíveis
 
 const NOMES_FORMATO = { post: 'Post', carrossel: 'Carrossel', story: 'Story', reels: 'Reels' };
@@ -598,9 +619,10 @@ function botao(texto, classe = 'previa-alternar') {
  * Abre nos arquivos crus; "Ver prévia" liga a simulação do Instagram. Na prévia, quem vê
  * escolhe os arquivos e o formato para comparar, sem mudar nada do conteúdo cadastrado.
  * @param {HTMLElement} alvo
- * @param {{ guias?: boolean }} opcoes  guias = mostrar a opção "Áreas cobertas" (só a Bea)
+ * @param {{ guias?: boolean, aoPedirArquivos?: () => void }} opcoes  guias = mostrar a opção
+ *   "Áreas cobertas" (só a Bea); aoPedirArquivos = atalho "Enviar arquivos" na prévia vazia
  */
-export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
+export function criarPrevia(alvo, { guias: comGuias = false, aoPedirArquivos = null } = {}) {
   const botaoModo = botao('Ver prévia');
   botaoModo.setAttribute('aria-pressed', 'false');
   const botaoInterface = botao('Ocultar interface');
@@ -647,6 +669,9 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
     vista.formato = formato;
     vista.midias = naPrevia ? sel : estado.midias;
 
+    const semArquivos = !estado.midias.length;
+    // Sem arquivo, não há o que simular: o botão some até o primeiro chegar.
+    botaoModo.hidden = semArquivos && !naPrevia;
     botaoModo.textContent = naPrevia ? 'Ver arquivos' : 'Ver prévia';
     botaoModo.setAttribute('aria-pressed', String(naPrevia));
     const comInterface = naPrevia && (formato === 'reels' || formato === 'story');
@@ -688,7 +713,8 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
       montada?.parar();
       tela.replaceChildren();
       raiz.dataset.formato = naPrevia ? formato : 'arquivos';
-      montada = !naPrevia ? montarArquivos(vista, tela)
+      raiz.toggleAttribute('data-vazia', !naPrevia && semArquivos);
+      montada = !naPrevia ? (semArquivos ? montarSemArquivos(tela, aoPedirArquivos) : montarArquivos(vista, tela))
         : formato === 'reels' ? montarReels(vista, tela)
         : formato === 'story' ? montarStory(vista, tela)
         : montarFeed(vista, tela);
