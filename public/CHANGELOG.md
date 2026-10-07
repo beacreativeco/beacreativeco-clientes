@@ -19,6 +19,22 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.3.0] — 07/10/2026
+
+### Novidades
+
+- Os clientes também têm um perfil: a foto (ou as iniciais) fica no topo e abre um menu com "Meu perfil", "Sobre o sistema" e "Sair".
+- Em "Meu perfil" o cliente coloca a foto e o nome de quem aprova os conteúdos e troca a senha. O e-mail de acesso aparece só para consulta.
+- Nas mensagens, a Bea vê o nome e a foto de quem aprova do lado do cliente.
+- "Esqueci a senha atual" nos perfis, para quem entrou pelo Google ou pelo convite e nunca criou uma senha.
+
+### Correções
+
+- Vídeos enviados no editor eram registrados como imagem: a miniatura aparecia quebrada e o Reels pedia um vídeo. Agora imagem e vídeo entram com o tipo certo.
+- Imagens e vídeos que não apareciam (miniatura quebrada) voltam a ser mostrados.
+- Quando o problema é na configuração do sistema, o aviso agora diz isso, em vez de "Sua sessão expirou", que fazia sair e entrar de novo sem resolver nada.
+- Ao excluir um cliente, a foto de perfil dele também é apagada.
+
 ## [1.2.0] — 07/10/2026
 
 ### Novidades

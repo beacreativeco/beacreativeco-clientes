@@ -92,7 +92,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Meu perfil: foto, nome, e-mail (dá para trocar, com confirmação no e-mail novo) e troca de senha
    - Dados da agência: nome, WhatsApp, Instagram e e-mail de contato (usados no envio do link e nos e-mails aos clientes, quando essas partes entrarem)
    - Foto e nome da Bea nos balões da conversa, do lado do cliente
-5d. [x] **Perfil do cliente** (mesmo estilo; na `dev`, migração `20261017000000`)
+5d. [x] **Perfil do cliente** (mesmo estilo; versão 1.3.0, migração `20261017000000`, já rodada)
    - **Falta:** rodar a migração no Supabase e testar no Preview (foto, nome, troca de senha, "Esqueci a senha atual"; nome e foto do cliente na conversa da Bea)
    - Menu do avatar nas páginas do cliente (foto ou iniciais): nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
    - Meu perfil (`/cliente/perfil/`): foto (ou logo) e nome de quem aprova (`clientes.contato_nome` e `contato_foto_url`, nome pela função `salvar_meu_nome`); e-mail só leitura (quem troca é a Bea); troca de senha
