@@ -61,8 +61,11 @@ async function avisarMensagem(m) {
 
   avisar(resumo, 'ok', destino);
 
-  // Aba em segundo plano: notificação do navegador (se a Bea permitiu na Caixa de mensagens).
-  if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+  // Aba em segundo plano: notificação do navegador. Com o push ativado neste aparelho, quem
+  // avisa é o push (chega até com o sistema fechado): aqui não, para não sair em dobro.
+  const comPush = await navigator.serviceWorker?.getRegistration('/')
+    .then((r) => r?.pushManager.getSubscription()).catch(() => null);
+  if (document.hidden && !comPush && 'Notification' in window && Notification.permission === 'granted') {
     const n = new Notification('BeaCreative', { body: m.texto ? `${resumo}\n${m.texto.slice(0, 120)}` : resumo, tag: m.cliente_id });
     n.onclick = () => { window.focus(); location.href = destino; };
   }
