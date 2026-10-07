@@ -110,6 +110,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - Carrossel: deslizar com encaixe (uma imagem por vez), setinhas nas laterais só em telas com mouse (somem na primeira/última) e setas do teclado com a prévia em foco; contador e bolinhas acompanham; mudar a ordem no editor mantém a posição. Ícones desenhados por nós, sem logo do Instagram.
   - Legenda em tempo real, como no app: no feed começa com o @ em negrito e fica acima de "Ver todos os comentários"; no Reels fica por cima do vídeo, embaixo. Corte medido de verdade em 2 linhas com "… mais" (clicar abre inteira), mantendo quebras de linha e emojis; #hashtags e @menções na cor de link. Story não tem legenda no Instagram: o texto aparece embaixo da tela, com esse aviso.
   - A página do cliente usa este mesmo componente (sem as "Áreas cobertas").
+  - Abre nos arquivos crus (foto inteira, vídeo com os controles do navegador); "Ver prévia" liga a simulação. Na prévia, quem vê escolhe os arquivos (miniaturas) e o formato, só entre os possíveis (`formatosPossiveis`: 1 vídeo → Reels/Story; 1 imagem → Post/Story; 2+ → Carrossel). Começa no formato cadastrado (`selecaoInicial`) e nada disso grava no banco.
   - Botão "Ocultar interface" para ver o vídeo limpo. "Áreas cobertas" (só no editor da Bea) destaca as faixas da interface, em pixels de 1080 × 1920: Reels 250 em cima, 420 embaixo e 230 à direita (a partir de 960); Story 250 em cima e 340 embaixo.
 - Definir as cores como variáveis CSS em `:root` num arquivo de estilos base.
 

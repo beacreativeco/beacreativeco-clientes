@@ -414,33 +414,18 @@ function montarStory(estado, tela) {
 
 // ---------------------------------------------------------------- Feed (post e carrossel)
 
-function montarFeed(estado, tela) {
-  const itens = estado.midias;
-  const nome = arroba(estado.cliente);
+/**
+ * Trilho de deslizar com encaixe (uma mídia por vez), setinhas no computador, teclado,
+ * contador e bolinhas. Serve ao carrossel do feed e aos arquivos crus.
+ * `memoria[chave]` guarda a posição: refazer o trilho (mudou a ordem) não volta ao início.
+ */
+function criarTrilho(itens, montarItem, { classe, vazioTexto, memoria, chave }) {
   const trilho = el('div', 'ig-post-trilho');
   const contador = el('span', 'ig-post-contador');
   const pontos = el('div', 'ig-pontos');
-  const videos = [];
 
-  if (!itens.length) {
-    trilho.append(el('div', 'ig-post-item', vazio('Adicione as imagens para ver a prévia.')));
-  }
-  for (const m of itens) {
-    const item = el('div', 'ig-post-item', criarMidia(m, { video: { loop: true, autoplay: true }, drive: estado.drive }));
-    if (m.tipo === 'video') {
-      const v = item.firstChild;
-      videos.push(v);
-      const som = el('button', 'ig-botao-som ig-botao-som-feed', icone('somDesligado'));
-      som.type = 'button';
-      som.setAttribute('aria-label', 'Ligar o som');
-      som.addEventListener('click', () => {
-        v.muted = !v.muted;
-        som.replaceChildren(icone(v.muted ? 'somDesligado' : 'somLigado'));
-      });
-      item.append(som);
-    }
-    trilho.append(item);
-  }
+  if (!itens.length) trilho.append(el('div', classe, vazio(vazioTexto)));
+  for (const m of itens) trilho.append(montarItem(m));
 
   // Navegação do carrossel: deslizar com encaixe (CSS), setinhas no computador e teclado.
   const seta = (nome, rotulo) => {
@@ -464,7 +449,7 @@ function montarFeed(estado, tela) {
   if (itens.length > 1) {
     itens.forEach(() => pontos.append(el('span', 'ig-ponto')));
     marcar = (i = atual()) => {
-      estado.posicaoCarrossel = i;
+      memoria[chave] = i;
       contador.textContent = `${i + 1}/${itens.length}`;
       [...pontos.children].forEach((p, n) => p.classList.toggle('ativo', n === i));
       setaAnterior.hidden = i === 0;
@@ -490,12 +475,42 @@ function montarFeed(estado, tela) {
     setaProxima.hidden = true;
   }
 
+  return {
+    midia,
+    pontos: itens.length > 1 ? pontos : null,
+    // Depois de entrar na página: antes disso o trilho não tem largura.
+    posicionar() { if (itens.length > 1) irPara(memoria[chave] ?? 0, false); },
+  };
+}
+
+function montarFeed(estado, tela) {
+  const itens = estado.midias;
+  const nome = arroba(estado.cliente);
+  const videos = [];
+
+  const { midia, pontos, posicionar } = criarTrilho(itens, (m) => {
+    const item = el('div', 'ig-post-item', criarMidia(m, { video: { loop: true, autoplay: true }, drive: estado.drive }));
+    if (m.tipo === 'video') {
+      const v = item.firstChild;
+      videos.push(v);
+      const som = el('button', 'ig-botao-som ig-botao-som-feed', icone('somDesligado'));
+      som.type = 'button';
+      som.setAttribute('aria-label', 'Ligar o som');
+      som.addEventListener('click', () => {
+        v.muted = !v.muted;
+        som.replaceChildren(icone(v.muted ? 'somDesligado' : 'somLigado'));
+      });
+      item.append(som);
+    }
+    return item;
+  }, { classe: 'ig-post-item', vazioTexto: 'Adicione as imagens para ver a prévia.', memoria: estado, chave: 'posicaoCarrossel' });
+
   const legenda = criarLegenda('ig-post-legenda', { prefixo: nome });
 
   const post = el('article', 'ig-post',
     el('header', 'ig-post-topo', avatar(estado.cliente), el('strong', null, nome), el('span', 'ig-espaco'), icone('mais')),
     midia,
-    itens.length > 1 && pontos,
+    pontos,
     el('div', 'ig-post-acoes',
       el('span', 'ig-acao-linha', icone('coracao'), el('small', null, '1.024')),
       el('span', 'ig-acao-linha', icone('balao'), el('small', null, '48')),
@@ -509,7 +524,7 @@ function montarFeed(estado, tela) {
 
   tela.append(post);
   // Mudou a ordem ou um arquivo: continua na mesma posição, sem animar.
-  if (itens.length > 1) irPara(estado.posicaoCarrossel ?? 0, false);
+  posicionar();
 
   return {
     atualizarTexto() { legenda.definir(estado.legenda.trim()); },
@@ -518,28 +533,178 @@ function montarFeed(estado, tela) {
   };
 }
 
+// ---------------------------------------------------------------- Arquivos crus
+
+// Como o arquivo é, sem moldura do Instagram: foto inteira, vídeo com os controles do navegador.
+function montarArquivos(estado, tela) {
+  const videos = [];
+  const { midia, pontos, posicionar } = criarTrilho(estado.midias, (m) => {
+    const conteudo = criarMidia(m, { video: { controls: true, muted: false, preload: 'metadata' }, drive: estado.drive });
+    if (m.tipo === 'video' && conteudo.tagName === 'VIDEO') videos.push(conteudo);
+    return el('div', 'ig-post-item arq-item', conteudo);
+  }, { classe: 'ig-post-item arq-item', vazioTexto: 'Nenhum arquivo nesta versão ainda.', memoria: estado, chave: 'posicaoArquivos' });
+
+  tela.append(el('div', 'arq', midia, pontos));
+  posicionar();
+  return {
+    atualizarTexto() {},
+    recortar() {},
+    parar() { videos.forEach((v) => v.pause()); },
+  };
+}
+
+// ---------------------------------------------------------------- formatos possíveis
+
+const NOMES_FORMATO = { post: 'Post', carrossel: 'Carrossel', story: 'Story', reels: 'Reels' };
+
+/** O que dá para simular com estes arquivos: 1 vídeo → Reels/Story; 1 imagem → Post/Story; 2+ → Carrossel. */
+function formatosPossiveis(midias) {
+  if (midias.length > 1) return ['carrossel'];
+  if (midias.length === 1) return midias[0].tipo === 'video' ? ['reels', 'story'] : ['post', 'story'];
+  return [];
+}
+
+/** Arquivos que a prévia usa até a pessoa escolher: os que combinam com o formato cadastrado. */
+function selecaoInicial(midias, formato) {
+  if (formato === 'carrossel' || midias.length <= 1) return midias;
+  const preferido = formato === 'reels' ? 'video' : formato === 'post' ? 'imagem' : null;
+  return [midias.find((m) => m.tipo === preferido) ?? midias[0]];
+}
+
+function miniatura(m) {
+  if (m.tipo === 'video') {
+    const v = el('video', 'previa-mini-midia');
+    Object.assign(v, { src: `${m.arquivo_url}#t=0.1`, muted: true, preload: 'metadata', playsInline: true });
+    v.setAttribute('playsinline', '');
+    return v;
+  }
+  const img = new Image();
+  img.src = m.arquivo_url;
+  img.alt = '';
+  img.decoding = 'async';
+  img.className = 'previa-mini-midia';
+  return img;
+}
+
 // ---------------------------------------------------------------- componente
 
+function botao(texto, classe = 'previa-alternar') {
+  const b = el('button', classe, texto);
+  b.type = 'button';
+  return b;
+}
+
 /**
+ * Abre nos arquivos crus; "Ver prévia" liga a simulação do Instagram. Na prévia, quem vê
+ * escolhe os arquivos e o formato para comparar, sem mudar nada do conteúdo cadastrado.
  * @param {HTMLElement} alvo
  * @param {{ guias?: boolean }} opcoes  guias = mostrar a opção "Áreas cobertas" (só a Bea)
  */
 export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
-  const botaoInterface = el('button', 'previa-alternar', 'Ocultar interface');
-  botaoInterface.type = 'button';
+  const botaoModo = botao('Ver prévia');
+  botaoModo.setAttribute('aria-pressed', 'false');
+  const botaoInterface = botao('Ocultar interface');
   botaoInterface.setAttribute('aria-pressed', 'false');
-  const botaoGuias = el('button', 'previa-alternar', 'Áreas cobertas');
-  botaoGuias.type = 'button';
+  const botaoGuias = botao('Áreas cobertas');
   botaoGuias.setAttribute('aria-pressed', 'false');
-  botaoGuias.hidden = !comGuias;
 
-  const controles = el('div', 'previa-controles', botaoInterface, botaoGuias);
+  const controles = el('div', 'previa-controles', botaoModo, botaoInterface, botaoGuias);
+  const formatos = el('div', 'previa-formatos');
+  formatos.setAttribute('role', 'group');
+  formatos.setAttribute('aria-label', 'Formato da prévia');
+  const escolha = el('div', 'previa-escolha');
+  escolha.setAttribute('role', 'group');
+  escolha.setAttribute('aria-label', 'Arquivos na prévia');
   const tela = el('div', 'previa-tela');
   // O Instagram não mostra legenda no Story: o texto fica embaixo, de referência.
   const legendaStory = el('div', 'previa-legenda-story');
-  const raiz = el('div', 'previa', controles, tela, legendaStory);
+  const raiz = el('div', 'previa', controles, formatos, escolha, tela, legendaStory);
   alvo.replaceChildren(raiz);
 
+  // `formato` e `midias` são os do conteúdo; a tela mostra a `vista` (o que a pessoa escolheu).
+  const estado = { formato: 'post', midias: [], legenda: '', cliente: null, data: null, drive: '' };
+  // A vista herda legenda, cliente etc. do estado e guarda a posição do carrossel entre remontagens.
+  const vista = Object.create(estado);
+  let modo = 'arquivos';
+  let escolhidas = null;     // null = automático (combina com o formato cadastrado); senão, Set de URLs
+  let formatoEscolhido = null;
+  let formatoAnterior = null;
+  let montada = null;
+  let chave = '';
+
+  const urlDe = (m) => m.arquivo_url;
+  const selecionadas = () => (escolhidas
+    ? estado.midias.filter((m) => escolhidas.has(urlDe(m)))
+    : selecaoInicial(estado.midias, estado.formato));
+
+  function desenhar() {
+    const sel = selecionadas();
+    const possiveis = estado.midias.length ? formatosPossiveis(sel) : [estado.formato];
+    const formato = possiveis.includes(formatoEscolhido) ? formatoEscolhido
+      : possiveis.includes(estado.formato) ? estado.formato : possiveis[0];
+    const naPrevia = modo === 'previa';
+
+    vista.formato = formato;
+    vista.midias = naPrevia ? sel : estado.midias;
+
+    botaoModo.textContent = naPrevia ? 'Ver arquivos' : 'Ver prévia';
+    botaoModo.setAttribute('aria-pressed', String(naPrevia));
+    const comInterface = naPrevia && (formato === 'reels' || formato === 'story');
+    botaoInterface.hidden = !comInterface;
+    botaoGuias.hidden = !comInterface || !comGuias;
+
+    formatos.hidden = !naPrevia;
+    formatos.replaceChildren(...possiveis.map((f) => {
+      const b = botao(NOMES_FORMATO[f], 'previa-formato');
+      b.setAttribute('aria-pressed', String(f === formato));
+      b.addEventListener('click', () => { formatoEscolhido = f; desenhar(); });
+      return b;
+    }));
+
+    // Escolher arquivos só faz sentido com mais de um. Sempre fica pelo menos um marcado.
+    escolha.hidden = !naPrevia || estado.midias.length < 2;
+    const marcadas = new Set(sel.map(urlDe));
+    escolha.replaceChildren(
+      el('span', 'previa-escolha-titulo', 'Arquivos na prévia'),
+      el('div', 'previa-escolha-lista', estado.midias.map((m, i) => {
+        const b = el('button', 'previa-mini', miniatura(m), el('span', 'previa-mini-numero', String(i + 1)));
+        b.type = 'button';
+        b.setAttribute('aria-pressed', String(marcadas.has(urlDe(m))));
+        b.setAttribute('aria-label', `${m.tipo === 'video' ? 'Vídeo' : 'Imagem'} ${i + 1}`);
+        b.addEventListener('click', () => {
+          const nova = new Set(marcadas);
+          if (nova.has(urlDe(m))) nova.delete(urlDe(m)); else nova.add(urlDe(m));
+          if (!nova.size) return;
+          escolhidas = nova;
+          desenhar();
+        });
+        return b;
+      })));
+
+    const novaChave = JSON.stringify([modo, formato, estado.data, estado.cliente?.instagram,
+      estado.cliente?.foto_perfil, vista.midias.map((m) => [m.arquivo_url, m.expira_em])]);
+    if (novaChave !== chave) {
+      chave = novaChave;
+      montada?.parar();
+      tela.replaceChildren();
+      raiz.dataset.formato = naPrevia ? formato : 'arquivos';
+      montada = !naPrevia ? montarArquivos(vista, tela)
+        : formato === 'reels' ? montarReels(vista, tela)
+        : formato === 'story' ? montarStory(vista, tela)
+        : montarFeed(vista, tela);
+    }
+    montada.atualizarTexto();
+    const texto = estado.legenda.trim();
+    legendaStory.hidden = !naPrevia || formato !== 'story' || !texto;
+    legendaStory.replaceChildren(
+      el('p', 'previa-legenda-story-aviso', 'Legenda (o Instagram não mostra legenda no Story)'),
+      el('p', 'previa-legenda-story-texto', textoComTags(texto)));
+  }
+
+  botaoModo.addEventListener('click', () => {
+    modo = modo === 'previa' ? 'arquivos' : 'previa';
+    desenhar();
+  });
   botaoInterface.addEventListener('click', () => {
     const limpa = raiz.classList.toggle('sem-interface');
     botaoInterface.setAttribute('aria-pressed', String(limpa));
@@ -551,9 +716,6 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
     botaoGuias.setAttribute('aria-pressed', String(ligadas));
   });
 
-  const estado = { formato: 'post', midias: [], legenda: '', cliente: null, data: null, drive: '' };
-  let montada = null;
-  let chave = '';
   // Mudou a largura (girar o celular, abrir a lateral): o corte da legenda muda junto.
   let larguraAnterior = 0;
   new ResizeObserver(([entrada]) => {
@@ -567,25 +729,19 @@ export function criarPrevia(alvo, { guias: comGuias = false } = {}) {
     /** Atualiza só o que mudou: digitar a legenda não recarrega os vídeos. */
     atualizar(novo) {
       Object.assign(estado, novo);
-      const novaChave = JSON.stringify([estado.formato, estado.data, estado.cliente?.instagram,
-        estado.cliente?.foto_perfil, estado.midias.map((m) => [m.arquivo_url, m.expira_em])]);
-      if (novaChave !== chave) {
-        chave = novaChave;
-        montada?.parar();
-        tela.replaceChildren();
-        const tipo = estado.formato;
-        raiz.dataset.formato = tipo;
-        controles.hidden = tipo === 'post' || tipo === 'carrossel';
-        montada = tipo === 'reels' ? montarReels(estado, tela)
-          : tipo === 'story' ? montarStory(estado, tela)
-          : montarFeed(estado, tela);
+      // A Bea trocou o formato cadastrado: a prévia volta a acompanhar o cadastro.
+      if (estado.formato !== formatoAnterior) {
+        formatoAnterior = estado.formato;
+        escolhidas = null;
+        formatoEscolhido = null;
       }
-      montada.atualizarTexto();
-      const texto = estado.legenda.trim();
-      legendaStory.hidden = estado.formato !== 'story' || !texto;
-      legendaStory.replaceChildren(
-        el('p', 'previa-legenda-story-aviso', 'Legenda (o Instagram não mostra legenda no Story)'),
-        el('p', 'previa-legenda-story-texto', textoComTags(texto)));
+      // Arquivo removido: sai da escolha; se não sobrar nenhum, volta ao automático.
+      if (escolhidas) {
+        const urls = new Set(estado.midias.map(urlDe));
+        escolhidas = new Set([...escolhidas].filter((u) => urls.has(u)));
+        if (!escolhidas.size) escolhidas = null;
+      }
+      desenhar();
     },
   };
 }

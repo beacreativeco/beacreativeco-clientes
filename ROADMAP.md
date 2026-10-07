@@ -100,7 +100,8 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - A foto e o @ da prévia dos posts continuam os que a Bea cadastrou (o cliente não mexe)
    - `/api/perfil/foto` serve aos dois lados; excluir cliente apaga a foto dele do R2
    - Junto, nos dois perfis: "Esqueci a senha atual" (manda o link de criar senha), para quem só entrou com o Google ou pelo convite e nunca teve senha
-5e. [ ] **Prévia opcional** (Bea e cliente; só front, sem migração)
+5e. [x] **Prévia opcional** (Bea e cliente; só front, sem migração; testada numa página local com arquivos de teste)
+   - **Falta:** testar no Preview, no editor da Bea e na página do cliente, com arquivos de verdade
    - Por padrão, os arquivos crus: imagens uma por vez (deslizar, sem moldura) e vídeo no player normal
    - Botão "Ver prévia" liga a simulação do Instagram (`previa-instagram.js`); "Ver arquivos" volta
    - Quem vê escolhe quais arquivos entram na prévia (não precisa ser todos juntos); os formatos seguem a escolha: 1 vídeo → Reels ou Story; 1 imagem → Post ou Story; 2 ou mais → Carrossel
