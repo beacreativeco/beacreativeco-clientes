@@ -165,7 +165,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Testado com dados de exemplo em 375px. **Falta:** testar tudo no Preview com o victordev e num celular de verdade; regra `apagar-conversa` no R2
    - Na subida para produção: MINOR (1.6.0), mudança visível sem mudar o jeito de aprovar
 
-10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano aprovado em 07/10/2026 (aviso de prazo às 9h; aprovação avisa sempre, separada da mensagem)
+10. [x] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano aprovado em 07/10/2026 (aviso de prazo às 9h; aprovação avisa sempre, separada da mensagem)
    - Quando avisa:
      - Bea: mensagem nova de cliente (título = nome do cliente), pedido de ajuste e aprovação
      - Cliente: mensagem nova da Bea (título "BeaCreative"), conteúdo liberado para aprovação (novo ou nova versão) e prazo de aprovação vencendo amanhã
@@ -187,8 +187,16 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Aba Mensagens da Bea: "Avisar no navegador" virou "Ativar notificações"
      - Chave pública em `config.js`; `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` gerados no `.dev.vars`
      - Migração rodada e Secrets gravados (Production e Preview, pelo `wrangler pages secret put`, direto do `.dev.vars`). Testado no Preview em 07/10/2026: teste chegou no Chrome do Android (victordev) e no Chrome do Windows (Bea). **Falta:** iPhone com o sistema instalado
-   - [ ] Entrega 2: avisos automáticos de mensagem, aprovação, pedido de ajuste e conteúdo liberado (gatilhos + `/api/push/evento`)
-   - [ ] Entrega 3: prazo vencendo amanhã (`pg_cron` + `/api/push/prazos`)
+   - [x] Entrega 2: avisos automáticos de mensagem, aprovação, pedido de ajuste e conteúdo liberado (migração `20261021000000`, rodada)
+     - Mudança no plano: em vez do Vault, o endereço e o segredo ficam em `push_destinos` (RLS, sem acesso para anon/authenticated), gravada pela chave de serviço; ninguém copia segredo à mão
+     - `push_eventos` reserva cada aviso uma vez só: o banco chama a produção e o Preview, e o Preview só envia para os clientes de teste (`PUSH_SO_CLIENTES`, Secret só no Preview, com o id do victordev)
+     - `POST /api/push/evento` confere o segredo, relê a linha no banco, responde 202 na hora e envia depois (`waitUntil`)
+     - Com push ativo no aparelho, a aba da Bea não manda mais o aviso local do navegador (não sai em dobro)
+     - Testado no Preview em 07/10/2026 (Bea no Chrome do Windows, victordev no Chrome do Android): mensagem nos dois sentidos, áudio, conteúdo novo, nova versão, pedido de ajuste e aprovação; com o app fechado
+   - [x] Entrega 3: prazo vencendo amanhã (migração `20261022000000`, rodada; `pg_cron` às 12h UTC = 9h de Brasília, job `push-prazos`, chama `/api/push/evento` com `{ tipo: 'prazos' }`)
+     - Um aviso por conteúdo e prazo ("vence amanhã às HH:MM"); prazo mudado avisa de novo
+     - Testado no Preview em 07/10/2026 disparando à mão (prazo do conteúdo de teste do victordev posto para 08/10 às 18h): chegou no Android
+   - **Falta:** iPhone com o sistema instalado; na subida para produção (1.7.0, MINOR), conferir o primeiro aviso de verdade às 9h
 
 ## Já pronto antes deste roadmap
 
