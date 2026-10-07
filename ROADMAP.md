@@ -131,6 +131,14 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Testado no ar: upload, pasta `trabalho/`, aprovação do cliente movendo os arquivos para `aprovados/`
    - Variáveis no Pages: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TRELLO_API_KEY`, `TRELLO_API_SECRET`, `TRELLO_TOKEN` e `SITE_URL` (`https://clientes.beacreativeco.com.br`, liga o link do sistema nos cartões do Trello)
 
+8. [ ] **Fase visual (só front-end, sem mudar regras nem banco)**: direção "Estúdio" aprovada em 07/10/2026, com modo claro e escuro (padrão: o do aparelho; escolha salva no aparelho). Comparação das direções: https://claude.ai/artifact/SS61pAWhiqnBXjeWUgpGa3. Uma área por vez, na `dev`, aprovada antes da próxima:
+   - 8.1 [x] Tokens (`tokens.css`), claro e escuro (`tema.js`), "Aparência" no menu do avatar, botões e escala tipográfica; todos os pares de cor passam no WCAG AA
+   - 8.2 [ ] Navegação: topo espresso com abas e indicador da ativa; barra embaixo no celular (Bea e cliente); transições entre telas e abas
+   - 8.3 [ ] Estados: esqueletos no carregamento, telas vazias com ação, erros claros
+   - 8.4 [ ] Formulários e janelas ("Editar cliente" em seções, botões sempre visíveis)
+   - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
+   - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão
