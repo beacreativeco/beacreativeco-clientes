@@ -113,14 +113,14 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Convite depois do login: Chrome/Edge (Android e computador) usam o botão do navegador; iPhone no Safari mostra o passo a passo (Compartilhar → Adicionar à Tela de Início); Chrome no iPhone orienta abrir no Safari
    - "Fechar" (volta depois de 30 dias, como no LAEG) e "Não mostrar de novo"; nada aparece se já estiver instalado
    - "Instalar o sistema" no menu do avatar, para Bea e cliente, a qualquer momento (só quando dá para instalar)
-5g. [ ] **Enviar arquivos pro Trello e pro Drive** (só a Bea, no editor; migração nova)
+5g. [x] **Enviar arquivos pro Trello e pro Drive** (só a Bea, no editor; migração nova)
    - Botões ao lado de cada arquivo; depois de enviado mostra "✓ No Trello" / "✓ No Drive" (com link), e mandar de novo pede confirmação
    - Trello (plano grátis, anexo até 10 MB): pelo servidor, anexa no cartão do conteúdo (`trello_card_id`) a versão do sistema; acima de 10 MB anexa o link do arquivo no sistema
    - Drive: login do Google só com a permissão `drive.file` + Google Picker (a Bea escolhe a pasta de cada cliente uma vez); envio direto do navegador para o Google, na pasta do cliente (`drive_pasta_url`); manda o original se ele ainda estiver na página, senão pede para escolher o arquivo original (ou manda a versão do sistema, avisando)
    - Precisa: projeto no Google Cloud com Drive API e Picker API, OAuth client (origens da produção, do Preview e do localhost) e chave de API restrita aos domínios
    - Registro em `midias`: quando e o id do anexo/arquivo, e se foi o original (migração `20261018000000`, já rodada)
    - **Trello pronto e testado no Preview** (imagem como arquivo; vídeo de 15 MB como link; "de novo" com confirmação)
-   - **Drive com o código pronto** (`drive.js`): falta a chave de API em `config.js` (`GOOGLE_API_KEY`) e testar; o ID do cliente OAuth já está lá
+   - **Drive pronto** (`drive.js`, chave e ID do cliente em `config.js`): no Preview o botão aparece e o login do Google abre (app em modo de teste, com aviso "não verificado"). **Falta:** teste completo com a conta Google definitiva (autorizar, escolher a pasta no Picker, enviar, "✓ No Drive"); essa conta precisa estar em "Usuários de teste", ou o app publicado
 5h. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
    - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
    - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
