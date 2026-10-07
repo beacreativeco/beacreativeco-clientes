@@ -1343,7 +1343,7 @@ a.cliente-nome:hover {
 
 /* ✓ no canto do formato escolhido */
 .formato::after {
-  content: "¹3";
+  content: "\2713";
   position: absolute;
   top: 6px;
   right: 6px;
