@@ -2880,3 +2880,112 @@ a.cliente-nome:hover {
   border-top: 1px solid currentColor;
   opacity: 0.4;
 }
+
+/* ---------- Convite para instalar o app (instalar.js) ---------- */
+.convite-instalar {
+  position: fixed;
+  left: var(--espaco);
+  right: var(--espaco);
+  bottom: var(--espaco);
+  z-index: 15; /* acima do toast, abaixo do menu do avatar */
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--espresso);
+  border-radius: var(--raio);
+  background: var(--papel);
+  box-shadow: 0 10px 30px rgba(77, 59, 49, 0.2);
+  animation: convite-entra 0.25s ease-out;
+}
+
+@keyframes convite-entra {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .convite-instalar { animation: none; }
+}
+
+.convite-topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 28px; /* espaço do × */
+}
+
+.convite-app-icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
+.convite-titulo {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.convite-texto {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.convite-icone-compartilhar {
+  display: inline-flex;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  color: var(--periwinkle-escuro);
+}
+
+.convite-icone-compartilhar svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.convite-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.convite-acoes .botao-secundario { padding: 9px 18px; }
+
+.convite-nunca {
+  justify-self: start;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.convite-fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--espresso);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.convite-fechar:hover,
+.convite-fechar:focus-visible { background: rgba(77, 59, 49, 0.08); }

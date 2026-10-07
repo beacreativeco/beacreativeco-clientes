@@ -1,5 +1,7 @@
 import { protegerPagina } from './auth.js';
 import { supabase } from './supabase.js';
+// Importado já no carregamento: o beforeinstallprompt do navegador pode chegar cedo.
+import { iniciarInstalacao } from './instalar.js';
 
 /**
  * Abre uma página logada: confere o acesso, roda `montar` e troca o
@@ -27,6 +29,8 @@ export async function iniciarPagina(area, montar) {
     app.hidden = false;
     // Rodapé com "Sobre o sistema" (versão, novidades e créditos), nos dois lados.
     import('./sobre.js').then((m) => m.ligarRodapeSobre(app)).catch(console.error);
+    // App na tela inicial: registra o service worker e agenda o convite para instalar.
+    iniciarInstalacao();
     // Painel da Bea: contador de não lidas, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);

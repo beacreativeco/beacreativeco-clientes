@@ -4,6 +4,7 @@
 // A página Meu perfil avisa mudanças com o evento 'perfil-mudou' ({ nome, foto_url }).
 import { sair } from './auth.js';
 import { abrirSobre } from './sobre.js';
+import { modoInstalacao, instalarAgora } from './instalar.js';
 
 function el(tag, classe, ...filhos) {
   const no = document.createElement(tag);
@@ -58,13 +59,16 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
   meuPerfil.href = linkPerfil;
   meuPerfil.setAttribute('role', 'menuitem');
   const sobre = el('button', 'perfil-item', 'Sobre o sistema');
+  // Só aparece quando dá para instalar neste navegador (e ainda não está instalado).
+  const instalar = el('button', 'perfil-item', 'Instalar o sistema');
+  instalar.hidden = !modoInstalacao();
   const botaoSair = el('button', 'perfil-item perfil-sair', 'Sair');
-  for (const b of [sobre, botaoSair]) {
+  for (const b of [sobre, instalar, botaoSair]) {
     b.type = 'button';
     b.setAttribute('role', 'menuitem');
   }
 
-  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, sobre, botaoSair);
+  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, sobre, instalar, botaoSair);
   menu.setAttribute('role', 'menu');
   menu.id = 'perfil-lista';
   menu.hidden = true;
@@ -78,7 +82,7 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
     botao.setAttribute('aria-label', `Perfil de ${atual.nome?.trim() || atual.email}`);
   }
 
-  const itens = () => [...menu.querySelectorAll('[role=menuitem]')];
+  const itens = () => [...menu.querySelectorAll('[role=menuitem]:not([hidden])')];
   function abrir() {
     menu.hidden = false;
     botao.setAttribute('aria-expanded', 'true');
@@ -96,6 +100,11 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
     fechar();
     abrirSobre();
   });
+  instalar.addEventListener('click', () => {
+    fechar();
+    instalarAgora();
+  });
+  window.addEventListener('instalacao-mudou', (e) => { instalar.hidden = !e.detail.pode; });
   botaoSair.addEventListener('click', sair);
   document.addEventListener('click', (e) => {
     if (!caixa.contains(e.target)) fechar();
