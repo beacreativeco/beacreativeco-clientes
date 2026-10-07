@@ -137,7 +137,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Cliente: Para aprovar, Aprovados (`/cliente/?ver=aprovados`) e Perfil. **Falta:** ver a barra num celular de verdade e as páginas do cliente logado
    - 8.3 [x] Estados: esqueleto da própria tela no carregamento (lista, agenda, editor, calendário, perfil), telas vazias com ação (`data-aciona`), falha ao abrir com "Tentar de novo" (diz quando é falta de internet), avisos com ícone
      - **Falta:** ver a tela de falha de verdade (só aparece com erro de conexão)
-   - 8.4 [ ] Formulários e janelas ("Editar cliente" em seções, botões sempre visíveis)
+   - 8.4 [x] Formulários e janelas: moldura do Estúdio nas janelas (cabeçalho espresso com a inicial, ✦ no canto, fio periwinkle; corpo que rola; rodapé fixo; folha no celular); "Editar cliente" em seções (Marca e contato, Acesso, Drive e Trello, Combinado); "Excluir cliente" com a mesma moldura em vermelho; campos de 48px com anel no foco em todos os formulários
    - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
    - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
 
