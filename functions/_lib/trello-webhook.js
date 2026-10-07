@@ -5,13 +5,20 @@
 import { rest } from './servidor.js';
 import { trello, trelloConfigurado } from './trello.js';
 
+const NECESSARIAS = ['TRELLO_API_KEY', 'TRELLO_TOKEN', 'TRELLO_API_SECRET', 'SITE_URL'];
+
+/** Nomes (nunca os valores) das variáveis que faltam no servidor para o webhook. */
+export function variaveisFaltando(env) {
+  return NECESSARIAS.filter((nome) => !env[nome]?.trim());
+}
+
 export function webhookConfigurado(env) {
-  return Boolean(trelloConfigurado(env) && env.SITE_URL && env.TRELLO_API_SECRET);
+  return trelloConfigurado(env) && variaveisFaltando(env).length === 0;
 }
 
 // Precisa ser exatamente o endereço registrado: entra no cálculo da assinatura.
 export function enderecoDoWebhook(env) {
-  return `${env.SITE_URL.replace(/\/$/, '')}/api/trello/webhook`;
+  return `${env.SITE_URL.trim().replace(/\/$/, '')}/api/trello/webhook`;
 }
 
 // Assinatura do Trello: base64(HMAC-SHA1(secret, corpo + endereço do webhook)).
@@ -19,7 +26,7 @@ export async function assinaturaValida(env, corpo, assinatura) {
   if (!assinatura) return false;
   const codificar = new TextEncoder();
   const chave = await crypto.subtle.importKey(
-    'raw', codificar.encode(env.TRELLO_API_SECRET), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'],
+    'raw', codificar.encode(env.TRELLO_API_SECRET.trim()), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'],
   );
   const bytes = new Uint8Array(await crypto.subtle.sign('HMAC', chave, codificar.encode(corpo + enderecoDoWebhook(env))));
   const esperada = btoa(String.fromCharCode(...bytes));

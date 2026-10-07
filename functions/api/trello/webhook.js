@@ -4,7 +4,7 @@
 // TRELLO_API_SECRET. Responde na hora e sincroniza o quadro em seguida (waitUntil), porque o
 // Trello desiste se a resposta demora.
 import { rest } from '../../_lib/servidor.js';
-import { webhookConfigurado, assinaturaValida, acaoInteressa } from '../../_lib/trello-webhook.js';
+import { webhookConfigurado, variaveisFaltando, assinaturaValida, acaoInteressa } from '../../_lib/trello-webhook.js';
 import { sincronizarQuadro } from '../../_lib/trello-sincronizar.js';
 
 export function onRequestHead() {
@@ -12,7 +12,10 @@ export function onRequestHead() {
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
-  if (!webhookConfigurado(env)) return new Response('Webhook não configurado.', { status: 503 });
+  // Só os nomes do que falta (estão no código, que é público), nunca valores.
+  if (!webhookConfigurado(env)) {
+    return new Response(`Webhook não configurado. Faltam no servidor: ${variaveisFaltando(env).join(', ')}.`, { status: 503 });
+  }
 
   const corpo = await request.text();
   if (!(await assinaturaValida(env, corpo, request.headers.get('x-trello-webhook')))) {

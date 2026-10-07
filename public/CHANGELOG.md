@@ -19,6 +19,12 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.1.1] — 07/10/2026
+
+### Correções
+
+- Quando falta alguma configuração do Trello no servidor, o aviso agora diz qual é, o que facilita a manutenção.
+
 ## [1.1.0] — 07/10/2026
 
 ### Novidades
