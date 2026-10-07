@@ -19,6 +19,7 @@ iniciarPagina('admin', async () => {
   document.getElementById('novo-cliente').addEventListener('click', () => abrirFormulario());
   lista.addEventListener('click', aoClicarNaLista);
   form.addEventListener('submit', salvar);
+  form.nome.addEventListener('input', () => { if (!editandoId) desenharInicial(form.nome.value); });
   dialogo.querySelectorAll('[data-fechar]').forEach((b) => b.addEventListener('click', () => dialogo.close()));
 
   await carregarClientes();
@@ -152,7 +153,12 @@ function abrirFormulario(cliente = null) {
   editandoId = cliente?.id ?? null;
   form.reset();
   avisoForm.hidden = true;
-  document.getElementById('titulo-dialogo').textContent = cliente ? 'Editar cliente' : 'Novo cliente';
+  // Cabeçalho da janela: o nome e a inicial do cliente (novo: a inicial acompanha a digitação).
+  document.getElementById('titulo-dialogo').textContent = cliente ? cliente.nome : 'Novo cliente';
+  document.getElementById('subtitulo-dialogo').textContent = cliente
+    ? 'Editar o cadastro da marca.'
+    : 'Cadastre a marca; Drive e Trello podem ficar para depois.';
+  desenharInicial(cliente?.nome ?? '');
 
   if (cliente) {
     for (const campo of ['nome', 'email', 'instagram', 'whatsapp', 'drive_pasta_url', 'prazo_padrao_dias', 'contrato_inicio']) {
@@ -164,6 +170,10 @@ function abrirFormulario(cliente = null) {
   preencherQuadros(cliente?.trello_board_id ?? '');
   dialogo.showModal();
   form.nome.focus();
+}
+
+function desenharInicial(nome) {
+  document.getElementById('dialogo-inicial').textContent = nome.trim().charAt(0).toUpperCase() || '✦';
 }
 
 // Quadros do Trello da Bea (busca uma vez). Se o Trello não responder, o quadro

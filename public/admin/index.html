@@ -72,58 +72,84 @@
     </li>
   </template>
 
-  <dialog id="dialogo-cliente" class="dialogo" aria-labelledby="titulo-dialogo">
+  <dialog id="dialogo-cliente" class="dialogo" aria-labelledby="titulo-dialogo" aria-describedby="subtitulo-dialogo">
     <form id="form-cliente" novalidate>
       <header class="dialogo-topo">
-        <h2 id="titulo-dialogo">Novo cliente</h2>
+        <span id="dialogo-inicial" class="dialogo-inicial" aria-hidden="true">✦</span>
+        <div class="dialogo-titulos">
+          <h2 id="titulo-dialogo">Novo cliente</h2>
+          <p id="subtitulo-dialogo" class="dialogo-subtitulo">Cadastre a marca; Drive e Trello podem ficar para depois.</p>
+        </div>
         <button class="botao-fechar" type="button" data-fechar aria-label="Fechar">×</button>
       </header>
 
-      <div id="aviso-form" class="aviso erro" role="alert" hidden></div>
+      <div class="dialogo-corpo">
+        <div id="aviso-form" class="aviso erro" role="alert" hidden></div>
 
-      <div class="campo">
-        <label for="c-nome">Nome da marca</label>
-        <input id="c-nome" name="nome" type="text" required autocomplete="off">
-      </div>
-      <div class="campo">
-        <label for="c-email">E-mail de acesso</label>
-        <input id="c-email" name="email" type="email" autocomplete="off">
-        <small class="dica">O convite para criar a senha vai para este e-mail.</small>
-      </div>
-      <div class="campos-lado-a-lado">
-        <div class="campo">
-          <label for="c-instagram">Instagram</label>
-          <input id="c-instagram" name="instagram" type="text" placeholder="@marca" autocomplete="off">
-        </div>
-        <div class="campo">
-          <label for="c-whatsapp">WhatsApp</label>
-          <input id="c-whatsapp" name="whatsapp" type="tel" placeholder="(11) 91234-5678" autocomplete="off">
-        </div>
-      </div>
-      <div class="campo">
-        <label for="c-drive">Pasta no Drive</label>
-        <input id="c-drive" name="drive_pasta_url" type="url" placeholder="https://drive.google.com/…" autocomplete="off">
-      </div>
-      <div class="campo">
-        <label for="c-trello">Quadro no Trello</label>
-        <select id="c-trello" name="trello_board_id">
-          <option value="">Nenhum</option>
-        </select>
-        <small class="dica">As entregas das listas "[FEED]" desse quadro aparecem no calendário.</small>
-      </div>
-      <div class="campos-lado-a-lado">
-        <div class="campo">
-          <label for="c-prazo">Prazo para aprovar (dias)</label>
-          <input id="c-prazo" name="prazo_padrao_dias" type="number" min="0" max="30" value="2">
-        </div>
-        <div class="campo">
-          <label for="c-inicio">Início do contrato</label>
-          <input id="c-inicio" name="contrato_inicio" type="date">
-        </div>
+        <fieldset class="secao-form">
+          <legend>Marca e contato</legend>
+          <p class="secao-form-dica">Como a marca aparece na prévia e por onde falar com ela.</p>
+          <div class="campo">
+            <label for="c-nome">Nome da marca</label>
+            <input id="c-nome" name="nome" type="text" required autocomplete="off">
+          </div>
+          <div class="campos-lado-a-lado">
+            <div class="campo">
+              <label for="c-instagram">Instagram</label>
+              <input id="c-instagram" name="instagram" type="text" placeholder="@marca" autocomplete="off">
+            </div>
+            <div class="campo">
+              <label for="c-whatsapp">WhatsApp</label>
+              <input id="c-whatsapp" name="whatsapp" type="tel" placeholder="(11) 91234-5678" autocomplete="off">
+              <small class="dica">Para onde vai o "Avisar no WhatsApp".</small>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="secao-form">
+          <legend>Acesso</legend>
+          <p class="secao-form-dica">Quem aprova os conteúdos entra no sistema com este e-mail.</p>
+          <div class="campo">
+            <label for="c-email">E-mail de acesso</label>
+            <input id="c-email" name="email" type="email" autocomplete="off">
+            <small class="dica">O convite para criar a senha vai para este e-mail.</small>
+          </div>
+        </fieldset>
+
+        <fieldset class="secao-form">
+          <legend>Drive e Trello</legend>
+          <p class="secao-form-dica">Onde ficam os originais e o quadro de produção da marca.</p>
+          <div class="campo">
+            <label for="c-drive">Pasta no Drive</label>
+            <input id="c-drive" name="drive_pasta_url" type="url" placeholder="https://drive.google.com/…" autocomplete="off">
+          </div>
+          <div class="campo">
+            <label for="c-trello">Quadro no Trello</label>
+            <select id="c-trello" name="trello_board_id">
+              <option value="">Nenhum</option>
+            </select>
+            <small class="dica">As entregas das listas "[FEED]" desse quadro aparecem no calendário.</small>
+          </div>
+        </fieldset>
+
+        <fieldset class="secao-form">
+          <legend>Combinado</legend>
+          <p class="secao-form-dica">Prazo que o cliente tem para aprovar e início do contrato.</p>
+          <div class="campos-lado-a-lado">
+            <div class="campo">
+              <label for="c-prazo">Prazo para aprovar (dias)</label>
+              <input id="c-prazo" name="prazo_padrao_dias" type="number" min="0" max="30" value="2">
+            </div>
+            <div class="campo">
+              <label for="c-inicio">Início do contrato</label>
+              <input id="c-inicio" name="contrato_inicio" type="date">
+            </div>
+          </div>
+        </fieldset>
       </div>
 
       <footer class="dialogo-rodape">
-        <button class="botao-link" type="button" data-fechar>Cancelar</button>
+        <button class="botao-secundario" type="button" data-fechar>Cancelar</button>
         <button class="botao botao-compacto" type="submit">Salvar cliente</button>
       </footer>
     </form>

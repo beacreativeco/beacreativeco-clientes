@@ -59,10 +59,16 @@
 
   <dialog id="dialogo-excluir" class="dialogo" aria-labelledby="titulo-excluir">
     <form id="form-excluir" novalidate>
-      <header class="dialogo-topo">
-        <h2 id="titulo-excluir">Excluir cliente</h2>
+      <header class="dialogo-topo dialogo-topo-perigo">
+        <span class="dialogo-inicial" aria-hidden="true">!</span>
+        <div class="dialogo-titulos">
+          <h2 id="titulo-excluir">Excluir cliente</h2>
+          <p class="dialogo-subtitulo">Apaga o cadastro e os conteúdos do sistema.</p>
+        </div>
         <button class="botao-fechar" type="button" data-fechar aria-label="Fechar">×</button>
       </header>
+
+      <div class="dialogo-corpo">
 
       <div class="aviso erro excluir-aviso">
         <p><strong>Não dá para desfazer.</strong> Vai ser apagado de vez:</p>
@@ -82,9 +88,10 @@
       </div>
 
       <div id="excluir-erro" class="aviso erro" role="alert" hidden></div>
+      </div>
 
       <footer class="dialogo-rodape">
-        <button class="botao-link" type="button" data-fechar>Cancelar</button>
+        <button class="botao-secundario" type="button" data-fechar>Cancelar</button>
         <button id="confirmar-excluir" class="botao botao-compacto botao-excluir" type="submit" disabled>Excluir de vez</button>
       </footer>
     </form>

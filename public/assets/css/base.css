@@ -158,26 +158,52 @@ a {
 }
 
 .campo label {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: var(--fs-legenda);
+  font-weight: 600;
+  color: var(--cor-texto);
 }
 
+/* Campos: altura de toque, fundo levemente diferente da superfície e um anel suave no foco. */
 .campo input,
 .campo textarea,
 .campo select {
+  min-height: 48px;
   font: inherit;
   color: inherit;
   padding: 12px 14px;
-  border: 1px solid var(--espresso);
-  border-radius: 10px;
-  background: var(--papel);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  transition: border-color var(--dur) var(--curva), box-shadow var(--dur) var(--curva),
+    background-color var(--dur) var(--curva);
+}
+
+.campo input:hover,
+.campo textarea:hover,
+.campo select:hover {
+  border-color: var(--cor-texto-2);
 }
 
 .campo input:focus,
 .campo textarea:focus,
-.campo select:focus {
-  outline: 2px solid var(--periwinkle);
-  outline-offset: 1px;
+.campo select:focus,
+.campo input:focus-visible,
+.campo textarea:focus-visible,
+.campo select:focus-visible {
+  outline: none;
+  border-color: var(--cor-acao);
+  background: var(--cor-superficie);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-acao) 28%, transparent);
+}
+
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: color-mix(in srgb, var(--cor-texto-2) 75%, transparent);
+}
+
+.campo input[aria-invalid="true"],
+.campo select[aria-invalid="true"] {
+  border-color: var(--cor-erro);
 }
 
 .botao {
@@ -246,29 +272,32 @@ textarea:focus-visible {
   margin-top: 20px;
 }
 
-/* Avisos dentro da tela (erro de formulário, confirmação): ícone + texto, em par de cores. */
+/* Avisos dentro da tela (erro de formulário, confirmação): ícone à esquerda e o texto em
+   fluxo normal (alguns avisos têm parágrafos e listas). Cores sempre em par. */
 .aviso {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--esp-3);
+  position: relative;
   font-size: var(--fs-pequeno);
   line-height: 1.45;
-  padding: var(--esp-3) var(--esp-4);
+  padding: var(--esp-3) var(--esp-4) var(--esp-3) 44px;
   border-radius: var(--raio-m);
   margin-bottom: var(--espaco);
 }
 
 .aviso::before {
-  flex: none;
+  position: absolute;
+  left: 14px;
+  top: 12px;
   display: grid;
   place-items: center;
   width: 20px;
   height: 20px;
-  margin-top: 1px;
   border-radius: 50%;
   font-size: 0.75rem;
   font-weight: 700;
 }
+
+.aviso p:first-child { margin-top: 0; }
+.aviso p:last-child, .aviso ul:last-child { margin-bottom: 0; }
 
 .aviso.erro {
   background: var(--cor-erro-fundo);
@@ -687,78 +716,226 @@ textarea:focus-visible {
 }
 
 /* ---------- Diálogo (gaveta no celular, centralizado no desktop) ---------- */
+/* ---------- Janelas (Editar cliente, Excluir cliente) ---------- */
+/* Moldura do Estúdio: cabeçalho espresso com a inicial do cliente, um ✦ grande e discreto
+   no canto e o fio periwinkle das abas; corpo que rola; rodapé com os botões sempre à vista.
+   No celular a janela sobe de baixo, como folha. */
 .dialogo {
   width: 100%;
   max-width: 100%;
-  max-height: 92vh;
+  max-height: 92dvh;
   margin: auto 0 0;
-  padding: 24px var(--espaco) 20px;
-  border: 0;
-  border-top: 1px solid var(--espresso);
-  border-radius: var(--raio) var(--raio) 0 0;
-  background: var(--creme);
-  color: var(--espresso);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--cor-moldura-borda);
+  border-radius: var(--raio-xg) var(--raio-xg) 0 0;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra-3);
+}
+
+.dialogo > form {
+  display: flex;
+  flex-direction: column;
+  max-height: 92dvh;
 }
 
 .dialogo::backdrop {
-  background: color-mix(in srgb, var(--cor-texto) 45%, transparent);
+  background: var(--cor-veu);
+  backdrop-filter: blur(3px);
+}
+
+.dialogo[open] { animation: janela-sobe var(--dur-lenta) var(--curva) both; }
+.dialogo[open]::backdrop { animation: veu-aparece var(--dur) var(--curva) both; }
+
+@keyframes janela-sobe {
+  from { opacity: 0; transform: translateY(32px); }
+}
+
+@keyframes veu-aparece {
+  from { opacity: 0; }
 }
 
 .dialogo-topo {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  gap: var(--esp-4);
+  padding: var(--esp-6) var(--esp-5) var(--esp-5);
+  overflow: hidden;
+  background: var(--cor-moldura);
+  color: var(--cor-moldura-texto);
+  box-shadow: inset 0 -3px 0 var(--cor-indicador);
+}
+
+/* O ✦ da marca, grande e quase transparente, saindo pelo canto. */
+.dialogo-topo::after {
+  content: "\2726";
+  position: absolute;
+  right: -18px;
+  top: -64px;
+  font-size: 190px;
+  line-height: 1;
+  color: var(--cor-indicador);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.dialogo-inicial {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--cor-indicador);
+  color: var(--espresso-900);
+  font-family: var(--fonte-titulo);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.dialogo-titulos {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
 }
 
 .dialogo-topo h2 {
-  font-size: 1.75rem;
   margin: 0;
+  overflow: hidden;
+  color: var(--cor-moldura-texto);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+.dialogo-subtitulo {
+  margin: 4px 0 0;
+  color: var(--cor-moldura-texto-2);
+  font-size: var(--fs-legenda);
+}
+
+/* Excluir: a mesma moldura, com o quadrinho em vermelho. */
+.dialogo-topo-perigo .dialogo-inicial {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro-texto);
+  font-family: var(--fonte-texto);
+  font-weight: 700;
+}
+
+.dialogo-topo-perigo { box-shadow: inset 0 -3px 0 var(--cor-erro-texto); }
+.dialogo-topo-perigo::after { content: none; }
 
 .botao-fechar {
-  font: inherit;
-  font-size: 1.75rem;
-  line-height: 1;
-  width: 44px;
-  height: 44px;
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: -6px -8px 0 0;
   border: 0;
+  border-radius: 50%;
   background: none;
   color: var(--espresso);
+  font: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
   cursor: pointer;
+  transition: background-color var(--dur) var(--curva);
 }
 
-.dica {
-  font-size: 0.8125rem;
-  opacity: 0.7;
+.dialogo-topo .botao-fechar { color: var(--cor-moldura-texto); }
+.dialogo-topo .botao-fechar:hover { background: color-mix(in srgb, var(--cor-moldura-texto) 12%, transparent); }
+.dialogo-topo .botao-fechar:focus-visible { outline-color: var(--cor-indicador); outline-offset: 0; }
+
+.dialogo-corpo {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--esp-2) var(--esp-5) var(--esp-4);
 }
 
-.dica-link {
-  display: block;
-  margin-top: 6px;
-  font-size: 0.8125rem;
+.dialogo-corpo > .aviso:first-child { margin-top: var(--esp-4); }
+
+/* Seção de formulário: título em The Seasons, uma linha de apoio e os campos. */
+.secao-form {
+  min-width: 0;
+  margin: 0;
+  padding: var(--esp-5) 0 var(--esp-1);
+  border: 0;
+  border-top: 1px solid var(--cor-borda);
 }
 
-.campos-lado-a-lado {
-  display: grid;
-  gap: 0 16px;
+.secao-form:first-of-type { border-top: 0; }
+
+.secao-form legend {
+  float: left; /* fica dentro da seção, abaixo da linha */
+  width: 100%;
+  padding: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: var(--cor-titulo);
+}
+
+.secao-form-dica {
+  clear: both;
+  margin: 2px 0 var(--esp-4);
+  padding-top: 2px;
+  color: var(--cor-texto-2);
+  font-size: var(--fs-legenda);
 }
 
 .dialogo-rodape {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 24px;
-  margin-top: 8px;
+  gap: var(--esp-3);
+  margin: 0;
+  padding: var(--esp-3) var(--esp-5) calc(var(--esp-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-superficie-2);
+}
+
+.dica {
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
+.dica-link {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--fs-legenda);
+}
+
+.campos-lado-a-lado {
+  display: grid;
+  gap: 0 var(--esp-4);
 }
 
 @media (min-width: 600px) {
   .dialogo {
-    max-width: 560px;
+    max-width: 600px;
+    max-height: 88dvh;
     margin: auto;
-    padding: 32px;
-    border: 1px solid var(--espresso);
-    border-radius: var(--raio);
+    border-radius: var(--raio-xg);
+  }
+
+  .dialogo > form { max-height: 88dvh; }
+
+  .dialogo-topo { padding: var(--esp-8) var(--esp-8) var(--esp-6); }
+  .dialogo-corpo { padding: var(--esp-2) var(--esp-8) var(--esp-6); }
+  .dialogo-rodape { padding: var(--esp-4) var(--esp-8); }
+
+  @keyframes janela-sobe {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
   }
 
   .campos-lado-a-lado {
@@ -779,7 +956,7 @@ textarea:focus-visible {
   background: var(--espresso);
   color: var(--creme);
   font-size: 0.875rem;
-  z-index: 10;
+  z-index: var(--z-aviso);
 }
 
 .toast.erro {
