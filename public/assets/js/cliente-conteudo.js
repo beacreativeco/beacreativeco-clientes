@@ -27,9 +27,14 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conteudo = c.data;
   cliente = cad.data;
 
-  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
-    .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem');
+  const [midias, bea] = await Promise.all([
+    supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
+      .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem'),
+    // Nome e foto da Bea nos balões dela. Se falhar, a conversa mostra só "Bea".
+    supabase.rpc('perfil_bea').maybeSingle(),
+  ]);
   if (midias.error) throw midias.error;
+  if (bea.error) console.error(bea.error);
 
   criarPrevia($('previa')).atualizar({
     formato: conteudo.formato,
@@ -44,6 +49,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conversa = criarConversa($('conversa'), {
     conteudoId: conteudo.id,
     eu: 'cliente',
+    perfilDoOutro: bea.data ?? null,
     pedirAjuste: async (mensagem) => {
       const { data, error } = await supabase.rpc('pedir_ajuste', {
         p_conteudo_id: conteudo.id,

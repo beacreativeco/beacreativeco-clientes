@@ -106,8 +106,9 @@ a {
     grid-template-areas:
       "marca aviso"
       "marca form"
+      "marca google"
       "marca acoes";
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
     column-gap: 64px;
   }
 
@@ -123,6 +124,7 @@ a {
   }
 
   .cartao > .aviso { grid-area: aviso; }
+  .cartao > .entrar-google { grid-area: google; }
   .cartao > form { grid-area: form; }
   .cartao > .acoes-secundarias { grid-area: acoes; }
 }
@@ -2597,4 +2599,278 @@ a.cliente-nome:hover {
     border-left-style: solid;
     opacity: 0.55;
   }
+}
+
+/* ---------- Perfil: avatar e menu no topo (padrão do LAEG-BIO) ---------- */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--periwinkle);
+  color: var(--branco);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.avatar.com-foto {
+  background: var(--papel);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-grande {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+}
+
+.perfil-menu {
+  position: relative;
+}
+
+.perfil-botao {
+  display: block;
+  padding: 2px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.perfil-botao:focus-visible {
+  outline: 2px solid var(--espresso);
+  outline-offset: 2px;
+}
+
+.perfil-botao[aria-expanded="true"] .avatar {
+  box-shadow: 0 0 0 2px var(--creme), 0 0 0 4px var(--periwinkle);
+}
+
+.perfil-lista {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  width: min(280px, calc(100vw - 2 * var(--espaco)));
+  padding: 6px;
+  border: 1px solid var(--espresso);
+  border-radius: var(--raio);
+  background: var(--papel);
+  box-shadow: 0 8px 24px rgba(77, 59, 49, 0.16);
+}
+
+.perfil-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(77, 59, 49, 0.15);
+}
+
+.perfil-quem {
+  display: grid;
+  min-width: 0;
+}
+
+.perfil-nome,
+.perfil-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfil-nome {
+  font-weight: 600;
+}
+
+.perfil-email {
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+.perfil-item {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--espresso);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.perfil-item:hover,
+.perfil-item:focus-visible {
+  background: var(--creme);
+  outline: none;
+}
+
+.perfil-sair {
+  color: var(--erro);
+}
+
+/* ---------- Página Meu perfil ---------- */
+.perfil-pagina {
+  max-width: 560px;
+}
+
+.perfil-secao {
+  padding: 20px var(--espaco);
+  margin-bottom: var(--espaco);
+  border: 1px solid rgba(77, 59, 49, 0.2);
+  border-radius: var(--raio);
+  background: var(--papel);
+}
+
+.perfil-secao h2 {
+  font-size: 1.375rem;
+  margin-bottom: 12px;
+}
+
+.perfil-secao .botao-compacto {
+  width: auto;
+}
+
+.perfil-atual {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.perfil-foto {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco);
+  margin-bottom: 20px;
+}
+
+.avatar-perfil {
+  width: 88px;
+  height: 88px;
+  font-size: 1.75rem;
+}
+
+.avatar-perfil.enviando {
+  opacity: 0.5;
+}
+
+.perfil-foto-acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.perfil-foto-acoes label.botao-secundario {
+  cursor: pointer;
+}
+
+.perfil-foto-acoes input:focus-visible + .botao-link,
+.perfil-foto-acoes label:has(+ input:focus-visible) {
+  outline: 2px solid var(--espresso);
+  outline-offset: 3px;
+}
+
+/* ---------- Conversa: nome e foto de quem está do outro lado ---------- */
+.conversa-autor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  color: var(--periwinkle-escuro);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.conversa-autor-foto {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.conversa-autor-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Login: entrar com o Google ---------- */
+.entrar-google {
+  margin-bottom: var(--espaco);
+}
+
+/* Botão no padrão do Google (fundo claro, "G" colorido), na forma dos nossos botões. */
+.botao-google {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid var(--espresso);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--espresso);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.botao-google:hover {
+  background: var(--papel);
+}
+
+.botao-google:focus-visible {
+  outline: 2px solid var(--periwinkle);
+  outline-offset: 3px;
+}
+
+.botao-google:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.separador-ou {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+
+.separador-ou::before,
+.separador-ou::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid currentColor;
+  opacity: 0.4;
 }

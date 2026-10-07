@@ -85,7 +85,9 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - No servidor (`/api/clientes/excluir`), com a chave de serviço, conferindo que é a admin; o Trello não é tocado
    - Testado no bucket local: apagar tudo (nada sobra no banco nem no R2), manter a vitrine (cadastro arquivado, conteúdo e arquivo da vitrine ficam), cliente ativo barrado na tela e no servidor
    - O teste achou uma falha da 0.9.0, corrigida na migração `20261015000000`: `mensagem_valida` recusava arquivos da conversa com a pasta na frente (imagem e áudio na conversa não enviavam)
-5c. [ ] **Perfil da Bea** (no padrão do menu do avatar do LAEG-BIO)
+5c. [x] **Perfil da Bea** (no padrão do menu do avatar do LAEG-BIO; versão 1.2.0, migração `20261016000000`, já rodada)
+   - **Falta testar com login:** foto, nome, dados da agência, troca de senha e troca de e-mail (esta só no ar); nome e foto da Bea na conversa do cliente
+   - Junto: "Entrar com o Google" no login (embaixo do Entrar), só para quem já tem acesso e com o mesmo e-mail; **falta** configurar o Google no Supabase (README, item 5) e testar, inclusive cliente convidado que ainda não criou senha
    - Foto ou iniciais no topo, abrindo o menu: nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
    - Meu perfil: foto, nome, e-mail (dá para trocar, com confirmação no e-mail novo) e troca de senha
    - Dados da agência: nome, WhatsApp, Instagram e e-mail de contato (usados no envio do link e nos e-mails aos clientes, quando essas partes entrarem)

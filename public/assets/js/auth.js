@@ -67,6 +67,35 @@ export async function entrar(email, senha) {
   return destino.rota;
 }
 
+/**
+ * Entrar com o Google. Só funciona para quem já tem acesso (o cadastro de novos usuários
+ * fica desligado no Supabase): o Google precisa ter o mesmo e-mail que a Bea cadastrou,
+ * e aí o Supabase junta as duas formas de entrar na mesma conta. Volta para o login,
+ * que leva para a área certa (ou mostra o erro, ver erroDoGoogle).
+ */
+export async function entrarComGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + ROTAS.login, queryParams: { prompt: 'select_account' } },
+  });
+  if (error) throw new Error('Não foi possível abrir o login do Google. Tente de novo em instantes.');
+}
+
+/** Erro devolvido pelo Supabase na volta do Google (na URL), já em português. Ou null. */
+export function erroDoGoogle() {
+  const params = new URLSearchParams(window.location.search);
+  const doHash = new URLSearchParams(window.location.hash.slice(1));
+  const codigo = params.get('error_code') ?? doHash.get('error_code');
+  const erro = params.get('error') ?? doHash.get('error');
+  if (!codigo && !erro) return null;
+  console.error('login com Google', erro, codigo, params.get('error_description') ?? doHash.get('error_description'));
+  if (codigo === 'signup_disabled' || /signup/i.test(params.get('error_description') ?? doHash.get('error_description') ?? '')) {
+    return 'Esta conta do Google não tem acesso. Entre com o Google do mesmo e-mail que a Bea cadastrou, ou com e-mail e senha.';
+  }
+  if (erro === 'access_denied') return 'O login com o Google foi cancelado.';
+  return 'Não foi possível entrar com o Google. Tente de novo ou entre com e-mail e senha.';
+}
+
 export async function sair() {
   await supabase.auth.signOut();
   window.location.replace(ROTAS.login);

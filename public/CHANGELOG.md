@@ -19,6 +19,16 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.2.0] — 07/10/2026
+
+### Novidades
+
+- A Bea tem um perfil: a foto (ou as iniciais) fica no topo do painel e abre um menu com "Meu perfil", "Sobre o sistema" e "Sair".
+- Em "Meu perfil" a Bea troca a foto, o nome, o e-mail de acesso (com confirmação no e-mail novo) e a senha.
+- Novo espaço para os dados da agência (nome, WhatsApp, Instagram e e-mail de contato), que vão ser usados no envio do link e nos e-mails aos clientes.
+- Nas mensagens, os clientes veem o nome e a foto da Bea.
+- Dá para entrar com a conta do Google, além do e-mail e senha. Vale para o Google do mesmo e-mail que a Bea cadastrou.
+
 ## [1.1.1] — 07/10/2026
 
 ### Correções

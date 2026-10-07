@@ -37,7 +37,8 @@ Em **Settings → Environment variables** (Production): `SUPABASE_URL` e `SUPABA
    insert into public.admins (user_id)
    select id from auth.users where email = 'EMAIL-DA-BEA';
    ```
-5. Copiar a URL do projeto e a chave **anon/publishable** para `public/assets/js/config.js`.
+5. **Entrar com o Google:** no Google Cloud Console, criar um cliente OAuth (Aplicativo da Web) com o URI de redirecionamento `https://<projeto>.supabase.co/auth/v1/callback`; em **Authentication → Sign In / Providers → Google**, ligar e colar o Client ID e o Client Secret. Manter "Allow new users to sign up" desligado.
+6. Copiar a URL do projeto e a chave **anon/publishable** para `public/assets/js/config.js`.
 
 ## Rodar local
 

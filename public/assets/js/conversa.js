@@ -173,7 +173,7 @@ function rotuloDoDia(iso) {
  *   aoChegar?: (mensagem: object) => void,   // mensagem nova da outra pessoa (tempo real)
  * }} opcoes
  */
-export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
+export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, perfilDoOutro }) {
   const outro = eu === 'bea' ? 'cliente' : 'bea';
   const nomeDoOutro = eu === 'bea' ? 'Cliente' : 'Bea';
 
@@ -262,7 +262,21 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
   const podeCopiar = (m) => Boolean(m.texto) && !m.apagada_em;
   const temMenu = (m) => m.tipo !== 'aprovacao' && (podeCopiar(m) || podeApagar(m));
 
-  function balao(m) {
+  // Nome e foto de quem está do outro lado (ex.: a Bea, para o cliente), no primeiro balão
+  // de cada sequência dela, como nos grupos do WhatsApp.
+  function autor() {
+    let foto = null;
+    if (perfilDoOutro.foto_url) {
+      const img = el('img');
+      img.src = perfilDoOutro.foto_url;
+      img.alt = '';
+      foto = el('span', 'conversa-autor-foto', img);
+      img.addEventListener('error', () => foto.remove(), { once: true });
+    }
+    return el('span', 'conversa-autor', foto, perfilDoOutro.nome || nomeDoOutro);
+  }
+
+  function balao(m, inicio = false) {
     if (m.tipo === 'aprovacao') {
       const quem = m.autor === eu ? 'Você aprovou' : `${nomeDoOutro} aprovou`;
       return el('p', 'conversa-evento', `✦ ${quem}, ${hora(m.criado_em)}`);
@@ -270,6 +284,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     const lado = m.autor === eu ? 'meu' : 'outro';
     const corpo = el('div', `conversa-balao conversa-${lado}`);
     corpo.dataset.id = m.id;
+    if (inicio && perfilDoOutro && lado === 'outro') corpo.append(autor());
     if (m.apagada_em) {
       corpo.classList.add('conversa-apagada');
       corpo.append(el('p', 'conversa-texto', m.autor === eu ? 'Você apagou esta mensagem' : 'Mensagem apagada'));
@@ -316,9 +331,9 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
     const atual = mensagens.get(m.id);
     if (!atual) return;
     const novo = { ...atual.m, ...m };
-    const no = balao(novo);
+    const no = balao(novo, atual.inicio);
     atual.no.replaceWith(no);
-    mensagens.set(m.id, { m: novo, no });
+    mensagens.set(m.id, { m: novo, no, inicio: atual.inicio });
     if (menuDe === m.id) fecharMenu();
     if (editando?.id === m.id && novo.apagada_em) sairDaEdicao();
   }
@@ -331,8 +346,10 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar }) {
       ultimoDia = dia;
       lista.append(el('p', 'conversa-dia', rotuloDoDia(m.criado_em)));
     }
-    const no = balao(m);
-    mensagens.set(m.id, { m, no });
+    // Começa uma sequência da outra pessoa? (depois de um balão meu, de um evento ou do dia)
+    const inicio = !lista.lastElementChild?.classList.contains('conversa-outro');
+    const no = balao(m, inicio);
+    mensagens.set(m.id, { m, no, inicio });
     lista.append(no);
     return true;
   }

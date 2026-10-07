@@ -50,6 +50,11 @@ export function chaveNaPasta(chave, pasta) {
   return `${pasta}/${semPasta}`;
 }
 
+// Foto de perfil (Bea agora, clientes no item 5d): perfil/<uuid>.jpg. Fora das pastas de
+// conteúdo, então nenhuma Lifecycle Rule apaga; a antiga sai quando a foto é trocada.
+export const CHAVE_PERFIL = new RegExp(`^perfil\\/${ID}\\.jpg$`);
+export const LIMITE_FOTO_PERFIL_MB = 1;
+
 // O que a conversa aceita (já otimizado no navegador) e o limite de cada um.
 export const TIPOS_CONVERSA = {
   'image/jpeg': { tipo: 'imagem', ext: 'jpg', limiteMb: 8 },

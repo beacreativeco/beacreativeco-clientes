@@ -32,6 +32,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - `trabalho/<conteudo_id>/…` (rascunho, com o cliente, em ajuste, versões antigas, conversa): **sem regra**.
   - `aprovados/<conteudo_id>/…`: regra **"apagar 30 dias depois"** (`DIAS_APROVADOS`).
   - `vitrine/<conteudo_id>/…` (`na_vitrine`): **nunca** apagados (nenhuma regra com esse prefixo).
+  - `perfil/<uuid>.jpg` (fotos de perfil, 400 × 400, até 1 MB, por `/api/perfil/foto`): sem regra; a anterior é apagada quando a foto é trocada.
   - Bucket inteiro: regra **"cancelar uploads em partes incompletos depois de 1 dia"**.
   - Nunca criar regra de exclusão sem prefixo (pegaria a vitrine).
   - Chaves antigas, sem pasta (`<conteudo_id>/…`), continuam válidas e contam como trabalho.
@@ -51,10 +52,12 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Perfis
 
+- Entrar com o Google (`entrarComGoogle` em `auth.js`): o cadastro de novos usuários fica desligado no Supabase, então só entra o Google cujo e-mail já tem acesso (o Supabase junta as duas formas de entrar na mesma conta). Conta sem acesso volta ao login com o aviso (`erroDoGoogle`).
+
 | Perfil | Acesso |
 | --- | --- |
-| Admin (Beatriz, única por enquanto) | Login e-mail/senha; tudo |
-| Cliente | Login e-mail/senha a partir de convite da Bea; Bea suspende/reativa a qualquer momento; exclui de vez só depois de suspenso (ou sem convite), digitando o nome (`/api/clientes/excluir`: apaga R2, conteúdos, login e cadastro; com vitrine mantida, o cadastro fica com `arquivado_em` e some das listas) |
+| Admin (Beatriz, única por enquanto) | Login e-mail/senha ou Google; tudo. Menu do avatar no topo (`perfil-menu.js`, montado por `ui.js`) e Meu perfil em `/admin/perfil/` (foto, nome, troca de e-mail com confirmação, troca de senha pedindo a atual, dados da agência) |
+| Cliente | Login e-mail/senha ou Google (mesmo e-mail do cadastro) a partir de convite da Bea; Bea suspende/reativa a qualquer momento; exclui de vez só depois de suspenso (ou sem convite), digitando o nome (`/api/clientes/excluir`: apaga R2, conteúdos, login e cadastro; com vitrine mantida, o cadastro fica com `arquivado_em` e some das listas) |
 | Visitante | Só a vitrine pública (no site institucional, lendo dados liberados) |
 
 ## Situações de um conteúdo
@@ -75,6 +78,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Modelo de dados (base)
 
+- `admins`: user_id, nome, foto_url (clientes leem só nome e foto, pela função `perfil_bea()`)
+- `agencia` (uma linha, `id = true`): nome, whatsapp, instagram, email_contato (envio do link e e-mails)
 - `clientes`: id, nome, slug, logo, foto_perfil, instagram, whatsapp, email, drive_pasta_url, trello_board_id, contrato_ativo, contrato_inicio, login_ativo, prazo_padrao_dias, aprovacao_automatica_dias, user_id (auth)
 - `conteudos`: id, cliente_id, titulo, formato (post, carrossel, story, reels), legenda, data_prevista, prazo_aprovacao, aprovacao_automatica, aprovado_por, aprovado_em, aprovado_versao, drive_url, status, versao_atual, na_vitrine (boolean), trello_card_id
 - `conteudos_internos`: conteudo_id, observacao_interna (só admin; fica fora de `conteudos` porque RLS filtra linhas, não colunas)

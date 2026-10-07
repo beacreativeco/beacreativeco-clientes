@@ -1,4 +1,5 @@
 import { protegerPagina } from './auth.js';
+import { supabase } from './supabase.js';
 
 /**
  * Abre uma página logada: confere o acesso, roda `montar` e troca o
@@ -15,7 +16,11 @@ export async function iniciarPagina(area, montar) {
     const acesso = await protegerPagina(area);
     if (!acesso) return; // já está redirecionando
     await montar(acesso);
-    if (area === 'admin') montarNavegacaoAdmin();
+    if (area === 'admin') {
+      montarNavegacaoAdmin();
+      // Se o menu falhar, o "Sair" antigo continua no topo: a página abre mesmo assim.
+      await montarPerfilAdmin(acesso.session).catch(console.error);
+    }
     carregando.hidden = true;
     app.hidden = false;
     // Rodapé com "Sobre o sistema" (versão, novidades e créditos), nos dois lados.
@@ -52,6 +57,16 @@ function montarNavegacaoAdmin() {
     nav.append(a);
   }
   topo.after(nav);
+}
+
+// Avatar com o menu (Meu perfil, Sobre o sistema, Sair) no lugar do "Sair" do topo.
+// Nome e foto vêm de `admins`; se falhar, o menu aparece com as iniciais do e-mail.
+async function montarPerfilAdmin(session) {
+  const { data, error } = await supabase.from('admins')
+    .select('nome, foto_url').eq('user_id', session.user.id).maybeSingle();
+  if (error) console.error(error);
+  const { montarMenuPerfil } = await import('./perfil-menu.js');
+  montarMenuPerfil({ ...data, email: session.user.email }, { linkPerfil: '/admin/perfil/' });
 }
 
 function mostrarFalhaAoCarregar(container) {
