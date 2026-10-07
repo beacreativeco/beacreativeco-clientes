@@ -50,7 +50,7 @@ self.addEventListener('push', (event) => {
     await self.registration.showNotification(aviso.titulo || 'BeaCreative', {
       body: aviso.corpo || '',
       icon: '/android-chrome-192x192.png',
-      badge: '/favicon-32x32.png',
+      badge: '/badge-96x96.png',
       tag: aviso.tag || undefined,
       renotify: Boolean(aviso.tag),
       data: { url },
