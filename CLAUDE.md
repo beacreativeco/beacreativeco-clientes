@@ -11,6 +11,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 - **Todo trabalho novo vai na branch `dev`. Nada direto na `main`.** Commits na `dev`; **sempre que uma entrega ficar pronta, push na `dev` sem perguntar** (o push publica no Preview). Na `main`, nunca, a não ser com "pode subir pra produção".
 - A Cloudflare publica a `dev` (Preview) em `https://dev.beacreativeco-clientes.pages.dev`, onde o Victor testa.
+- **Não criar outras branches além da `dev` sem avisar o Victor antes:** a Cloudflare está em "All non-Production branches", então qualquer branch nova vira um Preview publicado.
 - **Só juntar a `dev` na `main` quando o Victor disser "pode subir pra produção".** Aí, na `main`: subir a versão, entrada no `public/CHANGELOG.md`, commit `Versão X.Y.Z`, tag e Release (ver "Versão"). Depois, trazer a `main` de volta para a `dev`.
 - Na `dev`, o `ROADMAP.md` é atualizado a cada entrega, mas a versão e o CHANGELOG só mudam na subida para produção.
 - O Preview usa o **mesmo Supabase e o mesmo R2 da produção** (dados reais): testar com o cliente de teste (victordev, "quadro - teste" no Trello), nunca mexendo em conteúdo de cliente de verdade.
