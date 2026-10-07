@@ -1,6 +1,6 @@
 # Roadmap
 
-Tudo roda só no localhost por enquanto (`npx wrangler pages dev public --port 8788 --r2 MIDIAS`). A publicação é o último item.
+No ar em `https://clientes.beacreativeco.com.br` desde 06/10/2026 (versão 1.0.0). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
 
 Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
 
@@ -62,7 +62,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Trello → sistema: título, data, formato e etapa; nunca mexe em situação, mídias e legenda
      - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
      - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
-   - [ ] 4c. Tempo real com o webhook do Trello (só com o site publicado, junto do item 7)
+   - [ ] 4c. Tempo real com o webhook do Trello (o site já está publicado: pode ser feito)
 5. [ ] **Exclusão automática das mídias e espaço usado no painel** (versão 0.9.0, migração `20261013000000`)
    - [x] R2 ativado na conta da BeaCreative: bucket `beacreativeco-midias` (Standard, sem acesso público), alerta de orçamento de US$ 1 e de uso em 9 GB
    - [x] Pastas `trabalho/`, `aprovados/`, `vitrine/`; arquivos novos já nascem na pasta da situação; `/api/conteudo/organizar` move ao mudar de situação (chaves antigas, sem pasta, continuam funcionando)
@@ -71,7 +71,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - [x] Espaço usado na página Clientes, com aviso a partir de 8 GB
    - [x] Testado no bucket local: aprovar move para `aprovados/` com validade de 30 dias; voltar desfaz; arquivo de outro conteúdo não é tocado; "expirado" na prévia e na conversa
    - [ ] Criar as Lifecycle Rules no painel da Cloudflare (passo a passo combinado em 06/10/2026)
-   - Binding `MIDIAS` do bucket com o projeto do Pages: na publicação (item 7)
+   - [x] Binding `MIDIAS` do bucket com o projeto do Pages (na publicação); testado no ar: upload em `trabalho/` e aprovação movendo para `aprovados/`
 5b. [x] **Excluir cliente** (versão 0.10.0, migrações `20261014000000` e `20261015000000`)
    - Também para quem nunca recebeu convite (sem login para suspender)
    - Botão "Excluir cliente" na página do cliente, só com o acesso suspenso
@@ -96,7 +96,8 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
    - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
 6. [ ] **Avisos por e-mail**
-7. [ ] **Publicação (versão 1.0.0):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
+7. [x] **Publicação (versão 1.0.0, 06/10/2026):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
+   - Testado no ar: upload, pasta `trabalho/`, aprovação do cliente movendo os arquivos para `aprovados/`
    - Variáveis no Pages: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TRELLO_API_KEY`, `TRELLO_API_SECRET`, `TRELLO_TOKEN` e `SITE_URL` (`https://clientes.beacreativeco.com.br`, liga o link do sistema nos cartões do Trello)
 
 ## Já pronto antes deste roadmap

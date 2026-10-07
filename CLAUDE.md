@@ -2,7 +2,7 @@
 
 Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos para os clientes aprovarem, com pré-visualização igual ao Instagram, prazos, calendário e conversa por conteúdo.
 
-- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). **Ainda não publicado:** por enquanto tudo roda só no localhost; a publicação é o último item do `ROADMAP.md`.
+- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). No ar desde 06/10/2026 (versão 1.0.0). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
 - Ordem das entregas em `ROADMAP.md`: ao fim de cada uma, atualizar o arquivo e dizer qual é a próxima. Não fazer push sem pedido.
 - Site institucional (outro repositório, não mexer daqui): `beacreativeco/beacreativeco` em `beacreativeco.com.br`
 - Documento de escopo completo: https://claude.ai/code/artifact/7e520d1f-902d-4adc-ac15-e2529fa60c38
@@ -15,7 +15,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - Upload sempre em partes (multipart, 10 MiB por parte) pelas funções em `functions/api/midias/`, para passar do limite de corpo de requisição das Functions e aguentar vídeos grandes.
   - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar a versão do sistema com o nome do arquivo.
   - Os links de arquivo não exigem login: a proteção é a chave impossível de adivinhar (`<conteudo_id>/<uuid>.<ext>`). Decisão consciente para prévias de agência.
-  - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/` (sem Lifecycle Rules: para testar a expiração, mudar `expira_em` no banco). Em produção: R2 ativado na conta da BeaCreative, bucket `beacreativeco-midias` criado (Standard, acesso público desativado), alerta de orçamento de US$ 1 e de uso em 9 GB. Falta só o binding `MIDIAS` no Pages, na publicação.
+  - Local: `wrangler pages dev public --r2 MIDIAS` usa um bucket simulado em `.wrangler/` (sem Lifecycle Rules: para testar a expiração, mudar `expira_em` no banco). Em produção: R2 ativado na conta da BeaCreative, bucket `beacreativeco-midias` criado (Standard, acesso público desativado), alerta de orçamento de US$ 1 e de uso em 9 GB. Binding `MIDIAS` e variáveis configurados no Pages (Production).
   - Regras de armazenamento: ver a seção "Armazenamento (nunca passar dos 10 GB grátis do R2)".
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.

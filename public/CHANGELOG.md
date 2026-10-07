@@ -19,6 +19,13 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.0.0] — 06/10/2026
+
+### Novidades
+
+- O sistema está no ar em clientes.beacreativeco.com.br: a Bea e os clientes já podem usar de qualquer lugar, no celular ou no computador.
+- Tudo das versões anteriores passa a funcionar no endereço novo: envio de conteúdos, prévia igual ao Instagram, aprovação, pedido de ajuste, conversa com imagens e áudios, calendário e Trello.
+
 ## [0.10.0] — 06/10/2026
 
 ### Novidades
