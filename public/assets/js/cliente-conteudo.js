@@ -4,12 +4,11 @@ import { sair } from './auth.js';
 import { iniciarPagina, avisar, montarTrilha } from './ui.js';
 import { FORMATOS, SITUACOES_CLIENTE, lerData, diaSemanaHora, parametro } from './conteudos.js';
 import { criarPrevia } from './previa-instagram.js';
-import { criarConversa } from './conversa.js';
+import { montarResumoDaConversa } from './resumo-conversa.js';
 
 const $ = (id) => document.getElementById(id);
 let conteudo;
 let cliente;
-let conversa;
 
 iniciarPagina('cliente', async ({ perfil }) => {
   $('sair').addEventListener('click', sair);
@@ -27,14 +26,9 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conteudo = c.data;
   cliente = cad.data;
 
-  const [midias, bea] = await Promise.all([
-    supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
-      .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem'),
-    // Nome e foto da Bea nos balões dela. Se falhar, a conversa mostra só "Bea".
-    supabase.rpc('perfil_bea').maybeSingle(),
-  ]);
+  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
+    .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem');
   if (midias.error) throw midias.error;
-  if (bea.error) console.error(bea.error);
 
   criarPrevia($('previa')).atualizar({
     formato: conteudo.formato,
@@ -45,29 +39,13 @@ iniciarPagina('cliente', async ({ perfil }) => {
     drive: conteudo.drive_url ?? '',
   });
 
-  // "Pedir ajuste" abre a conversa: a próxima mensagem do cliente vira o pedido.
-  conversa = criarConversa($('conversa'), {
-    clienteId: cliente.id,
+  // A conversa fica na aba Mensagens: aqui, o último pedido de ajuste e o botão que abre a
+  // conversa filtrada neste conteúdo.
+  await montarResumoDaConversa($('secao-conversa'), {
     conteudoId: conteudo.id,
     eu: 'cliente',
-    perfilDoOutro: bea.data ?? null,
-    pedirAjuste: async (mensagem) => {
-      const { data, error } = await supabase.rpc('pedir_ajuste', {
-        p_conteudo_id: conteudo.id,
-        p_tipo: mensagem.tipo,
-        p_texto: mensagem.texto ?? null,
-        p_arquivo_url: mensagem.arquivo_url ?? null,
-        p_duracao_s: mensagem.duracao_s ?? null,
-        p_onda: mensagem.onda ?? null,
-      });
-      if (error) throw error;
-      conteudo = data;
-      desenhar();
-      avisar('Pedido de ajuste enviado para a Bea.');
-      organizarDepois(conteudo.id);
-    },
-  });
-  await conversa.carregar();
+    link: `/cliente/mensagens/?conteudo=${conteudo.id}`,
+  }).carregar();
 
   ligarDecisao();
   desenhar();
@@ -169,7 +147,6 @@ async function decidir(botao, chamada, sucesso) {
     return;
   }
   conteudo = data;
-  conversa.sairDoModoAjuste();
   desenhar();
   if (conteudo.status === 'aprovado') $('resultado').classList.add('acabou-de-aprovar');
   avisar(sucesso);

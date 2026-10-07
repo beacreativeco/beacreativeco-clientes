@@ -2167,27 +2167,56 @@ a.cliente-nome:hover {
   }
 }
 
-/* No editor, a conversa com o cliente aparece logo abaixo do título. */
-.editor-conversa {
-  margin: 0 0 32px;
+/* Tela do conteúdo (editor e página do cliente): no lugar da conversa, o último pedido de
+   ajuste e o botão que abre a conversa filtrada neste conteúdo (resumo-conversa.js). */
+.resumo-conversa {
+  display: grid;
+  gap: var(--esp-3);
+  margin: 0 0 var(--esp-8);
 }
 
-.editor-conversa h2 {
-  font-size: 1.5rem;
-  margin-bottom: 12px;
+.resumo-conversa-botao { justify-self: start; }
+
+.resumo-ajuste {
+  display: grid;
+  gap: var(--esp-1);
+  min-width: 0;
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-left: 3px solid var(--cor-erro);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
 }
 
-/* ---------- Conversa por conteúdo (estilo WhatsApp) ---------- */
-.cc-conversa h2 {
-  font-size: 1.5rem;
-  margin-bottom: 12px;
+.resumo-ajuste-rotulo {
+  font-size: var(--fs-mini);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cor-erro-texto);
 }
 
-/* "Pedir ajuste" rola até o título da conversa: um respiro em cima. */
-.cc-conversa,
-.editor-conversa {
-  scroll-margin-top: 12px;
+.resumo-ajuste-texto {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+
+q.resumo-ajuste-texto { quotes: "“" "”"; }
+
+.resumo-ajuste-quem {
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
+@media (max-width: 599px) {
+  .resumo-conversa-botao { justify-self: stretch; text-align: center; }
+}
+
+/* ---------- Conversa (estilo WhatsApp) ---------- */
 
 .conversa {
   position: relative; /* o menu da mensagem se posiciona aqui */
@@ -3275,22 +3304,6 @@ a.conversa-cartao:focus-visible {
 
 .conversa-tela .conversa-escrever {
   padding-bottom: max(8px, env(safe-area-inset-bottom));
-}
-
-/* Celular: a conversa ocupa a largura toda, sem a caixa em volta, e o título é menor. */
-@media (max-width: 599px) {
-  .cc-conversa h2,
-  .editor-conversa h2 {
-    font-size: 1.125rem;
-    margin-bottom: 8px;
-  }
-
-  .cc-conversa .conversa,
-  .editor-conversa .conversa {
-    margin: 0 calc(var(--espaco) * -1);
-    border: 0;
-    border-radius: 0;
-  }
 }
 
 /* ---------- Crédito de desenvolvimento (rodapé do login), igual ao do LAEG-BIO ---------- */

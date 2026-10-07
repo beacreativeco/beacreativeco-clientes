@@ -15,6 +15,12 @@ iniciarPagina('cliente', async ({ perfil }) => {
   document.getElementById('sair').addEventListener('click', sair);
   document.body.classList.add('conversa-aberta');
   acompanharTeclado();
+  // Voltar: quem veio de uma página do sistema (ex.: a tela do conteúdo) volta para ela.
+  document.querySelector('.mensagens-voltar').addEventListener('click', (e) => {
+    if (!document.referrer.startsWith(`${location.origin}/cliente/`)) return;
+    e.preventDefault();
+    history.back();
+  });
   clienteId = perfil.cliente.id;
 
   // Nome e foto da Bea no topo e nos balões dela. Se falhar, fica só "Bea".

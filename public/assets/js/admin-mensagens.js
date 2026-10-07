@@ -24,10 +24,12 @@ iniciarPagina('admin', async () => {
   window.addEventListener('mensagens-mudaram', () => carregarLista().catch(console.error));
   window.addEventListener('popstate', () => abrirDoEndereco().catch(console.error));
 
-  // Voltar (celular): se a conversa foi aberta pela lista, volta no histórico.
+  // Voltar (celular): se a conversa foi aberta pela lista, ou veio da tela do conteúdo
+  // ("Conversar sobre este conteúdo"), volta no histórico.
   document.querySelector('.mensagens-voltar').addEventListener('click', (e) => {
     e.preventDefault();
-    if (history.state?.daLista) history.back();
+    const veioDoConteudo = aberta?.conteudoId && document.referrer.startsWith(`${location.origin}/admin/conteudo/`);
+    if (history.state?.daLista || veioDoConteudo) history.back();
     else {
       history.replaceState(null, '', '/admin/mensagens/');
       abrir(null);

@@ -6,7 +6,7 @@ import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, definirDestinoDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
-import { criarConversa } from './conversa.js';
+import { montarResumoDaConversa } from './resumo-conversa.js';
 import { limparArquivosDaConversa } from './upload.js';
 
 const form = document.getElementById('form-conteudo');
@@ -53,7 +53,7 @@ iniciarPagina('admin', async () => {
     return;
   }
   desenhar();
-  if (conteudo) await abrirConversa();
+  if (conteudo) await mostrarResumoDaConversa();
 });
 
 // ---------------------------------------------------------------- carregar
@@ -127,30 +127,31 @@ function mostrarLinksExternos() {
   caixa.hidden = !caixa.childElementCount;
 }
 
-// Conversa com o cliente (mesmo componente da página dele). Se o cliente aprovar ou pedir
-// ajuste com o editor aberto, a situação atualiza sozinha.
-async function abrirConversa() {
-  document.getElementById('secao-conversa').hidden = false;
-  const conversa = criarConversa(document.getElementById('conversa'), {
-    clienteId: cliente.id,
+// A conversa fica na aba Mensagens: aqui, o último pedido de ajuste e o botão que abre a
+// conversa filtrada neste conteúdo. Se o cliente aprovar ou pedir ajuste com o editor
+// aberto, a situação atualiza sozinha.
+async function mostrarResumoDaConversa() {
+  const link = `/admin/mensagens/?cliente=${cliente.id}&conteudo=${conteudo.id}`;
+  // Link antigo (aviso ou Caixa de antes da aba Mensagens): vai direto para a conversa.
+  if (location.hash === '#conversa') {
+    window.location.replace(link);
+    return;
+  }
+  const secao = document.getElementById('secao-conversa');
+  secao.hidden = false;
+  await montarResumoDaConversa(secao, {
     conteudoId: conteudo.id,
     eu: 'bea',
-    // Nome e foto de quem aprova (Meu perfil do cliente); sem nome, o do cadastro.
-    perfilDoOutro: { nome: cliente.contato_nome || cliente.nome, foto_url: cliente.contato_foto_url },
-    aoChegar: async (m) => {
-      if (m.tipo !== 'aprovacao' && !m.pedido_ajuste) return;
+    link,
+    nomeDoOutro: cliente.contato_nome || cliente.nome,
+    aoMudarSituacao: async (m) => {
       const { data, error } = await supabase.from('conteudos').select('*').eq('id', conteudo.id).single();
       if (error) return console.error(error);
       conteudo = data;
       atualizarSituacao();
       avisar(m.tipo === 'aprovacao' ? 'O cliente aprovou este conteúdo.' : 'O cliente pediu ajuste.');
     },
-  });
-  await conversa.carregar();
-  // Veio da Caixa de mensagens ou de um aviso: vai direto para a conversa.
-  if (location.hash === '#conversa') {
-    document.getElementById('secao-conversa').scrollIntoView({ block: 'start' });
-  }
+  }).carregar();
 }
 
 // ---------------------------------------------------------------- tela

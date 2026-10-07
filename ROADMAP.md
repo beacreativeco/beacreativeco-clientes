@@ -144,7 +144,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
    - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
 
-9. [ ] **Conversa por cliente** (pedido de 07/10/2026; plano e rascunhos: https://claude.ai/artifact/X67MYmy3D7DndaGdX91jaw). A conversa sai da tela do conteúdo e vira uma só por cliente, na aba Mensagens; cada mensagem pode carregar o conteúdo de que fala
+9. [x] **Conversa por cliente** (pedido de 07/10/2026; plano e rascunhos: https://claude.ai/artifact/X67MYmy3D7DndaGdX91jaw). A conversa sai da tela do conteúdo e vira uma só por cliente, na aba Mensagens; cada mensagem pode carregar o conteúdo de que fala
    - [x] Entrega 1: conversa por cliente (migração `20261019000000`, já rodada; compatível com a 1.5.1 no ar)
      - Banco: `mensagens.cliente_id` (preenchido nas antigas pelo conteúdo), `conteudo_id` opcional (conteúdo excluído: a mensagem fica), `so_bea` (escrita num rascunho: o cliente nunca vê; conteúdo retirado da aprovação: a conversa continua visível), `leituras_cliente`, `marcar_conversa_do_cliente_lida`, `conversas_por_cliente`
      - Bea: `/admin/mensagens/` com lista de clientes (foto, nome, última mensagem com "…", data, não lidas, busca) e conversa ao lado; no celular, lista → conversa em tela cheia, sem topo nem barra de baixo
@@ -152,14 +152,18 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Cartão do conteúdo no balão (miniatura, título, situação; abre o conteúdo); aprovação com o título; apagadas seguidas viram "N mensagens apagadas"; balões até 80%, sem rolagem lateral; onda do áudio na largura do balão; a conversa fica no fim quando a tela muda (teclado, página aparecendo)
      - Imagem e áudio sem conteúdo vão para `conversa/<cliente_id>/` (30 dias). **Falta:** criar no R2 a regra `apagar-conversa` (prefixo `conversa/`, 30 dias)
      - Testado com dados de exemplo (computador e 375px). **Falta:** testar no Preview com o victordev e num celular de verdade (teclado no Android e no iPhone)
-     - A conversa continua também na tela do conteúdo (filtrada nele) até a Entrega 3
    - [x] Entrega 2: conteúdos na conversa (só front, sem migração)
      - Clipe na conversa inteira: "Imagem" ou "Conteúdo" (lista dos conteúdos do cliente, fora rascunho; folha embaixo no celular); o conteúdo escolhido fica em cima da caixa e vai com a próxima mensagem (texto, áudio ou imagem, que sobe na pasta do conteúdo)
      - "Pedir ajuste" na tela do conteúdo do cliente abre `/cliente/mensagens/?conteudo=…&ajuste=1`: conversa inteira com o conteúdo anexado como "Pedido de ajuste"; a próxima mensagem vai por `pedir_ajuste` (recarregar não reabre o pedido)
      - Conversa filtrada: `/admin/mensagens/?cliente=…&conteudo=…` e `/cliente/mensagens/?conteudo=…`, com a faixa "Só [título] · Ver tudo"
      - Avisos no meio da conversa: "✦ … aprovou “título”" e "… pediu ajuste em “título”" (antes do balão do pedido); o cartão atualiza a situação quando chega aprovação ou pedido
      - Testado com dados de exemplo em 375px. **Falta:** testar no Preview (pedido de ajuste de verdade, com texto, áudio e imagem, e o comentário no Trello)
-   - [ ] Entrega 3: tela do conteúdo sem chat (último pedido de ajuste + "Conversar sobre este conteúdo (N)")
+   - [x] Entrega 3: tela do conteúdo sem chat (só front)
+     - Editor da Bea e página do cliente: no lugar da conversa, o último pedido de ajuste (data, texto cortado em 4 linhas, ou aviso de áudio/imagem) e "Conversar sobre este conteúdo (N)", que abre a conversa filtrada (`resumo-conversa.js`, em tempo real)
+     - No editor, aprovação ou pedido de ajuste chegando continua atualizando a situação na hora; link antigo com `#conversa` leva à conversa filtrada
+     - A seta de voltar da conversa filtrada volta para a tela do conteúdo de onde se veio
+     - Testado com dados de exemplo em 375px. **Falta:** testar tudo no Preview com o victordev e num celular de verdade; regra `apagar-conversa` no R2
+   - Na subida para produção: MINOR (1.6.0), mudança visível sem mudar o jeito de aprovar
 
 ## Já pronto antes deste roadmap
 
