@@ -1,7 +1,7 @@
 // POST /api/midias/concluir  { chave, uploadId, partes: [{ partNumber, etag }] }
 // Junta as partes no R2 e registra a mídia no conteúdo (versão atual, última posição).
 import { responder, exigirAdmin, rest } from '../../_lib/servidor.js';
-import { TIPOS, conteudoDaChave, urlDaChave, pastaDaChave, expiraEm } from '../../_lib/midias.js';
+import { tipoDaChave, conteudoDaChave, urlDaChave, pastaDaChave, expiraEm } from '../../_lib/midias.js';
 
 export async function onRequestPost({ request, env }) {
   if (!env.MIDIAS) return responder(500, 'Armazenamento de arquivos não configurado.');
@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env }) {
 
   const ultimas = await rest(env,
     `midias?select=ordem&conteudo_id=eq.${conteudoId}&versao=eq.${conteudo.versao_atual}&order=ordem.desc&limit=1`);
-  const regra = TIPOS[objeto.httpMetadata?.contentType];
+  const regra = tipoDaChave(chave);
 
   const [midia] = await rest(env, 'midias', {
     metodo: 'POST',

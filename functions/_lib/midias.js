@@ -62,6 +62,23 @@ export const TIPOS_CONVERSA = {
   'audio/webm': { tipo: 'audio', ext: 'webm', limiteMb: 5 },
 };
 
+// Tipo pela extensão da chave (que nós mesmos geramos). Não confiar no contentType guardado
+// no R2: no upload em partes ele pode voltar vazio, e aí o vídeo virava "imagem" e, com o
+// nosniff, o navegador não mostrava nada.
+const POR_EXTENSAO = {
+  jpg: { mime: 'image/jpeg', tipo: 'imagem' },
+  png: { mime: 'image/png', tipo: 'imagem' },
+  webp: { mime: 'image/webp', tipo: 'imagem' },
+  mp4: { mime: 'video/mp4', tipo: 'video' },
+  mov: { mime: 'video/quicktime', tipo: 'video' },
+  m4a: { mime: 'audio/mp4', tipo: 'audio' },
+  webm: { mime: 'audio/webm', tipo: 'audio' },
+};
+
+export function tipoDaChave(chave) {
+  return POR_EXTENSAO[(chave || '').split('.').pop().toLowerCase()] ?? null;
+}
+
 export function conteudoDaChave(chave) {
   return CHAVE.exec(chave || '')?.[2] ?? null;
 }

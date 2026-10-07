@@ -3,7 +3,7 @@
 // GET /api/midia/perfil/<uuid>.jpg                    → foto de perfil
 // GET /api/midia/<conteudo_id>/<uuid>.<ext>?download=1 → baixa o original com o nome do arquivo
 // Sem login: a chave é impossível de adivinhar (decisão registrada no CLAUDE.md).
-import { CHAVE, CHAVE_CONVERSA, CHAVE_PERFIL } from '../../_lib/midias.js';
+import { CHAVE, CHAVE_CONVERSA, CHAVE_PERFIL, tipoDaChave } from '../../_lib/midias.js';
 
 export async function onRequestGet(contexto) {
   return entregar(contexto, true);
@@ -36,6 +36,9 @@ async function entregar({ request, env, params }, comCorpo) {
 
   const headers = new Headers();
   objeto.writeHttpMetadata(headers);
+  // Com nosniff, sem Content-Type o navegador não mostra: vale o da extensão (ver tipoDaChave).
+  const tipo = tipoDaChave(chave);
+  if (tipo) headers.set('Content-Type', tipo.mime);
   headers.set('ETag', objeto.httpEtag);
   headers.set('Accept-Ranges', 'bytes');
   headers.set('Cache-Control', 'private, max-age=31536000, immutable');
