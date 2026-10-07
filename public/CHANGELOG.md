@@ -19,6 +19,12 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.1.0] — 07/10/2026
+
+### Novidades
+
+- O que a Bea muda no Trello aparece sozinho no sistema, na hora: cartão novo, título, data, formato e etapa, sem precisar abrir o calendário.
+
 ## [1.0.0] — 06/10/2026
 
 ### Novidades

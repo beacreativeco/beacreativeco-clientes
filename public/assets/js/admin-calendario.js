@@ -108,6 +108,12 @@ iniciarPagina('admin', async () => {
 
 // ---------------------------------------------------------------- Trello
 
+// Confere que o Trello avisa o sistema de cada mudança nos quadros (webhook; só com o site
+// no ar). Em silêncio: se falhar, a sincronização ao abrir o Calendário continua valendo.
+function ligarAvisosDoTrello() {
+  chamarServidor('/api/trello/webhooks', { metodo: 'POST', corpo: {} }).catch(console.error);
+}
+
 const quando = (isoTs) => {
   const d = new Date(isoTs);
   const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -131,6 +137,7 @@ async function sincronizar(pedidoPelaBea) {
     desenhar();
     mostrarStatus(`Trello atualizado ${quando(em)}.`);
     mostrarAvisos(resultado);
+    ligarAvisosDoTrello();
     const novos = resultado.reduce((s, r) => s + (r.criados ?? 0), 0);
     const mudados = resultado.reduce((s, r) => s + (r.atualizados ?? 0), 0);
     const falhas = resultado.filter((r) => r.erro);

@@ -62,7 +62,11 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Trello → sistema: título, data, formato e etapa; nunca mexe em situação, mídias e legenda
      - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
      - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
-   - [ ] 4c. Tempo real com o webhook do Trello (o site já está publicado: pode ser feito)
+   - [ ] 4c. Tempo real com o webhook do Trello (versão 1.1.0; **falta testar no ar**)
+     - O Trello avisa `/api/trello/webhook` a cada mudança num quadro ligado e o sistema sincroniza só aquele quadro (título, data, formato, lista, etapa, cartão saindo); comentários, anexos, descrição e arrastar na mesma lista não disparam
+     - Assinatura de cada aviso conferida com `TRELLO_API_SECRET` (precisa estar nas variáveis do Pages); responde na hora e sincroniza em seguida
+     - Webhooks criados/removidos por `/api/trello/webhooks`: depois de salvar um cliente com o quadro mudado e depois de cada sincronização do Calendário; quadro desligado responde 410 e o Trello apaga o webhook sozinho
+     - Sincronização movida para `functions/_lib/trello-sincronizar.js` (a mesma no botão e no webhook)
 5. [x] **Exclusão automática das mídias e espaço usado no painel** (versão 0.9.0, migração `20261013000000`)
    - [x] R2 ativado na conta da BeaCreative: bucket `beacreativeco-midias` (Standard, sem acesso público), alerta de orçamento de US$ 1 e de uso em 9 GB
    - [x] Pastas `trabalho/`, `aprovados/`, `vitrine/`; arquivos novos já nascem na pasta da situação; `/api/conteudo/organizar` move ao mudar de situação (chaves antigas, sem pasta, continuam funcionando)

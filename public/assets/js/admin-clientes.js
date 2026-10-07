@@ -244,6 +244,10 @@ async function salvar(e) {
 
   dialogo.close();
   avisar(editandoId ? 'Cliente atualizado.' : 'Cliente cadastrado.');
+  // Quadro ligado, trocado ou desligado: acerta os avisos do Trello (webhook) para esse quadro.
+  if ((original?.trello_board_id ?? null) !== dados.trello_board_id) {
+    chamarServidor('/api/trello/webhooks', { metodo: 'POST', corpo: {} }).catch(console.error);
+  }
   await carregarClientes().catch(() => avisar('Salvo, mas a lista não atualizou. Recarregue a página.', 'erro'));
 }
 
