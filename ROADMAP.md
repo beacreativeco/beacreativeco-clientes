@@ -63,14 +63,14 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
      - Sistema → Trello: a definir (ex.: etiqueta/comentário quando o cliente aprova, link do conteúdo no cartão)
      - Precisa: chave e token da API do Trello da conta da Bea (no `.dev.vars`) e a Bea renomear os cartões do J.Franco e da Le Bel no padrão
    - [ ] 4c. Tempo real com o webhook do Trello (o site já está publicado: pode ser feito)
-5. [ ] **Exclusão automática das mídias e espaço usado no painel** (versão 0.9.0, migração `20261013000000`)
+5. [x] **Exclusão automática das mídias e espaço usado no painel** (versão 0.9.0, migração `20261013000000`)
    - [x] R2 ativado na conta da BeaCreative: bucket `beacreativeco-midias` (Standard, sem acesso público), alerta de orçamento de US$ 1 e de uso em 9 GB
    - [x] Pastas `trabalho/`, `aprovados/`, `vitrine/`; arquivos novos já nascem na pasta da situação; `/api/conteudo/organizar` move ao mudar de situação (chaves antigas, sem pasta, continuam funcionando)
    - [x] Prazos: `aprovados/` 30 dias depois da aprovação; `vitrine/` nunca; `trabalho/` sem regra; uploads incompletos cancelados depois de 1 dia
    - [x] "Arquivo expirado, veja no Drive" na prévia, no editor e na conversa (pela data ou quando o arquivo dá 404)
    - [x] Espaço usado na página Clientes, com aviso a partir de 8 GB
    - [x] Testado no bucket local: aprovar move para `aprovados/` com validade de 30 dias; voltar desfaz; arquivo de outro conteúdo não é tocado; "expirado" na prévia e na conversa
-   - [ ] Criar as Lifecycle Rules no painel da Cloudflare (passo a passo combinado em 06/10/2026)
+   - [x] Lifecycle Rules criadas no R2 (06/10/2026): `apagar-aprovados` (prefixo `aprovados/`, 30 dias depois do upload) e uploads incompletos cancelados depois de 1 dia (bucket inteiro)
    - [x] Binding `MIDIAS` do bucket com o projeto do Pages (na publicação); testado no ar: upload em `trabalho/` e aprovação movendo para `aprovados/`
 5b. [x] **Excluir cliente** (versão 0.10.0, migrações `20261014000000` e `20261015000000`)
    - Também para quem nunca recebeu convite (sem login para suspender)
