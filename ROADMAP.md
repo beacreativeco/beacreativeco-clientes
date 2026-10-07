@@ -100,20 +100,20 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - A foto e o @ da prévia dos posts continuam os que a Bea cadastrou (o cliente não mexe)
    - `/api/perfil/foto` serve aos dois lados; excluir cliente apaga a foto dele do R2
    - Junto, nos dois perfis: "Esqueci a senha atual" (manda o link de criar senha), para quem só entrou com o Google ou pelo convite e nunca teve senha
-5e. [x] **Prévia opcional** (Bea e cliente; só front, sem migração; testada numa página local com arquivos de teste)
+5e. [x] **Prévia opcional** (versão 1.4.0; Bea e cliente; só front, sem migração; testada numa página local com arquivos de teste)
    - Testado no Preview, no editor da Bea (conteúdo com 1 imagem). **Falta:** conteúdo com vários arquivos e vídeo, e a página do cliente
    - Por padrão, os arquivos crus: imagens uma por vez (deslizar, sem moldura) e vídeo no player normal
    - Botão "Ver prévia" liga a simulação do Instagram (`previa-instagram.js`); "Ver arquivos" volta
    - Quem vê escolhe quais arquivos entram na prévia (não precisa ser todos juntos); os formatos seguem a escolha: 1 vídeo → Reels ou Story; 1 imagem → Post ou Story; 2 ou mais → Carrossel
    - A prévia abre no formato cadastrado pela Bea (se for possível com os arquivos), com seletor para comparar; nada disso grava no banco
    - "Ocultar interface" e "Áreas cobertas" (só Bea) continuam dentro da prévia
-5f. [x] **Instalar o sistema como app** (PWA, no padrão do LAEG-BIO; `instalar.js`, `sw.js`)
+5f. [x] **Instalar o sistema como app** (versão 1.4.0; PWA, no padrão do LAEG-BIO; `instalar.js`, `sw.js`)
    - Testado no Preview (Chrome no computador: convite, "Agora não" pausando, item no menu) e o convite do iPhone simulado localmente. **Falta:** instalar de verdade no Android e no iPhone
    - `site.webmanifest` com `display: standalone`, nome "BeaCreative" e ícones da marca (comuns e maskable), mais um service worker mínimo (rede primeiro, nunca guarda `/api/`)
    - Convite depois do login: Chrome/Edge (Android e computador) usam o botão do navegador; iPhone no Safari mostra o passo a passo (Compartilhar → Adicionar à Tela de Início); Chrome no iPhone orienta abrir no Safari
    - "Fechar" (volta depois de 30 dias, como no LAEG) e "Não mostrar de novo"; nada aparece se já estiver instalado
    - "Instalar o sistema" no menu do avatar, para Bea e cliente, a qualquer momento (só quando dá para instalar)
-5g. [x] **Enviar arquivos pro Trello e pro Drive** (só a Bea, no editor; migração nova)
+5g. [x] **Enviar arquivos pro Trello e pro Drive** (versão 1.4.0; só a Bea, no editor; migração nova)
    - Botões ao lado de cada arquivo; depois de enviado mostra "✓ No Trello" / "✓ No Drive" (com link), e mandar de novo pede confirmação
    - Trello (plano grátis, anexo até 10 MB): pelo servidor, anexa no cartão do conteúdo (`trello_card_id`) a versão do sistema; acima de 10 MB anexa o link do arquivo no sistema
    - Drive: login do Google só com a permissão `drive.file` + Google Picker (a Bea escolhe a pasta de cada cliente uma vez); envio direto do navegador para o Google, na pasta do cliente (`drive_pasta_url`); manda o original se ele ainda estiver na página, senão pede para escolher o arquivo original (ou manda a versão do sistema, avisando)
@@ -121,7 +121,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Registro em `midias`: quando e o id do anexo/arquivo, e se foi o original (migração `20261018000000`, já rodada)
    - **Trello pronto e testado no Preview** (imagem como arquivo; vídeo de 15 MB como link; "de novo" com confirmação)
    - **Drive pronto** (`drive.js`, chave e ID do cliente em `config.js`): no Preview o botão aparece e o login do Google abre (app em modo de teste, com aviso "não verificado"). **Falta:** teste completo com a conta Google definitiva (autorizar, escolher a pasta no Picker, enviar, "✓ No Drive"); essa conta precisa estar em "Usuários de teste", ou o app publicado
-5h. [x] **Avisar o cliente no WhatsApp** (decisão de 07/10: só WhatsApp, mensagem simples)
+5h. [x] **Avisar o cliente no WhatsApp** (versão 1.4.0; decisão de 07/10: só WhatsApp, mensagem simples)
    - Botão "Avisar no WhatsApp" no rodapé do editor enquanto o conteúdo está em aprovação: abre o `wa.me` no número do cadastro do cliente com "Oi, [nome]! Tem conteúdo novo pra você aprovar: “[título]”. Dá uma olhada aqui: [link]" (nova versão: "Tem uma nova versão de …")
    - Sem número no cadastro, o WhatsApp abre para escolher o contato. Link da página do conteúdo: logado, abre direto; sem login, entra e cai na lista
    - O `wa.me` abre o WhatsApp logado no aparelho de quem clica (o Business da Bea no celular, ou o WhatsApp Web com o número dela)

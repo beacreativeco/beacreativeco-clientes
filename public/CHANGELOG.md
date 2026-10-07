@@ -19,6 +19,16 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.4.0] — 07/10/2026
+
+### Novidades
+
+- Os arquivos de cada conteúdo aparecem do jeito que são, sem a moldura do Instagram. O botão "Ver prévia" mostra como vai ficar no Instagram.
+- Na prévia dá para escolher quais arquivos entram e comparar os formatos possíveis (Post, Carrossel, Story ou Reels), sem mudar o que a Bea cadastrou.
+- Dá para instalar o sistema na tela inicial do celular ou do computador, como um aplicativo. O convite aparece depois de entrar, e a opção "Instalar o sistema" fica no menu do perfil.
+- No editor, a Bea envia cada arquivo para o cartão do Trello do conteúdo e para a pasta do cliente no Google Drive, e vê quais já foram enviados.
+- Botão "Avisar no WhatsApp" para mandar ao cliente uma mensagem pronta com o link do conteúdo.
+
 ## [1.3.0] — 07/10/2026
 
 ### Novidades
