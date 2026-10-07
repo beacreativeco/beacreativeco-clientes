@@ -37,10 +37,11 @@ export async function rest(env, caminho, { metodo = 'GET', corpo, retornar = tru
 }
 
 /**
- * Confere o token da sessão e se o usuário está em `admins`.
- * Devolve { usuario } ou { resposta } (um erro pronto para retornar).
+ * Quem está logado, pelo token da sessão. Devolve { usuario } ou { resposta } (erro pronto).
+ * Separa chave do servidor recusada (configuração, 500) de sessão vencida (401): antes as
+ * duas viravam "Sua sessão expirou" e sair e entrar de novo não resolvia nada.
  */
-export async function exigirAdmin(request, env) {
+export async function usuarioDaSessao(request, env) {
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     return { resposta: responder(500, 'Servidor sem configuração do Supabase.') };
   }
@@ -48,11 +49,28 @@ export async function exigirAdmin(request, env) {
   const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   if (!token) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
 
-  const respUsuario = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+  const resp = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
     headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
   });
-  if (!respUsuario.ok) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
-  const usuario = await respUsuario.json();
+  if (resp.ok) return { usuario: await resp.json() };
+
+  // Chave recusada: o Supabase responde "Invalid API key" / "Unregistered API key".
+  // Token ruim ou vencido vem como bad_jwt, sem falar em API key.
+  const corpo = await resp.text();
+  if (/api key/i.test(corpo)) {
+    console.error('SUPABASE_SERVICE_ROLE_KEY recusada', resp.status, corpo);
+    return { resposta: responder(500, 'Chave do servidor inválida (configuração). Avise o suporte.') };
+  }
+  return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
+}
+
+/**
+ * Confere o token da sessão e se o usuário está em `admins`.
+ * Devolve { usuario } ou { resposta } (um erro pronto para retornar).
+ */
+export async function exigirAdmin(request, env) {
+  const { usuario, resposta } = await usuarioDaSessao(request, env);
+  if (resposta) return { resposta };
 
   const admins = await rest(env, `admins?select=user_id&user_id=eq.${usuario.id}`);
   if (!admins?.length) return { resposta: responder(403, 'Só a admin pode fazer isso.') };
@@ -68,17 +86,8 @@ export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
  * Devolve { autor: 'bea' | 'cliente' } ou { resposta } (um erro pronto para retornar).
  */
 export async function exigirAcessoConversa(request, env, conteudoId) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
-    return { resposta: responder(500, 'Servidor sem configuração do Supabase.') };
-  }
-  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-  if (!token) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
-
-  const respUsuario = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
-    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
-  });
-  if (!respUsuario.ok) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
-  const usuario = await respUsuario.json();
+  const { usuario, resposta } = await usuarioDaSessao(request, env);
+  if (resposta) return { resposta };
 
   const [conteudo] = (await rest(env, `conteudos?select=id,cliente_id,status&id=eq.${conteudoId}`)) ?? [];
   if (!conteudo) return { resposta: responder(404, 'Conteúdo não encontrado.') };

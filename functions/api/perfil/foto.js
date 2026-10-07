@@ -2,23 +2,16 @@
 // DELETE /api/perfil/foto   → tira a foto (volta às iniciais)
 // Foto de perfil em perfil/<uuid>.jpg; apaga a anterior. Serve aos dois lados:
 // a Bea grava em admins.foto_url; o cliente (login ativo) em clientes.contato_foto_url.
-import { responder, rest } from '../../_lib/servidor.js';
+import { responder, rest, usuarioDaSessao } from '../../_lib/servidor.js';
 import { CHAVE_PERFIL, LIMITE_FOTO_PERFIL_MB, urlDaChave, chaveDaUrl } from '../../_lib/midias.js';
 
 const LIMITE = LIMITE_FOTO_PERFIL_MB * 1024 * 1024;
 
 // De quem é a foto: devolve { linha, coluna } (onde gravar) ou { resposta } (erro pronto).
 async function donoDaFoto(request, env) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
-    return { resposta: responder(500, 'Servidor sem configuração do Supabase.') };
-  }
-  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
-  if (!token) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
-  const respUsuario = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
-    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
-  });
-  if (!respUsuario.ok) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
-  const { id } = await respUsuario.json();
+  const { usuario, resposta } = await usuarioDaSessao(request, env);
+  if (resposta) return { resposta };
+  const { id } = usuario;
 
   const admins = await rest(env, `admins?select=user_id&user_id=eq.${id}`);
   if (admins?.length) return { linha: `admins?user_id=eq.${id}`, coluna: 'foto_url' };
