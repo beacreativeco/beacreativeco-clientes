@@ -60,7 +60,7 @@ iniciarPagina('admin', async () => {
 
 async function carregarCliente(id) {
   const { data, error } = await supabase
-    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil, contato_nome, contato_foto_url, drive_pasta_url').eq('id', id).maybeSingle();
+    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, whatsapp, foto_perfil, contato_nome, contato_foto_url, drive_pasta_url').eq('id', id).maybeSingle();
   if (error) throw error;
   cliente = data;
 }
@@ -199,6 +199,7 @@ function atualizarSituacao() {
   botoes.enviar.hidden = !['rascunho', 'ajuste_solicitado'].includes(status) || (postadoNoTrello && status === 'rascunho');
   botoes.enviar.textContent = status === 'ajuste_solicitado' ? 'Reenviar para aprovação' : 'Enviar para aprovação';
   botoes.retirar.hidden = status !== 'em_aprovacao';
+  atualizarAvisoWhatsapp(status);
   botoes.excluir.hidden = status !== 'rascunho';
 
   prazo.hidden = true;
@@ -215,6 +216,31 @@ function atualizarSituacao() {
     prazo.textContent = `Aprovado ${quem} em ${dataHora(conteudo.aprovado_em)}.`;
     prazo.hidden = false;
   }
+}
+
+// "Avisar no WhatsApp": abre a conversa com o cliente com a mensagem pronta e o link.
+// Sem número no cadastro, o WhatsApp abre para a Bea escolher o contato.
+function atualizarAvisoWhatsapp(status) {
+  const link = document.getElementById('avisar-whatsapp');
+  link.hidden = status !== 'em_aprovacao';
+  if (link.hidden) return;
+  const nome = (cliente.contato_nome || cliente.nome).trim().split(/\s+/)[0];
+  const endereco = `${location.origin}/cliente/conteudo/?id=${conteudo.id}`;
+  const novidade = conteudo.versao_atual > 1
+    ? `Tem uma nova versão de “${conteudo.titulo}” pra você aprovar.`
+    : `Tem conteúdo novo pra você aprovar: “${conteudo.titulo}”.`;
+  const texto = `Oi, ${nome}! ${novidade}\nDá uma olhada aqui: ${endereco}`;
+  const numero = numeroWhatsapp(cliente.whatsapp);
+  link.href = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+  link.title = numero ? '' : 'O cliente não tem WhatsApp no cadastro: escolha o contato no WhatsApp.';
+}
+
+// "(11) 98765-4321" → "5511987654321". Sem DDI, é Brasil. Número estranho: vazio (escolher contato).
+function numeroWhatsapp(texto) {
+  const digitos = (texto || '').replace(/\D/g, '');
+  if (digitos.length === 10 || digitos.length === 11) return `55${digitos}`;
+  if (digitos.length >= 12 && digitos.length <= 13) return digitos;
+  return '';
 }
 
 function atualizarContador() {

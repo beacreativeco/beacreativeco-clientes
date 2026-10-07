@@ -121,9 +121,9 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Registro em `midias`: quando e o id do anexo/arquivo, e se foi o original (migração `20261018000000`, já rodada)
    - **Trello pronto e testado no Preview** (imagem como arquivo; vídeo de 15 MB como link; "de novo" com confirmação)
    - **Drive pronto** (`drive.js`, chave e ID do cliente em `config.js`): no Preview o botão aparece e o login do Google abre (app em modo de teste, com aviso "não verificado"). **Falta:** teste completo com a conta Google definitiva (autorizar, escolher a pasta no Picker, enviar, "✓ No Drive"); essa conta precisa estar em "Usuários de teste", ou o app publicado
-5h. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
-   - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
-   - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
+5h. [x] **Avisar o cliente no WhatsApp** (decisão de 07/10: só WhatsApp, mensagem simples)
+   - Botão "Avisar no WhatsApp" no rodapé do editor enquanto o conteúdo está em aprovação: abre o `wa.me` no número do cadastro do cliente com "Oi, [nome]! Tem conteúdo novo pra você aprovar: “[título]”. Dá uma olhada aqui: [link]" (nova versão: "Tem uma nova versão de …")
+   - Sem número no cadastro, o WhatsApp abre para escolher o contato. Link da página do conteúdo: logado, abre direto; sem login, entra e cai na lista
 6. [ ] **Avisos por e-mail**
 7. [x] **Publicação (versão 1.0.0, 06/10/2026):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
    - Testado no ar: upload, pasta `trabalho/`, aprovação do cliente movendo os arquivos para `aprovados/`
