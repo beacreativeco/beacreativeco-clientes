@@ -1069,6 +1069,27 @@ a.cliente-nome:hover {
   font-size: 0.8125rem;
 }
 
+/* Enviar pro Trello / Drive, e o "✓" de já enviado. */
+.midia-destinos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(77, 59, 49, 0.12);
+  font-size: 0.8125rem;
+}
+
+.midia-destinos .botao-link { font-size: 0.8125rem; }
+
+.midia-feito {
+  color: var(--periwinkle-escuro);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.midia-feito:hover { text-decoration: underline; }
+
 .botao-icone {
   font: inherit;
   font-size: 1.25rem;

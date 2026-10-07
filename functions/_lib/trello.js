@@ -8,12 +8,13 @@ export function trelloConfigurado(env) {
   return Boolean(env.TRELLO_API_KEY && env.TRELLO_TOKEN);
 }
 
-export async function trello(env, caminho, { metodo = 'GET', params = {} } = {}) {
+// `corpo`: FormData para mandar arquivo (anexo); o resto vai nos parâmetros da URL.
+export async function trello(env, caminho, { metodo = 'GET', params = {}, corpo } = {}) {
   const url = new URL(`${API}${caminho}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.set('key', env.TRELLO_API_KEY);
   url.searchParams.set('token', env.TRELLO_TOKEN);
-  const resp = await fetch(url, { method: metodo });
+  const resp = await fetch(url, { method: metodo, body: corpo });
   if (!resp.ok) {
     console.error('trello', metodo, caminho, resp.status, await resp.text());
     throw new Error(resp.status === 401 ? 'O acesso ao Trello foi recusado (token revogado?).' : 'Falha ao falar com o Trello.');

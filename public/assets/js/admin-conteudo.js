@@ -3,7 +3,7 @@ import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
-  iniciarMidias, carregarMidias, definirFormato, definirDrive, midiasAtuais, enviandoArquivos, excluirTodas,
+  iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
 import { criarConversa } from './conversa.js';
@@ -89,6 +89,8 @@ let postadoNoTrello = false;
 // "Trello: Gravado · Abrir no Trello", e o aviso da sincronização quando houver.
 function mostrarTrello(internos) {
   postadoNoTrello = Boolean(internos?.trello_etiquetas?.includes('POSTADO'));
+  // "Enviar pro Trello" nos arquivos só aparece com o conteúdo ligado a um cartão.
+  definirTrello({ cartao: conteudo?.trello_card_id, url: internos?.trello_url });
   const info = document.getElementById('trello-info');
   const etapa = internos?.trello_etiquetas?.at(-1);
   const partes = [];

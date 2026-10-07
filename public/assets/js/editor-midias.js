@@ -5,7 +5,7 @@ import {
   FORMATOS, REGRAS_FORMATO, LIMITE_OTIMIZADO_MB, TIPOS_ARQUIVO, aceiteDoInput, problemaDoArquivo, tamanhoLegivel, tipoMime,
   expirou, avisarSeSumiu,
 } from './conteudos.js';
-import { enviarArquivo, excluirMidia } from './upload.js';
+import { enviarArquivo, excluirMidia, anexarNoTrello } from './upload.js';
 import { otimizarImagem, otimizarVideo } from './otimizar.js';
 
 const lista = document.getElementById('lista-midias');
@@ -19,6 +19,7 @@ const modeloEnvio = document.getElementById('modelo-envio');
 let midias = [];          // linhas de `midias` da versão atual, em ordem
 let formato = 'post';
 let driveUrl = '';        // com Drive, "Baixar" leva ao original de lá
+let trello = { cartao: null, url: null }; // cartão do conteúdo ("Enviar pro Trello" só com ele)
 let envios = [];          // [{ arquivo, conteudoId, li, controle }]
 let enviando = false;
 let garantirConteudo;     // () => Promise<conteudoId> (cria o rascunho se ainda não existe)
@@ -73,6 +74,30 @@ export function definirDrive(url) {
     const m = midias.find((x) => x.id === li.dataset.id);
     if (m) configurarBaixar(li.querySelector('[data-acao="baixar"]'), m);
   });
+}
+
+/** Cartão do Trello ligado ao conteúdo (id e link), ou nada. */
+export function definirTrello({ cartao, url }) {
+  trello = { cartao: cartao || null, url: url || null };
+  lista.querySelectorAll('.midia').forEach((li) => {
+    const m = midias.find((x) => x.id === li.dataset.id);
+    if (m) configurarDestinos(li, m);
+  });
+}
+
+// "✓ No Trello" (link para o cartão) depois de enviado; mandar de novo pede confirmação.
+function configurarDestinos(li, m) {
+  const feito = li.querySelector('[data-feito="trello"]');
+  const botao = li.querySelector('[data-acao="trello"]');
+  const enviado = Boolean(m.trello_enviado_em);
+  feito.hidden = !enviado;
+  feito.href = trello.url || m.trello_anexo_url || '#';
+  feito.title = enviado ? `Enviado em ${new Date(m.trello_enviado_em).toLocaleString('pt-BR')}`
+    + (m.trello_como === 'link' ? ' (link: o arquivo passa de 10 MB, limite do Trello)' : '') : '';
+  botao.hidden = !trello.cartao || (expirou(m.expira_em) && !enviado);
+  botao.textContent = enviado ? 'Enviar de novo' : 'Enviar pro Trello';
+  delete botao.dataset.confirmar;
+  li.querySelector('.midia-destinos').hidden = !trello.cartao && !enviado;
 }
 
 function configurarBaixar(link, m) {
@@ -211,6 +236,7 @@ function desenhar() {
     li.querySelector('.midia-tamanho').textContent =
       `${m.tipo === 'video' ? 'Vídeo' : 'Imagem'}, ${tamanhoLegivel(Number(m.tamanho_mb))}`;
     configurarBaixar(li.querySelector('[data-acao="baixar"]'), m);
+    configurarDestinos(li, m);
     li.querySelector('[data-acao="antes"]').disabled = i === 0;
     li.querySelector('[data-acao="depois"]').disabled = i === midias.length - 1;
     li.querySelector('[data-acao="antes"]').hidden = midias.length < 2;
@@ -263,6 +289,38 @@ async function aoClicarNaLista(e) {
   if (acao === 'antes') return mover(i, i - 1, botao);
   if (acao === 'depois') return mover(i, i + 1, botao);
   if (acao === 'remover') return remover(i, botao);
+  if (acao === 'trello') return enviarProTrello(i, botao);
+}
+
+async function enviarProTrello(i, botao) {
+  const m = midias[i];
+  const deNovo = Boolean(m.trello_enviado_em);
+  // Já está no cartão: dois cliques, para não duplicar o anexo sem querer.
+  if (deNovo && !botao.dataset.confirmar) {
+    botao.dataset.confirmar = '1';
+    botao.textContent = 'Confirmar envio';
+    setTimeout(() => {
+      if (!botao.isConnected || !botao.dataset.confirmar) return;
+      delete botao.dataset.confirmar;
+      botao.textContent = 'Enviar de novo';
+    }, 4000);
+    return;
+  }
+  botao.disabled = true;
+  botao.textContent = 'Enviando…';
+  try {
+    const { midia, como } = await anexarNoTrello(m.id, deNovo);
+    Object.assign(m, midia);
+    avisar(como === 'link'
+      ? 'Passou de 10 MB (limite do Trello): foi o link do arquivo no sistema.'
+      : 'Arquivo anexado no cartão do Trello.');
+  } catch (err) {
+    aoErro(err.message);
+  } finally {
+    botao.disabled = false;
+    const li = botao.closest('.midia');
+    if (li) configurarDestinos(li, m);
+  }
 }
 
 async function mover(de, para, botao) {

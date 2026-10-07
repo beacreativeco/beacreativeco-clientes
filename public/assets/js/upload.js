@@ -116,6 +116,11 @@ export async function excluirMidia(midiaId) {
   await chamar('/api/midias/excluir', { midia_id: midiaId });
 }
 
+// Anexa no cartão do Trello do conteúdo; devolve a linha de `midias` atualizada.
+export async function anexarNoTrello(midiaId, deNovo = false) {
+  return chamar('/api/trello/anexar', { midia_id: midiaId, de_novo: deNovo });
+}
+
 // Arquivos da conversa (imagens e áudios) de um conteúdo que vai ser excluído.
 export async function limparArquivosDaConversa(conteudoId) {
   await chamar('/api/conversa/limpar', { conteudo_id: conteudoId });
