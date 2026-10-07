@@ -7,6 +7,7 @@ import {
 } from './conteudos.js';
 import { enviarArquivo, excluirMidia, anexarNoTrello } from './upload.js';
 import { otimizarImagem, otimizarVideo } from './otimizar.js';
+import { driveConfigurado, enviarProDrive, conectarDrive, prepararDrive } from './drive.js';
 
 const lista = document.getElementById('lista-midias');
 const fila = document.getElementById('fila-envio');
@@ -20,6 +21,10 @@ let midias = [];          // linhas de `midias` da versão atual, em ordem
 let formato = 'post';
 let driveUrl = '';        // com Drive, "Baixar" leva ao original de lá
 let trello = { cartao: null, url: null }; // cartão do conteúdo ("Enviar pro Trello" só com ele)
+let destinoDrive = { pastaUrl: '', nomeCliente: '', titulo: '' };
+// Originais (alta qualidade) dos arquivos enviados nesta página: o sistema só guarda a
+// versão comprimida, então "Enviar pro Drive" só tem o original enquanto a página está aberta.
+const originais = new Map(); // midia.id → File
 let envios = [];          // [{ arquivo, conteudoId, li, controle }]
 let enviando = false;
 let garantirConteudo;     // () => Promise<conteudoId> (cria o rascunho se ainda não existe)
@@ -44,6 +49,7 @@ export function iniciarMidias(opcoes) {
   });
   lista.addEventListener('click', aoClicarNaLista);
   fila.addEventListener('click', aoClicarNaFila);
+  prepararDrive();
   window.addEventListener('beforeunload', (e) => {
     if (envios.length) e.preventDefault();
   });
@@ -85,19 +91,38 @@ export function definirTrello({ cartao, url }) {
   });
 }
 
-// "✓ No Trello" (link para o cartão) depois de enviado; mandar de novo pede confirmação.
+/** Pasta do Drive do cliente e o título do conteúdo (nome do arquivo no Drive). */
+export function definirDestinoDrive(destino) {
+  destinoDrive = { ...destinoDrive, ...destino };
+}
+
+const quando = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+// "✓ No Trello" / "✓ No Drive" (com link) depois de enviado; mandar de novo pede confirmação.
 function configurarDestinos(li, m) {
-  const feito = li.querySelector('[data-feito="trello"]');
-  const botao = li.querySelector('[data-acao="trello"]');
-  const enviado = Boolean(m.trello_enviado_em);
-  feito.hidden = !enviado;
-  feito.href = trello.url || m.trello_anexo_url || '#';
-  feito.title = enviado ? `Enviado em ${new Date(m.trello_enviado_em).toLocaleString('pt-BR')}`
+  const feitoTrello = li.querySelector('[data-feito="trello"]');
+  const botaoTrello = li.querySelector('[data-acao="trello"]');
+  const noTrello = Boolean(m.trello_enviado_em);
+  feitoTrello.hidden = !noTrello;
+  feitoTrello.href = trello.url || m.trello_anexo_url || '#';
+  feitoTrello.title = noTrello ? `Enviado em ${quando(m.trello_enviado_em)}`
     + (m.trello_como === 'link' ? ' (link: o arquivo passa de 10 MB, limite do Trello)' : '') : '';
-  botao.hidden = !trello.cartao || (expirou(m.expira_em) && !enviado);
-  botao.textContent = enviado ? 'Enviar de novo' : 'Enviar pro Trello';
-  delete botao.dataset.confirmar;
-  li.querySelector('.midia-destinos').hidden = !trello.cartao && !enviado;
+  botaoTrello.hidden = !trello.cartao || (expirou(m.expira_em) && !noTrello);
+  botaoTrello.textContent = noTrello ? 'Trello de novo' : 'Enviar pro Trello';
+  delete botaoTrello.dataset.confirmar;
+
+  const feitoDrive = li.querySelector('[data-feito="drive"]');
+  const botaoDrive = li.querySelector('[data-acao="drive"]');
+  const noDrive = Boolean(m.drive_enviado_em);
+  feitoDrive.hidden = !noDrive;
+  feitoDrive.href = m.drive_arquivo_url || '#';
+  feitoDrive.textContent = noDrive && m.drive_original === false ? '✓ No Drive (versão do sistema)' : '✓ No Drive';
+  feitoDrive.title = noDrive ? `Enviado em ${quando(m.drive_enviado_em)}` : '';
+  botaoDrive.hidden = !driveConfigurado();
+  botaoDrive.textContent = noDrive ? 'Drive de novo' : 'Enviar pro Drive';
+  delete botaoDrive.dataset.confirmar;
+
+  li.querySelector('.midia-destinos').hidden = botaoTrello.hidden && botaoDrive.hidden && !noTrello && !noDrive;
 }
 
 function configurarBaixar(link, m) {
@@ -194,6 +219,7 @@ async function processarFila() {
         sinal: envio.controle.signal,
         aoProgredir: etapa('Enviando'),
       });
+      originais.set(midia.id, envio.arquivo);
       midias.push(midia);
       desenhar();
       avisar(`${envio.arquivo.name} enviado.`);
@@ -290,6 +316,104 @@ async function aoClicarNaLista(e) {
   if (acao === 'depois') return mover(i, i + 1, botao);
   if (acao === 'remover') return remover(i, botao);
   if (acao === 'trello') return enviarProTrello(i, botao);
+  if (acao === 'drive') return pedirDrive(i, botao);
+  if (acao === 'drive-escolher') return escolherOriginal(i);
+  if (acao === 'drive-sistema') return mandarProDrive(i, null);
+  if (acao === 'drive-cancelar') botao.closest('.midia-escolha-original').hidden = true;
+}
+
+// ---------------------------------------------------------------- Drive
+
+// Arquivo escolhido à mão (o original que está no computador da Bea).
+const escolhaOriginal = Object.assign(document.createElement('input'), { type: 'file', hidden: true });
+document.body.append(escolhaOriginal);
+
+async function pedirDrive(i, botao) {
+  const m = midias[i];
+  // Já está no Drive: dois cliques, para não duplicar sem querer.
+  if (m.drive_enviado_em && !botao.dataset.confirmar) {
+    botao.dataset.confirmar = '1';
+    botao.textContent = 'Confirmar envio';
+    setTimeout(() => {
+      if (!botao.isConnected || !botao.dataset.confirmar) return;
+      delete botao.dataset.confirmar;
+      botao.textContent = 'Drive de novo';
+    }, 4000);
+    return;
+  }
+  delete botao.dataset.confirmar;
+  // Login do Google já no clique (a janelinha só abre como resposta direta a um clique).
+  try {
+    await conectarDrive();
+  } catch (err) {
+    aoErro(err.message);
+    return;
+  }
+  const original = originais.get(m.id);
+  if (original) return mandarProDrive(i, original);
+  // Sem o original na página: a Bea escolhe o arquivo ou manda a versão do sistema.
+  botao.textContent = m.drive_enviado_em ? 'Drive de novo' : 'Enviar pro Drive';
+  botao.closest('.midia').querySelector('.midia-escolha-original').hidden = false;
+}
+
+function escolherOriginal(i) {
+  const m = midias[i];
+  escolhaOriginal.accept = m.tipo === 'video' ? 'video/*' : 'image/*';
+  escolhaOriginal.onchange = () => {
+    const arquivo = escolhaOriginal.files[0];
+    escolhaOriginal.value = '';
+    if (!arquivo) return;
+    if (!arquivo.type.startsWith(m.tipo === 'video' ? 'video/' : 'image/')) {
+      aoErro(`Escolha ${m.tipo === 'video' ? 'um vídeo' : 'uma imagem'}: este arquivo é ${m.tipo === 'video' ? 'vídeo' : 'imagem'}.`);
+      return;
+    }
+    mandarProDrive(i, arquivo);
+  };
+  escolhaOriginal.click();
+}
+
+// `original`: File em alta qualidade; null = a versão comprimida que está no sistema.
+async function mandarProDrive(i, original) {
+  const m = midias[i];
+  const li = lista.querySelector(`.midia[data-id="${m.id}"]`);
+  const botao = li?.querySelector('[data-acao="drive"]');
+  if (li) li.querySelector('.midia-escolha-original').hidden = true;
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Drive…';
+  }
+  try {
+    let arquivo = original;
+    let nome = original?.name;
+    if (!arquivo) {
+      const resp = await fetch(m.arquivo_url);
+      if (!resp.ok) throw new Error('O arquivo não está mais no sistema (expirou).');
+      arquivo = await resp.blob();
+      const titulo = (destinoDrive.titulo || 'Conteúdo').replace(/[\\/:*?"<>|]+/g, ' ').trim();
+      nome = `${titulo} - ${m.tipo === 'video' ? 'vídeo' : 'imagem'} ${i + 1}.${m.arquivo_url.split('.').pop()}`;
+    }
+    const enviado = await enviarProDrive(arquivo, {
+      nome,
+      pastaUrl: destinoDrive.pastaUrl,
+      nomeCliente: destinoDrive.nomeCliente,
+      aoProgredir: (fracao) => { if (botao) botao.textContent = `Drive ${Math.floor(fracao * 100)}%`; },
+    });
+    const { data, error } = await supabase.from('midias').update({
+      drive_arquivo_id: enviado.id,
+      drive_arquivo_url: enviado.url,
+      drive_enviado_em: new Date().toISOString(),
+      drive_original: Boolean(original),
+    }).eq('id', m.id).select().single();
+    if (error) throw new Error('Foi pro Drive, mas não deu para registrar aqui. Recarregue a página.');
+    Object.assign(m, data);
+    avisar((original ? 'Original enviado pro Drive.' : 'Versão do sistema enviada pro Drive.')
+      + (enviado.outraPasta ? ' Foi na pasta que você escolheu, não na do cadastro do cliente.' : ''));
+  } catch (err) {
+    aoErro(err.message);
+  } finally {
+    if (botao) botao.disabled = false;
+    if (li?.isConnected) configurarDestinos(li, m);
+  }
 }
 
 async function enviarProTrello(i, botao) {
@@ -302,7 +426,7 @@ async function enviarProTrello(i, botao) {
     setTimeout(() => {
       if (!botao.isConnected || !botao.dataset.confirmar) return;
       delete botao.dataset.confirmar;
-      botao.textContent = 'Enviar de novo';
+      botao.textContent = 'Trello de novo';
     }, 4000);
     return;
   }

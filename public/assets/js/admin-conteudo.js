@@ -3,7 +3,7 @@ import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { SITUACOES, LIMITE_LEGENDA, dataHora, parametro, problemaDasMidias } from './conteudos.js';
 import {
-  iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, midiasAtuais, enviandoArquivos, excluirTodas,
+  iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, definirDestinoDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
 import { criarConversa } from './conversa.js';
@@ -33,6 +33,7 @@ iniciarPagina('admin', async () => {
   form.querySelectorAll('input[name="formato"]').forEach((r) =>
     r.addEventListener('change', () => definirFormato(form.formato.value)));
   form.drive_url.addEventListener('input', () => definirDrive(form.drive_url.value.trim()));
+  form.titulo.addEventListener('input', () => definirDestinoDrive({ titulo: form.titulo.value.trim() }));
   iniciarMidias({
     // Arquivo precisa de um conteúdo salvo: cria o rascunho na hora, se for novo.
     garantirConteudo: async () => {
@@ -59,7 +60,7 @@ iniciarPagina('admin', async () => {
 
 async function carregarCliente(id) {
   const { data, error } = await supabase
-    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil, contato_nome, contato_foto_url').eq('id', id).maybeSingle();
+    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil, contato_nome, contato_foto_url, drive_pasta_url').eq('id', id).maybeSingle();
   if (error) throw error;
   cliente = data;
 }
@@ -159,6 +160,8 @@ function desenhar() {
 
   definirFormato(form.formato.value);
   definirDrive(form.drive_url.value.trim());
+  // "Enviar pro Drive": pasta do cadastro do cliente; o título vira o nome do arquivo.
+  definirDestinoDrive({ pastaUrl: cliente.drive_pasta_url ?? '', nomeCliente: cliente.nome, titulo: form.titulo.value.trim() });
   atualizarContador();
   atualizarSituacao();
   atualizarPrevia();

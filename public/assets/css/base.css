@@ -1090,6 +1090,26 @@ a.cliente-nome:hover {
 
 .midia-feito:hover { text-decoration: underline; }
 
+/* "Enviar pro Drive" sem o original na página: escolher o arquivo ou mandar a do sistema. */
+.midia-escolha-original {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(123, 133, 206, 0.12);
+  font-size: 0.8125rem;
+}
+
+.midia-escolha-original p { margin: 0; }
+
+.midia-escolha-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.midia-escolha-botoes .botao-link { font-size: 0.8125rem; }
+
 .botao-icone {
   font: inherit;
   font-size: 1.25rem;
