@@ -8,5 +8,5 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_ihe5BwV3tW0q9vnvcJQSEw_QVdJR-oM
 // proteção é a lista de origens/sites autorizados no Google Cloud. Sem a chave, o botão
 // do Drive não aparece.
 export const GOOGLE_CLIENT_ID = '493593349658-k0289urhpknpt5moe7jpr9ht64bl65aj.apps.googleusercontent.com';
-export const GOOGLE_API_KEY = '';
+export const GOOGLE_API_KEY = 'AIzaSyBZAC81PQJahcPPSFDH-JGBuhh-ZwybDGM';
 export const GOOGLE_APP_ID = '493593349658';
