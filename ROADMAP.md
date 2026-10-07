@@ -47,9 +47,9 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - [x] Páginas do cliente revisadas (360, 390 e computador): "Pedir ajuste" não quebra mais em duas linhas
 4. [ ] **Página da Bea: clientes, calendário e Trello** (o sistema complementa o Trello, não substitui: conversa nos dois sentidos)
    - [x] 4a. Calendário (versão 0.7.0): `/admin/calendario/`, entregas do mês de todos os clientes com cor por cliente, total e aprovadas por cliente (filtra ao tocar), grade no computador e lista por dia no celular, "Sem data"; navegação Clientes · Calendário · Mensagens no painel
-   - [ ] 4b. Trello ↔ sistema
+   - [x] 4b. Trello ↔ sistema
      - [x] Trello → sistema (versão 0.8.0, migração `20261011000000`): cadastro do cliente escolhe o quadro; `/api/trello/sincronizar` cria rascunhos dos cartões das listas de entregas, atualiza título/data (formato só em rascunho), etapa e link do cartão em `conteudos_internos`; rascunho vazio some quando o cartão sai, o resto fica com aviso; sincroniza ao abrir o calendário e pelo botão
-     - [ ] Sistema → Trello (escrito na versão 0.8.0, migração `20261012000000`; **falta testar** num quadro de teste na conta da Bea, para não escrever nos quadros das clientes)
+     - [x] Sistema → Trello (versão 0.8.0, migração `20261012000000`; testado no ar em 06/10/2026 no "quadro - teste", ligado ao cliente victordev: etiquetas AGUARDANDO APROVAÇÃO e APROVADO e comentário da aprovação funcionando; o anexo do link e o comentário do pedido de ajuste ficam para conferir no uso)
        - Enviar ao cliente: etiqueta AGUARDANDO APROVAÇÃO (sai quando o cliente decide ou a Bea retira)
        - Aprovado: etiqueta APROVADO e comentário "Sistema de aprovação: ✦ Aprovado por …"
        - Pedido de ajuste: comentário com o texto (áudio/imagem: aviso para ver no sistema)
