@@ -124,6 +124,8 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
 5h. [x] **Avisar o cliente no WhatsApp** (decisão de 07/10: só WhatsApp, mensagem simples)
    - Botão "Avisar no WhatsApp" no rodapé do editor enquanto o conteúdo está em aprovação: abre o `wa.me` no número do cadastro do cliente com "Oi, [nome]! Tem conteúdo novo pra você aprovar: “[título]”. Dá uma olhada aqui: [link]" (nova versão: "Tem uma nova versão de …")
    - Sem número no cadastro, o WhatsApp abre para escolher o contato. Link da página do conteúdo: logado, abre direto; sem login, entra e cai na lista
+   - O `wa.me` abre o WhatsApp logado no aparelho de quem clica (o Business da Bea no celular, ou o WhatsApp Web com o número dela)
+   - **Envio automático: pesquisado em 07/10/2026 e adiado** (decidir depois). Cloud API da Meta, modelo de mensagem aprovado (categoria utilidade, ~US$ 0,007–0,008 por mensagem no Brasil). Ou número novo só para o sistema (direto com a Meta, sem mensalidade) ou o mesmo número do Business da Bea (coexistência, em geral via parceiro BSP pago). Precisa de Portfólio empresarial na Meta; envio só pela produção
 6. [ ] **Avisos por e-mail**
 7. [x] **Publicação (versão 1.0.0, 06/10/2026):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
    - Testado no ar: upload, pasta `trabalho/`, aprovação do cliente movendo os arquivos para `aprovados/`
