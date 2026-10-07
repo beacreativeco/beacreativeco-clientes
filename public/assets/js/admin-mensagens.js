@@ -33,6 +33,7 @@ async function carregar() {
     const badge = li.querySelector('.nao-lidas');
     badge.hidden = c.nao_lidas === 0;
     badge.textContent = String(c.nao_lidas);
+    badge.setAttribute('aria-label', `${c.nao_lidas} ${c.nao_lidas === 1 ? 'mensagem não lida' : 'mensagens não lidas'}`);
     return li;
   }));
 }

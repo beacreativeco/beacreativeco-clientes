@@ -32,6 +32,7 @@ body {
 }
 
 body {
+  overflow-x: clip; /* nada no sistema pode rolar para o lado */
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--cor-fundo);
@@ -568,6 +569,8 @@ textarea:focus-visible {
   flex: none;
   white-space: nowrap;
 }
+
+.cabecalho-secao > div { min-width: 0; }
 
 .cabecalho-secao h1 {
   font-size: clamp(2rem, 8vw, 3rem);
@@ -2502,45 +2505,120 @@ a.cliente-nome:hover {
 }
 
 /* ---------- Caixa de mensagens (Bea) ---------- */
+/* Cada conversa é um cartão tocável: cliente, data, título do conteúdo, prévia em até duas
+   linhas com "…" e o indicador de não lida. Nada aqui pode alargar a página no celular:
+   os itens flex/grade têm min-width: 0 e o texto quebra ou é cortado. */
 .caixa {
-  list-style: none;
-  margin: 16px 0 0;
+  display: grid;
+  gap: var(--esp-2);
+  margin: var(--esp-4) 0 0;
   padding: 0;
-  border-top: 1px solid var(--espresso);
+  list-style: none;
 }
 
-.caixa-item { border-bottom: 1px solid var(--espresso); }
+.caixa-item { min-width: 0; }
 
 .caixa-link {
   display: grid;
-  gap: 2px;
-  padding: 14px 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  min-width: 0;
+  padding: var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
   color: inherit;
   text-decoration: none;
+  transition: background-color var(--dur) var(--curva), border-color var(--dur) var(--curva),
+    transform var(--dur-rapida) var(--curva);
 }
 
-.caixa-link:hover .caixa-titulo { text-decoration: underline; }
+.caixa-link:hover {
+  border-color: var(--cor-borda-forte);
+  background: var(--cor-superficie-hover);
+}
+
+.caixa-link:active { transform: scale(0.99); }
 
 .caixa-topo,
 .caixa-rodape {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: var(--esp-2);
+  min-width: 0;
 }
 
-.caixa-cliente { font-weight: 600; }
-
-.caixa-quando,
-.caixa-titulo { font-size: 0.875rem; color: var(--cor-texto-2); }
-
-.caixa-previa {
+.caixa-cliente {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
+  font-weight: 600;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+.caixa-quando {
+  flex: none;
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
+.caixa-titulo {
+  overflow: hidden;
+  font-size: var(--fs-pequeno);
+  color: var(--cor-texto-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caixa-rodape { align-items: flex-start; }
+
+/* Prévia: até duas linhas, com "…" no fim; palavras e links longos quebram em vez de alargar. */
+.caixa-previa {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-pequeno);
+  line-height: 1.45;
+}
+
+.caixa-rodape .nao-lidas { flex: none; margin-top: 1px; }
+
+/* Não lida: bolinha periwinkle antes do nome, prévia em negrito e borda de destaque. */
+.caixa-ponto {
+  flex: none;
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cor-acao);
+}
+
+.caixa-item.tem-novas .caixa-ponto { display: block; }
 .caixa-item.tem-novas .caixa-previa { font-weight: 600; }
+.caixa-item.tem-novas .caixa-link { border-color: var(--cor-acao); }
+
+/* "Avisar no navegador": no celular vira só o sino (44px), com a dica. */
+.botao-sino svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 599px) {
+  .botao-sino { position: relative; width: 44px; padding: 0; }
+  .botao-sino .botao-texto { display: none; }
+}
 
 /* Imagens de referência na conversa */
 .conversa-anexar {

@@ -37,7 +37,7 @@
           <h1>Mensagens</h1>
           <p id="resumo" class="subtitulo"></p>
         </div>
-        <button id="ativar-notificacoes" class="botao-secundario" type="button" hidden>Avisar no navegador</button>
+        <button id="ativar-notificacoes" class="botao-secundario botao-sino" type="button" aria-label="Avisar no navegador" data-dica="Avisar no navegador" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span class="botao-texto">Avisar no navegador</span></button>
       </div>
       <p id="notificacoes-info" class="dica" hidden></p>
 
@@ -54,6 +54,7 @@
     <li class="caixa-item">
       <a class="caixa-link">
         <span class="caixa-topo">
+          <span class="caixa-ponto" aria-hidden="true"></span>
           <span class="caixa-cliente"></span>
           <span class="caixa-quando"></span>
         </span>
