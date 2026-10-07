@@ -24,7 +24,10 @@
     <button id="sair" class="botao-link" type="button">Sair</button>
   </header>
 
-  <div id="carregando" class="carregando" role="status"><img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256"><span class="carregando-texto">Carregando…</span></div>
+  <div id="carregando" class="carregando" role="status">
+    <span class="so-leitor">Carregando…</span>
+    <div class="esqueleto esqueleto-lista" aria-hidden="true"><div class="esq-cabecalho"><span class="esq esq-titulo"></span><span class="esq esq-botao"></span></div><div class="esq-linhas"><div class="esq-item"><span class="esq-texto"><span class="esq esq-nome"></span><span class="esq esq-linha curta"></span></span><span class="esq esq-chip"></span></div><div class="esq-item"><span class="esq-texto"><span class="esq esq-nome"></span><span class="esq esq-linha curta"></span></span><span class="esq esq-chip"></span></div><div class="esq-item"><span class="esq-texto"><span class="esq esq-nome"></span><span class="esq esq-linha curta"></span></span><span class="esq esq-chip"></span></div><div class="esq-item"><span class="esq-texto"><span class="esq esq-nome"></span><span class="esq esq-linha curta"></span></span><span class="esq esq-chip"></span></div><div class="esq-item"><span class="esq-texto"><span class="esq esq-nome"></span><span class="esq esq-linha curta"></span></span><span class="esq esq-chip"></span></div></div></div>
+  </div>
 
   <div id="app" hidden>
     <main class="conteudo-pagina">
@@ -36,6 +39,7 @@
       <div id="lista-vazia" class="vazio" hidden>
         <img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256">
         <p>Nenhum cliente ainda. Cadastre o primeiro para começar a enviar conteúdos para aprovação.</p>
+        <button class="botao-secundario vazio-acao" type="button" data-aciona="novo-cliente">Cadastrar o primeiro cliente</button>
       </div>
       <ul id="lista-clientes" class="lista-clientes"></ul>
 

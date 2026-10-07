@@ -120,23 +120,46 @@ async function montarPerfilCliente({ session, perfil }) {
   }, { linkPerfil: '/cliente/perfil/' });
 }
 
+// Erro ao abrir a página: diz o que aconteceu e o que fazer, no lugar do esqueleto.
 function mostrarFalhaAoCarregar(container) {
-  const monograma = container.querySelector('.marca-monograma');
-  container.replaceChildren(...(monograma ? [monograma] : []));
+  const semInternet = !navigator.onLine;
   container.classList.add('falha');
+  container.setAttribute('role', 'alert');
+
+  const titulo = document.createElement('h1');
+  titulo.className = 'falha-titulo';
+  titulo.textContent = semInternet ? 'Sem internet' : 'Não foi possível abrir esta página';
 
   const texto = document.createElement('p');
-  texto.textContent = 'Não foi possível carregar a página. Confira sua internet e tente de novo.';
+  texto.textContent = semInternet
+    ? 'Confira o Wi-Fi ou os dados do celular e tente de novo.'
+    : 'Pode ter sido uma falha rápida de conexão. Tente de novo; se continuar, avise a Bea.';
 
-  const botao = document.createElement('button');
-  botao.type = 'button';
-  botao.className = 'botao botao-compacto';
-  botao.textContent = 'Tentar de novo';
-  botao.addEventListener('click', () => window.location.reload());
+  const tentar = document.createElement('button');
+  tentar.type = 'button';
+  tentar.className = 'botao botao-compacto';
+  tentar.textContent = 'Tentar de novo';
+  tentar.addEventListener('click', () => window.location.reload());
 
-  container.append(texto, botao);
+  const inicio = Object.assign(document.createElement('a'), { href: '/', className: 'botao-secundario', textContent: 'Voltar ao início' });
+
+  const acoes = document.createElement('div');
+  acoes.className = 'falha-acoes';
+  acoes.append(tentar, inicio);
+
+  const caixa = document.createElement('div');
+  caixa.className = 'falha-carregar';
+  caixa.append(titulo, texto, acoes);
+  container.replaceChildren(caixa);
   container.hidden = false;
 }
+
+// Botões das telas vazias ("Cadastrar o primeiro cliente"…) acionam o botão da própria
+// tela que faz isso, pelo id em data-aciona: nenhuma lógica repetida.
+document.addEventListener('click', (e) => {
+  const atalho = e.target.closest('[data-aciona]');
+  if (atalho) document.getElementById(atalho.dataset.aciona)?.click();
+});
 
 /**
  * Aviso rápido no rodapé da tela (salvo, convite enviado, erro...).

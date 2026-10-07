@@ -24,7 +24,10 @@
     <button id="sair" class="botao-link" type="button">Sair</button>
   </header>
 
-  <div id="carregando" class="carregando" role="status"><img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256"><span class="carregando-texto">Carregando…</span></div>
+  <div id="carregando" class="carregando" role="status">
+    <span class="so-leitor">Carregando…</span>
+    <div class="esqueleto esqueleto-calendario" aria-hidden="true"><div class="esq-cabecalho"><span class="esq esq-titulo"></span></div><div class="esq-chips"><span class="esq esq-chip"></span><span class="esq esq-chip"></span><span class="esq esq-chip"></span><span class="esq esq-chip"></span></div><div class="esq-calendario"><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span><span class="esq"></span></div></div>
+  </div>
 
   <div id="app" hidden>
     <main class="conteudo-pagina calendario-pagina">
@@ -58,6 +61,7 @@
       <div id="cal-vazio" class="vazio" hidden>
         <img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256">
         <p>Nenhuma entrega com data neste mês.</p>
+        <button class="botao-secundario vazio-acao" type="button" data-aciona="mes-hoje">Ver o mês de hoje</button>
       </div>
 
       <!-- Computador: grade do mês. Celular: lista por dia (só os dias com entrega). -->

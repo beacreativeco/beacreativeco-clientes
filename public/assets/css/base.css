@@ -246,21 +246,50 @@ textarea:focus-visible {
   margin-top: 20px;
 }
 
+/* Avisos dentro da tela (erro de formulário, confirmação): ícone + texto, em par de cores. */
 .aviso {
-  font-size: 0.875rem;
-  padding: 10px 12px;
-  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  font-size: var(--fs-pequeno);
+  line-height: 1.45;
+  padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--raio-m);
   margin-bottom: var(--espaco);
+}
+
+.aviso::before {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .aviso.erro {
   background: var(--cor-erro-fundo);
-  color: var(--erro);
+  color: var(--cor-erro-texto);
+}
+
+.aviso.erro::before {
+  content: "!";
+  background: var(--cor-erro-texto);
+  color: var(--cor-erro-fundo);
 }
 
 .aviso.ok {
   background: var(--cor-destaque-fundo);
-  color: var(--espresso);
+  color: var(--cor-destaque-texto);
+}
+
+.aviso.ok::before {
+  content: "✓";
+  background: var(--cor-destaque-texto);
+  color: var(--cor-destaque-fundo);
 }
 
 /* ---------- Topo das áreas logadas ---------- */
@@ -319,58 +348,140 @@ textarea:focus-visible {
   margin: 0 auto;
 }
 
-/* Carregando: o monograma b✦ respirando no meio da tela. */
-.carregando {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: calc(100dvh - 60px - var(--altura-barra, 0px));
-}
-
 .marca-monograma {
   display: block;
   width: auto;
   height: 64px;
 }
 
-.carregando .marca-monograma {
-  animation: respirar 1.6s ease-in-out infinite;
+/* ---------- Carregando: esqueleto da própria tela ---------- */
+/* Cada página desenha, enquanto carrega, blocos no lugar do que vai aparecer (lista,
+   agenda, editor, calendário, perfil). O brilho passa devagar; parado para quem
+   desativou animações. */
+.carregando {
+  min-height: calc(100dvh - 60px - var(--altura-barra, 0px));
 }
 
-.carregando.falha .marca-monograma {
-  animation: none;
-  opacity: 0.5;
+.esqueleto {
+  display: grid;
+  gap: var(--esp-6);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--esp-8) var(--espaco);
 }
 
-@keyframes respirar {
-  50% { opacity: 0.35; transform: scale(0.94); }
+.esqueleto-calendario { max-width: 1200px; }
+.esqueleto-perfil { max-width: 560px; }
+
+.esq {
+  display: block;
+  border-radius: var(--raio-p);
+  background: linear-gradient(100deg, var(--cor-esqueleto) 40%, var(--cor-esqueleto-brilho) 50%, var(--cor-esqueleto) 60%)
+    var(--cor-esqueleto);
+  background-size: 300% 100%;
+  animation: brilho 1.6s linear infinite;
+}
+
+@keyframes brilho {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+.esq-cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.esq-titulo { width: min(55%, 320px); height: 44px; border-radius: var(--raio-m); }
+.esq-botao { width: 140px; height: 44px; border-radius: var(--raio-m); }
+.esq-linha { width: 70%; height: 12px; }
+.esq-linha.curta { width: 40%; }
+.esq-linha.mini { width: 120px; }
+.esq-nome { width: min(60%, 240px); height: 22px; }
+.esq-chip { flex: none; width: 92px; height: 26px; border-radius: var(--raio-p); }
+.esq-data { flex: none; width: 48px; height: 56px; border-radius: var(--raio-m); }
+.esq-bloco { height: 160px; border-radius: var(--raio-g); }
+.esq-campo { height: 48px; border-radius: var(--raio-m); }
+.esq-cartao { height: 220px; border-radius: var(--raio-g); }
+.esq-previa { width: 100%; max-width: 340px; aspect-ratio: 9 / 16; margin: 0 auto; border-radius: var(--raio-g); }
+
+.esq-linhas { display: grid; }
+
+.esq-item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+  padding: var(--esp-5) 0;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.esq-texto {
+  display: grid;
+  flex: 1;
+  gap: var(--esp-2);
+}
+
+.esq-grade-editor,
+.esq-coluna {
+  display: grid;
+  gap: var(--esp-4);
+}
+
+@media (min-width: 900px) {
+  .esqueleto-editor { max-width: 1180px; }
+  .esq-grade-editor { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--esp-12); align-items: start; }
+}
+
+.esq-chips { display: flex; flex-wrap: wrap; gap: var(--esp-2); }
+
+.esq-calendario {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--esp-1);
+}
+
+.esq-calendario .esq { height: 88px; border-radius: var(--raio-p); }
+
+@media (max-width: 599px) {
+  .esq-calendario .esq { height: 56px; }
+  .esq-botao { width: 110px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .carregando .marca-monograma { animation: none; }
+  .esq { animation: none; }
 }
 
-.carregando-texto {
-  font-size: 0.8125rem;
-  opacity: 0.6;
-}
-
-/* ---------- Falha ao carregar ---------- */
+/* ---------- Falha ao carregar (ui.js) ---------- */
 .carregando.falha {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espaco);
-  padding: var(--espaco);
-  text-align: center;
+  display: grid;
+  place-items: center;
+  padding: var(--esp-8) var(--espaco);
 }
 
-.carregando.falha p {
-  max-width: 32ch;
+.falha-carregar {
+  display: grid;
+  justify-items: start;
+  gap: var(--esp-3);
+  max-width: 40ch;
+}
+
+.falha-titulo {
   margin: 0;
+  font-size: var(--fs-titulo);
+}
+
+.falha-carregar p {
+  margin: 0;
+  color: var(--cor-texto-2);
+}
+
+.falha-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-3);
+  margin-top: var(--esp-2);
 }
 
 /* ---------- Botões menores ---------- */
@@ -481,22 +592,31 @@ textarea:focus-visible {
 .espaco .dica { margin: 8px 0 0; }
 
 /* Tela vazia: monograma e um texto curto, no centro. */
+/* Tela vazia: monograma, o que está acontecendo e o que dá para fazer agora. */
 .vazio {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  max-width: 36ch;
-  margin: 56px auto;
+  gap: var(--esp-4);
+  max-width: 44ch;
+  margin: var(--esp-10) auto;
+  padding: var(--esp-10) var(--esp-6);
+  border: 1px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-g);
   text-align: center;
 }
 
 .vazio .marca-monograma {
-  height: 56px;
-  opacity: 0.85;
+  height: 48px;
+  opacity: 0.9;
 }
 
-.vazio p { margin: 0; }
+.vazio p {
+  margin: 0;
+  color: var(--cor-texto-2);
+}
+
+.vazio-acao { margin-top: var(--esp-1); }
 
 .lista-clientes {
   list-style: none;
