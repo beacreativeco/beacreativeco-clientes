@@ -1419,7 +1419,7 @@ a.cliente-nome:hover {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  font-size: 0.8125rem;
+  font-size: var(--fs-legenda);
 }
 
 .midia-posicao {
@@ -1432,37 +1432,248 @@ a.cliente-nome:hover {
   color: var(--cor-texto-2);
 }
 
+/* Embaixo da miniatura: ordem de um lado, ações do outro; integrações numa linha própria. */
+.midia-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+.midia-ordem,
 .midia-acoes {
   display: flex;
-  flex-wrap: wrap;
+  gap: var(--esp-1);
+}
+
+.midia-acoes { margin-left: auto; }
+
+/* Botão de ícone: 44 × 44 (área de toque), todos do mesmo tamanho. */
+.botao-icone {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 4px 12px;
-}
-
-.midia-acoes .botao-link {
-  font-size: 0.8125rem;
-}
-
-/* Enviar pro Trello / Drive, e o "✓" de já enviado. */
-.midia-destinos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
-  padding-top: 6px;
-  border-top: 1px solid color-mix(in srgb, var(--cor-texto) 12%, transparent);
-  font-size: 0.8125rem;
-}
-
-.midia-destinos .botao-link { font-size: 0.8125rem; }
-
-.midia-feito {
-  color: var(--periwinkle-escuro);
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 11px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--fs-legenda);
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--curva), border-color var(--dur) var(--curva),
+    color var(--dur) var(--curva);
 }
 
-.midia-feito:hover { text-decoration: underline; }
+.botao-icone svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.botao-icone:hover {
+  background: var(--cor-superficie-hover);
+  border-color: var(--cor-texto-2);
+}
+
+.botao-icone:disabled {
+  background: transparent;
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-2);
+  cursor: default;
+}
+
+/* Remover: vermelho discreto; ao confirmar, mostra "Remover?" em vermelho cheio. */
+.botao-icone-perigo { color: var(--cor-erro); }
+
+.botao-icone-perigo:hover {
+  background: var(--cor-erro-fundo);
+  border-color: var(--cor-erro);
+}
+
+.botao-icone .confirmar-texto { display: none; }
+.botao-icone.confirmando .confirmar-texto { display: inline; }
+
+.botao-icone.confirmando {
+  background: var(--cor-acao);
+  border-color: transparent;
+  color: var(--cor-acao-texto);
+}
+
+.botao-icone-perigo.confirmando {
+  background: var(--cor-erro-texto);
+  color: var(--cor-erro-fundo);
+}
+
+/* Dica ao passar o mouse (e no foco do teclado), só onde há mouse. */
+@media (hover: hover) {
+  [data-dica]:not([data-dica=""]):hover::after,
+  [data-dica]:not([data-dica=""]):focus-visible::after {
+    content: attr(data-dica);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    z-index: var(--z-menu);
+    transform: translateX(-50%);
+    padding: 5px 9px;
+    border-radius: var(--raio-p);
+    background: var(--cor-moldura);
+    color: var(--cor-moldura-texto);
+    box-shadow: var(--sombra-2);
+    font: 500 0.75rem/1.3 var(--fonte-texto);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .confirmando[data-dica]::after { content: none; }
+}
+
+/* ---------- Integrações: Trello e Google Drive ---------- */
+.midia-integracoes {
+  display: grid;
+  gap: 6px;
+  padding-top: var(--esp-2);
+  border-top: 1px solid var(--cor-borda);
+}
+
+.integracao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.botao-integracao {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-height: 44px;
+  padding: 0 var(--esp-3);
+  overflow: hidden;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: var(--fs-legenda);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--curva), border-color var(--dur) var(--curva);
+}
+
+.botao-integracao:hover {
+  background: var(--cor-superficie-hover);
+  border-color: var(--cor-texto-2);
+}
+
+/* Ícones oficiais das marcas (só redimensionados, sem mudar cor ou proporção). */
+.integ-icone {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.integ-texto {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Estados: normal → enviando → enviado (✓, Abrir no…, reenviar) → erro (Tentar de novo). */
+.integracao .integ-abrir,
+.integracao .integ-de-novo { display: none; }
+
+.integracao[data-estado="enviado"] > .botao-integracao[data-acao] { display: none; }
+
+.integracao[data-estado="enviado"] .integ-abrir,
+.integracao[data-estado="enviado"] .integ-de-novo { display: inline-flex; }
+
+.integ-abrir {
+  border-color: transparent;
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+  overflow: visible;
+}
+
+.integ-abrir:hover {
+  background: var(--cor-destaque-fundo);
+  border-color: var(--cor-destaque-texto);
+}
+
+.integ-abrir .integ-texto::before {
+  content: "\2713\00a0";
+  font-weight: 700;
+}
+
+/* Enviando: a barra enche com a porcentagem (Drive) ou corre de um lado ao outro (Trello). */
+.integracao[data-estado="enviando"] > .botao-integracao[data-acao] {
+  cursor: progress;
+  border-color: var(--cor-acao);
+}
+
+.integracao[data-estado="enviando"] > .botao-integracao[data-acao]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--progresso, 0) * 100%);
+  background: var(--cor-destaque-fundo);
+  transition: width var(--dur) linear;
+}
+
+.integracao.sem-porcentagem > .botao-integracao[data-acao]::before {
+  width: 45%;
+  animation: barra-corre 1.1s var(--curva) infinite;
+}
+
+@keyframes barra-corre {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(240%); }
+}
+
+.integracao[data-estado="erro"] > .botao-integracao[data-acao] {
+  border-color: var(--cor-erro);
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro-texto);
+}
+
+/* ---------- Sincronizar com o Trello: o ícone gira enquanto busca ---------- */
+.botao-sincronizar .integ-icone { z-index: auto; }
+
+.icone-sincronizar {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.botao-sincronizar.sincronizando .icone-sincronizar { animation: girar 0.9s linear infinite; }
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
 
 /* "Enviar pro Drive" sem o original na página: escolher o arquivo ou mandar a do sistema. */
 .midia-escolha-original {
@@ -1483,30 +1694,6 @@ a.cliente-nome:hover {
 }
 
 .midia-escolha-botoes .botao-link { font-size: 0.8125rem; }
-
-.botao-icone {
-  font: inherit;
-  font-size: 1.25rem;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--espresso);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--espresso);
-  cursor: pointer;
-}
-
-.botao-icone:disabled {
-  color: var(--cor-texto-2);
-  border-color: var(--cor-borda);
-  cursor: default;
-}
-
-.botao-icone:focus-visible {
-  outline: 2px solid var(--periwinkle);
-  outline-offset: 2px;
-}
 
 /* Área de soltar arquivos */
 .soltar {

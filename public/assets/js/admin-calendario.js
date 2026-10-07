@@ -130,6 +130,8 @@ async function sincronizar(pedidoPelaBea) {
   sincronizando = true;
   const botao = $('sincronizar');
   botao.disabled = true;
+  botao.classList.add('sincronizando'); // o ícone gira enquanto busca
+  botao.setAttribute('aria-busy', 'true');
   mostrarStatus('Buscando no Trello…');
   try {
     const { resultado, em } = await chamarServidor('/api/trello/sincronizar', { metodo: 'POST', corpo: {} });
@@ -154,6 +156,8 @@ async function sincronizar(pedidoPelaBea) {
   } finally {
     sincronizando = false;
     botao.disabled = false;
+    botao.classList.remove('sincronizando');
+    botao.removeAttribute('aria-busy');
   }
 }
 

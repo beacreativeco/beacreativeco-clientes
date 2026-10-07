@@ -147,17 +147,27 @@
         <span class="midia-posicao"></span>
         <span class="midia-tamanho"></span>
       </div>
-      <div class="midia-acoes">
-        <button class="botao-icone" type="button" data-acao="antes" aria-label="Mover para antes">‹</button>
-        <button class="botao-icone" type="button" data-acao="depois" aria-label="Mover para depois">›</button>
-        <a class="botao-link" data-acao="baixar">Baixar</a>
-        <button class="botao-link botao-perigo" type="button" data-acao="remover">Remover</button>
+      <div class="midia-barra">
+        <div class="midia-ordem" role="group" aria-label="Ordem do arquivo">
+          <button class="botao-icone" type="button" data-acao="antes" aria-label="Mover para antes" data-dica="Mover para antes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></button>
+          <button class="botao-icone" type="button" data-acao="depois" aria-label="Mover para depois" data-dica="Mover para depois"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6"/></svg></button>
+        </div>
+        <div class="midia-acoes">
+          <a class="botao-icone" data-acao="baixar" aria-label="Baixar o arquivo" data-dica="Baixar o arquivo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/></svg></a>
+          <button class="botao-icone botao-icone-perigo" type="button" data-acao="remover" aria-label="Remover o arquivo" data-dica="Remover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M10 7V5h4v2M6.5 7l1 12.5h9L17.5 7M10.2 10.5v6M13.8 10.5v6"/></svg><span class="confirmar-texto"></span></button>
+        </div>
       </div>
-      <div class="midia-destinos">
-        <a class="midia-feito" data-feito="trello" target="_blank" rel="noopener" hidden>✓ No Trello</a>
-        <button class="botao-link" type="button" data-acao="trello">Enviar pro Trello</button>
-        <a class="midia-feito" data-feito="drive" target="_blank" rel="noopener" hidden>✓ No Drive</a>
-        <button class="botao-link" type="button" data-acao="drive">Enviar pro Drive</button>
+      <div class="midia-integracoes">
+        <div class="integracao" data-integracao="trello" data-estado="normal">
+          <button class="botao-integracao" type="button" data-acao="trello"><img class="integ-icone" src="/assets/img/marcas/trello.svg" alt="" width="20" height="20"><span class="integ-texto">Enviar pro Trello</span></button>
+          <a class="botao-integracao integ-abrir" target="_blank" rel="noopener"><img class="integ-icone" src="/assets/img/marcas/trello.svg" alt="" width="20" height="20"><span class="integ-texto">Abrir no Trello</span></a>
+          <button class="botao-icone integ-de-novo" type="button" data-acao="trello" aria-label="Enviar pro Trello de novo" data-dica="Enviar de novo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg><span class="confirmar-texto"></span></button>
+        </div>
+        <div class="integracao" data-integracao="drive" data-estado="normal">
+          <button class="botao-integracao" type="button" data-acao="drive"><img class="integ-icone" src="/assets/img/marcas/google-drive.png" alt="" width="20" height="20"><span class="integ-texto">Enviar pro Drive</span></button>
+          <a class="botao-integracao integ-abrir" target="_blank" rel="noopener"><img class="integ-icone" src="/assets/img/marcas/google-drive.png" alt="" width="20" height="20"><span class="integ-texto">Abrir no Drive</span></a>
+          <button class="botao-icone integ-de-novo" type="button" data-acao="drive" aria-label="Enviar pro Google Drive de novo" data-dica="Enviar de novo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg><span class="confirmar-texto"></span></button>
+        </div>
       </div>
       <div class="midia-escolha-original" hidden>
         <p>O original em alta qualidade não está mais nesta página.</p>

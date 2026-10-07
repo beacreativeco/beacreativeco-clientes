@@ -99,36 +99,79 @@ export function definirDestinoDrive(destino) {
 const quando = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
 // "✓ No Trello" / "✓ No Drive" (com link) depois de enviado; mandar de novo pede confirmação.
+// Integrações (Trello e Drive): cada uma tem um estado — normal, enviando, enviado ou erro —
+// que o CSS usa para mostrar o botão certo ("Enviar pro…", barra de progresso, "Abrir no…"
+// com o ✓ e o reenviar, ou "Tentar de novo").
+const INTEGRACOES = {
+  trello: { enviar: 'Enviar pro Trello' },
+  drive: { enviar: 'Enviar pro Drive' },
+};
+
+function estadoIntegracao(li, qual, estado, { texto, progresso } = {}) {
+  const caixa = li.querySelector(`[data-integracao="${qual}"]`);
+  const botao = caixa.querySelector('.botao-integracao[data-acao]');
+  caixa.dataset.estado = estado;
+  botao.disabled = estado === 'enviando';
+  botao.querySelector('.integ-texto').textContent =
+    texto ?? (estado === 'erro' ? 'Tentar de novo' : INTEGRACOES[qual].enviar);
+  // Com porcentagem, a barra enche; sem (Trello), a barra corre de um lado ao outro.
+  if (progresso == null) caixa.style.removeProperty('--progresso');
+  else caixa.style.setProperty('--progresso', String(progresso));
+  caixa.classList.toggle('sem-porcentagem', estado === 'enviando' && progresso == null);
+}
+
+// "✓ Abrir no Trello / Drive" depois de enviado; mandar de novo pede confirmação.
 function configurarDestinos(li, m) {
-  const feitoTrello = li.querySelector('[data-feito="trello"]');
-  const botaoTrello = li.querySelector('[data-acao="trello"]');
+  const caixaTrello = li.querySelector('[data-integracao="trello"]');
   const noTrello = Boolean(m.trello_enviado_em);
-  feitoTrello.hidden = !noTrello;
-  feitoTrello.href = trello.url || m.trello_anexo_url || '#';
-  feitoTrello.title = noTrello ? `Enviado em ${quando(m.trello_enviado_em)}`
-    + (m.trello_como === 'link' ? ' (link: o arquivo passa de 10 MB, limite do Trello)' : '') : '';
-  botaoTrello.hidden = !trello.cartao || (expirou(m.expira_em) && !noTrello);
-  botaoTrello.textContent = noTrello ? 'Trello de novo' : 'Enviar pro Trello';
-  delete botaoTrello.dataset.confirmar;
+  caixaTrello.hidden = !trello.cartao || (expirou(m.expira_em) && !noTrello);
+  estadoIntegracao(li, 'trello', noTrello ? 'enviado' : 'normal');
+  const abrirTrello = caixaTrello.querySelector('.integ-abrir');
+  abrirTrello.href = trello.url || m.trello_anexo_url || '#';
+  abrirTrello.dataset.dica = noTrello ? `Enviado em ${quando(m.trello_enviado_em)}`
+    + (m.trello_como === 'link' ? ' (link: passa de 10 MB, limite do Trello)' : '') : '';
 
-  const feitoDrive = li.querySelector('[data-feito="drive"]');
-  const botaoDrive = li.querySelector('[data-acao="drive"]');
+  const caixaDrive = li.querySelector('[data-integracao="drive"]');
   const noDrive = Boolean(m.drive_enviado_em);
-  feitoDrive.hidden = !noDrive;
-  feitoDrive.href = m.drive_arquivo_url || '#';
-  feitoDrive.textContent = noDrive && m.drive_original === false ? '✓ No Drive (versão do sistema)' : '✓ No Drive';
-  feitoDrive.title = noDrive ? `Enviado em ${quando(m.drive_enviado_em)}` : '';
-  botaoDrive.hidden = !driveConfigurado();
-  botaoDrive.textContent = noDrive ? 'Drive de novo' : 'Enviar pro Drive';
-  delete botaoDrive.dataset.confirmar;
+  caixaDrive.hidden = !driveConfigurado();
+  estadoIntegracao(li, 'drive', noDrive ? 'enviado' : 'normal');
+  const abrirDrive = caixaDrive.querySelector('.integ-abrir');
+  abrirDrive.href = m.drive_arquivo_url || '#';
+  abrirDrive.dataset.dica = noDrive
+    ? `Enviado em ${quando(m.drive_enviado_em)}${m.drive_original === false ? ' (versão do sistema)' : ' (original)'}`
+    : '';
 
-  li.querySelector('.midia-destinos').hidden = botaoTrello.hidden && botaoDrive.hidden && !noTrello && !noDrive;
+  li.querySelector('.midia-integracoes').hidden = caixaTrello.hidden && caixaDrive.hidden;
+}
+
+// Confirmação em dois toques (Remover, Enviar de novo): o primeiro mostra a pergunta no
+// próprio botão; o segundo, em até 4 s, confirma. Devolve true quando é para seguir.
+function confirmarNoBotao(botao, pergunta) {
+  // "Tentar de novo" depois de um erro: a Bea acabou de pedir, não precisa perguntar.
+  if (!botao.querySelector('.confirmar-texto')) return true;
+  if (botao.dataset.confirmar) {
+    delete botao.dataset.confirmar;
+    botao.classList.remove('confirmando');
+    return true;
+  }
+  botao.dataset.confirmar = '1';
+  botao.classList.add('confirmando');
+  botao.querySelector('.confirmar-texto').textContent = pergunta;
+  setTimeout(() => {
+    if (!botao.isConnected || !botao.dataset.confirmar) return;
+    delete botao.dataset.confirmar;
+    botao.classList.remove('confirmando');
+  }, 4000);
+  return false;
 }
 
 function configurarBaixar(link, m) {
   link.hidden = expirou(m.expira_em) && !driveUrl;
   link.href = driveUrl || `${m.arquivo_url}?download=1`;
-  link.textContent = driveUrl ? 'Original (Drive)' : 'Baixar';
+  // Com Drive, o botão leva ao original de lá; sem, baixa a versão do sistema.
+  const rotulo = driveUrl ? 'Abrir o original no Drive' : 'Baixar o arquivo';
+  link.setAttribute('aria-label', rotulo);
+  link.dataset.dica = rotulo;
   if (driveUrl) {
     link.target = '_blank';
     link.rel = 'noopener';
@@ -265,8 +308,7 @@ function desenhar() {
     configurarDestinos(li, m);
     li.querySelector('[data-acao="antes"]').disabled = i === 0;
     li.querySelector('[data-acao="depois"]').disabled = i === midias.length - 1;
-    li.querySelector('[data-acao="antes"]').hidden = midias.length < 2;
-    li.querySelector('[data-acao="depois"]').hidden = midias.length < 2;
+    li.querySelector('.midia-ordem').hidden = midias.length < 2;
     return li;
   }));
   aoMudar?.();
@@ -330,29 +372,19 @@ document.body.append(escolhaOriginal);
 
 async function pedirDrive(i, botao) {
   const m = midias[i];
-  // Já está no Drive: dois cliques, para não duplicar sem querer.
-  if (m.drive_enviado_em && !botao.dataset.confirmar) {
-    botao.dataset.confirmar = '1';
-    botao.textContent = 'Confirmar envio';
-    setTimeout(() => {
-      if (!botao.isConnected || !botao.dataset.confirmar) return;
-      delete botao.dataset.confirmar;
-      botao.textContent = 'Drive de novo';
-    }, 4000);
-    return;
-  }
-  delete botao.dataset.confirmar;
+  // Já está no Drive: dois toques, para não duplicar sem querer.
+  if (m.drive_enviado_em && !confirmarNoBotao(botao, 'Enviar de novo?')) return;
   // Login do Google já no clique (a janelinha só abre como resposta direta a um clique).
   try {
     await conectarDrive();
   } catch (err) {
+    estadoIntegracao(botao.closest('.midia'), 'drive', 'erro');
     aoErro(err.message);
     return;
   }
   const original = originais.get(m.id);
   if (original) return mandarProDrive(i, original);
   // Sem o original na página: a Bea escolhe o arquivo ou manda a versão do sistema.
-  botao.textContent = m.drive_enviado_em ? 'Drive de novo' : 'Enviar pro Drive';
   botao.closest('.midia').querySelector('.midia-escolha-original').hidden = false;
 }
 
@@ -376,11 +408,9 @@ function escolherOriginal(i) {
 async function mandarProDrive(i, original) {
   const m = midias[i];
   const li = lista.querySelector(`.midia[data-id="${m.id}"]`);
-  const botao = li?.querySelector('[data-acao="drive"]');
-  if (li) li.querySelector('.midia-escolha-original').hidden = true;
-  if (botao) {
-    botao.disabled = true;
-    botao.textContent = 'Drive…';
+  if (li) {
+    li.querySelector('.midia-escolha-original').hidden = true;
+    estadoIntegracao(li, 'drive', 'enviando', { texto: 'Enviando 0%', progresso: 0 });
   }
   try {
     let arquivo = original;
@@ -396,7 +426,9 @@ async function mandarProDrive(i, original) {
       nome,
       pastaUrl: destinoDrive.pastaUrl,
       nomeCliente: destinoDrive.nomeCliente,
-      aoProgredir: (fracao) => { if (botao) botao.textContent = `Drive ${Math.floor(fracao * 100)}%`; },
+      aoProgredir: (fracao) => {
+        if (li?.isConnected) estadoIntegracao(li, 'drive', 'enviando', { texto: `Enviando ${Math.floor(fracao * 100)}%`, progresso: fracao });
+      },
     });
     const { data, error } = await supabase.from('midias').update({
       drive_arquivo_id: enviado.id,
@@ -406,44 +438,32 @@ async function mandarProDrive(i, original) {
     }).eq('id', m.id).select().single();
     if (error) throw new Error('Foi pro Drive, mas não deu para registrar aqui. Recarregue a página.');
     Object.assign(m, data);
+    if (li?.isConnected) configurarDestinos(li, m);
     avisar((original ? 'Original enviado pro Drive.' : 'Versão do sistema enviada pro Drive.')
       + (enviado.outraPasta ? ' Foi na pasta que você escolheu, não na do cadastro do cliente.' : ''));
   } catch (err) {
+    if (li?.isConnected) estadoIntegracao(li, 'drive', 'erro');
     aoErro(err.message);
-  } finally {
-    if (botao) botao.disabled = false;
-    if (li?.isConnected) configurarDestinos(li, m);
   }
 }
 
 async function enviarProTrello(i, botao) {
   const m = midias[i];
   const deNovo = Boolean(m.trello_enviado_em);
-  // Já está no cartão: dois cliques, para não duplicar o anexo sem querer.
-  if (deNovo && !botao.dataset.confirmar) {
-    botao.dataset.confirmar = '1';
-    botao.textContent = 'Confirmar envio';
-    setTimeout(() => {
-      if (!botao.isConnected || !botao.dataset.confirmar) return;
-      delete botao.dataset.confirmar;
-      botao.textContent = 'Trello de novo';
-    }, 4000);
-    return;
-  }
-  botao.disabled = true;
-  botao.textContent = 'Enviando…';
+  // Já está no cartão: dois toques, para não duplicar o anexo sem querer.
+  if (deNovo && !confirmarNoBotao(botao, 'Enviar de novo?')) return;
+  const li = botao.closest('.midia');
+  estadoIntegracao(li, 'trello', 'enviando', { texto: 'Enviando…' });
   try {
     const { midia, como } = await anexarNoTrello(m.id, deNovo);
     Object.assign(m, midia);
+    if (li.isConnected) configurarDestinos(li, m);
     avisar(como === 'link'
       ? 'Passou de 10 MB (limite do Trello): foi o link do arquivo no sistema.'
       : 'Arquivo anexado no cartão do Trello.');
   } catch (err) {
+    if (li.isConnected) estadoIntegracao(li, 'trello', 'erro');
     aoErro(err.message);
-  } finally {
-    botao.disabled = false;
-    const li = botao.closest('.midia');
-    if (li) configurarDestinos(li, m);
   }
 }
 
@@ -468,18 +488,9 @@ async function mover(de, para, botao) {
   desenhar();
 }
 
-// Dois cliques, como no "Excluir rascunho".
+// Dois toques: o primeiro mostra "Remover?" no próprio botão, o segundo remove.
 async function remover(i, botao) {
-  if (!botao.dataset.confirmar) {
-    botao.dataset.confirmar = '1';
-    botao.textContent = 'Confirmar';
-    setTimeout(() => {
-      if (!botao.isConnected) return;
-      delete botao.dataset.confirmar;
-      botao.textContent = 'Remover';
-    }, 4000);
-    return;
-  }
+  if (!confirmarNoBotao(botao, 'Remover?')) return;
   botao.disabled = true;
   try {
     await excluirMidia(midias[i].id);
