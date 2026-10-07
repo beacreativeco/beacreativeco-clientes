@@ -1,15 +1,37 @@
 // PUT    /api/perfil/foto   (corpo = JPEG quadrado, já recortado e comprimido no navegador)
 // DELETE /api/perfil/foto   → tira a foto (volta às iniciais)
-// Foto de perfil da Bea em perfil/<uuid>.jpg; grava admins.foto_url e apaga a anterior.
-// Só a admin, por enquanto (o perfil do cliente é o item 5d).
-import { responder, exigirAdmin, rest } from '../../_lib/servidor.js';
+// Foto de perfil em perfil/<uuid>.jpg; apaga a anterior. Serve aos dois lados:
+// a Bea grava em admins.foto_url; o cliente (login ativo) em clientes.contato_foto_url.
+import { responder, rest } from '../../_lib/servidor.js';
 import { CHAVE_PERFIL, LIMITE_FOTO_PERFIL_MB, urlDaChave, chaveDaUrl } from '../../_lib/midias.js';
 
 const LIMITE = LIMITE_FOTO_PERFIL_MB * 1024 * 1024;
 
+// De quem é a foto: devolve { linha, coluna } (onde gravar) ou { resposta } (erro pronto).
+async function donoDaFoto(request, env) {
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { resposta: responder(500, 'Servidor sem configuração do Supabase.') };
+  }
+  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!token) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
+  const respUsuario = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
+    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${token}` },
+  });
+  if (!respUsuario.ok) return { resposta: responder(401, 'Sua sessão expirou. Entre de novo.') };
+  const { id } = await respUsuario.json();
+
+  const admins = await rest(env, `admins?select=user_id&user_id=eq.${id}`);
+  if (admins?.length) return { linha: `admins?user_id=eq.${id}`, coluna: 'foto_url' };
+
+  const [cliente] = (await rest(env, `clientes?select=id&user_id=eq.${id}&login_ativo=is.true`)) ?? [];
+  if (cliente) return { linha: `clientes?id=eq.${cliente.id}`, coluna: 'contato_foto_url' };
+
+  return { resposta: responder(403, 'Seu acesso não está ativo no momento.') };
+}
+
 export async function onRequestPut({ request, env }) {
   if (!env.MIDIAS) return responder(500, 'Armazenamento de arquivos não configurado.');
-  const { usuario, resposta } = await exigirAdmin(request, env);
+  const { resposta, ...dono } = await donoDaFoto(request, env);
   if (resposta) return resposta;
 
   const tipo = (request.headers.get('Content-Type') || '').split(';')[0].trim();
@@ -22,22 +44,22 @@ export async function onRequestPut({ request, env }) {
   const chave = `perfil/${crypto.randomUUID()}.jpg`;
   await env.MIDIAS.put(chave, bytes, { httpMetadata: { contentType: 'image/jpeg' } });
   const fotoUrl = urlDaChave(chave);
-  await trocarFoto(env, usuario.id, fotoUrl);
+  await trocarFoto(env, dono, fotoUrl);
   return responder(200, null, { foto_url: fotoUrl });
 }
 
 export async function onRequestDelete({ request, env }) {
   if (!env.MIDIAS) return responder(500, 'Armazenamento de arquivos não configurado.');
-  const { usuario, resposta } = await exigirAdmin(request, env);
+  const { resposta, ...dono } = await donoDaFoto(request, env);
   if (resposta) return resposta;
-  await trocarFoto(env, usuario.id, null);
+  await trocarFoto(env, dono, null);
   return responder(200, null, { foto_url: null });
 }
 
 // Grava a nova no banco e só então apaga a anterior (nunca fica link quebrado no meio).
-async function trocarFoto(env, userId, fotoUrl) {
-  const [admin] = (await rest(env, `admins?select=foto_url&user_id=eq.${userId}`)) ?? [];
-  await rest(env, `admins?user_id=eq.${userId}`, { metodo: 'PATCH', corpo: { foto_url: fotoUrl }, retornar: false });
-  const anterior = chaveDaUrl(admin?.foto_url);
+async function trocarFoto(env, { linha, coluna }, fotoUrl) {
+  const [atual] = (await rest(env, `${linha}&select=${coluna}`)) ?? [];
+  await rest(env, linha, { metodo: 'PATCH', corpo: { [coluna]: fotoUrl }, retornar: false });
+  const anterior = chaveDaUrl(atual?.[coluna]);
   if (CHAVE_PERFIL.test(anterior)) await env.MIDIAS.delete(anterior);
 }

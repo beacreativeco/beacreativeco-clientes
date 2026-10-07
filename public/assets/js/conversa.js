@@ -278,7 +278,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
 
   function balao(m, inicio = false) {
     if (m.tipo === 'aprovacao') {
-      const quem = m.autor === eu ? 'Você aprovou' : `${nomeDoOutro} aprovou`;
+      const quem = m.autor === eu ? 'Você aprovou' : `${perfilDoOutro?.nome || nomeDoOutro} aprovou`;
       return el('p', 'conversa-evento', `✦ ${quem}, ${hora(m.criado_em)}`);
     }
     const lado = m.autor === eu ? 'meu' : 'outro';

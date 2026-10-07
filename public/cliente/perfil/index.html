@@ -21,14 +21,16 @@
 
   <div id="app" hidden>
     <header class="topo">
-      <a class="titulo titulo-link" href="/admin/"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></a>
+      <a class="titulo titulo-link" href="/cliente/"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></a>
       <button id="sair" class="botao-link" type="button">Sair</button>
     </header>
 
     <main class="conteudo-pagina perfil-pagina">
+      <a class="voltar" href="/cliente/">Seus conteúdos</a>
       <h1>Meu perfil</h1>
 
-      <!-- Foto e nome: aparecem no topo do painel e, para os clientes, nos balões da conversa. -->
+      <!-- Foto e nome de quem aprova: a Bea vê nos balões da conversa.
+           A foto e o @ da prévia dos posts são os que a Bea cadastrou (não mudam aqui). -->
       <section class="perfil-secao" aria-labelledby="t-voce">
         <h2 id="t-voce">Você</h2>
         <div class="perfil-foto">
@@ -43,7 +45,7 @@
           <div class="campo">
             <label for="nome">Seu nome</label>
             <input id="nome" name="nome" type="text" autocomplete="name" maxlength="80">
-            <small class="dica">Os clientes veem seu nome e sua foto nas mensagens.</small>
+            <small class="dica">A Bea vê seu nome e sua foto (ou a logo) nas mensagens. A foto e o @ da prévia dos posts continuam os que ela cadastrou.</small>
           </div>
           <button class="botao botao-compacto" type="submit">Salvar nome</button>
         </form>
@@ -51,15 +53,8 @@
 
       <section class="perfil-secao" aria-labelledby="t-email">
         <h2 id="t-email">E-mail de acesso</h2>
-        <p class="perfil-atual">Hoje: <strong id="email-atual"></strong></p>
-        <form id="form-email" novalidate>
-          <div class="campo">
-            <label for="email">Novo e-mail</label>
-            <input id="email" name="email" type="email" autocomplete="email">
-            <small class="dica">Enviamos um link de confirmação. O e-mail só muda depois que você confirmar.</small>
-          </div>
-          <button class="botao botao-compacto" type="submit">Trocar e-mail</button>
-        </form>
+        <p class="perfil-atual"><strong id="email-atual"></strong></p>
+        <p class="dica">Para trocar o e-mail, fale com a Bea.</p>
       </section>
 
       <section class="perfil-secao" aria-labelledby="t-senha">
@@ -82,37 +77,11 @@
           <button class="botao botao-compacto" type="submit">Trocar senha</button>
         </form>
       </section>
-
-      <section class="perfil-secao" aria-labelledby="t-agencia">
-        <h2 id="t-agencia">Dados da agência</h2>
-        <p class="dica">Usados no envio do link para o cliente e nos e-mails que o sistema manda.</p>
-        <form id="form-agencia" novalidate>
-          <div class="campo">
-            <label for="a-nome">Nome da agência</label>
-            <input id="a-nome" name="nome" type="text" autocomplete="organization">
-          </div>
-          <div class="campos-lado-a-lado">
-            <div class="campo">
-              <label for="a-whatsapp">WhatsApp</label>
-              <input id="a-whatsapp" name="whatsapp" type="tel" placeholder="(11) 91234-5678" autocomplete="off">
-            </div>
-            <div class="campo">
-              <label for="a-instagram">Instagram</label>
-              <input id="a-instagram" name="instagram" type="text" placeholder="@beacreative" autocomplete="off">
-            </div>
-          </div>
-          <div class="campo">
-            <label for="a-email">E-mail de contato</label>
-            <input id="a-email" name="email_contato" type="email" autocomplete="off">
-          </div>
-          <button class="botao botao-compacto" type="submit">Salvar dados da agência</button>
-        </form>
-      </section>
     </main>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <script type="module" src="/assets/js/admin-perfil.js"></script>
+  <script type="module" src="/assets/js/cliente-perfil.js"></script>
 </body>
 </html>

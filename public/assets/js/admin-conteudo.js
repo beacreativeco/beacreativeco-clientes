@@ -19,7 +19,7 @@ const botoes = {
 };
 
 let conteudo = null;      // linha de `conteudos` (null enquanto é novo)
-let cliente = null;       // { id, nome, prazo_padrao_dias, instagram, foto_perfil }
+let cliente = null;       // { id, nome, prazo_padrao_dias, instagram, foto_perfil, contato_nome, contato_foto_url }
 let temNotaInterna = false;
 
 iniciarPagina('admin', async () => {
@@ -59,7 +59,7 @@ iniciarPagina('admin', async () => {
 
 async function carregarCliente(id) {
   const { data, error } = await supabase
-    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil').eq('id', id).maybeSingle();
+    .from('clientes').select('id, nome, prazo_padrao_dias, instagram, foto_perfil, contato_nome, contato_foto_url').eq('id', id).maybeSingle();
   if (error) throw error;
   cliente = data;
 }
@@ -118,6 +118,8 @@ async function abrirConversa() {
   const conversa = criarConversa(document.getElementById('conversa'), {
     conteudoId: conteudo.id,
     eu: 'bea',
+    // Nome e foto de quem aprova (Meu perfil do cliente); sem nome, o do cadastro.
+    perfilDoOutro: { nome: cliente.contato_nome || cliente.nome, foto_url: cliente.contato_foto_url },
     aoChegar: async (m) => {
       if (m.tipo !== 'aprovacao' && !m.pedido_ajuste) return;
       const { data, error } = await supabase.from('conteudos').select('*').eq('id', conteudo.id).single();

@@ -4,17 +4,17 @@
 //   → resumo: { nome, pode, comuns: { conteudos, arquivos, mb }, vitrine: { conteudos, arquivos, mb } }
 // POST /api/clientes/excluir  { cliente_id, nome, manter_vitrine }
 //   → apaga os arquivos no R2 (todas as pastas), os conteúdos (conversas, mídias e notas vão
-//     junto, em cascata), o login e o cadastro. Com manter_vitrine, os conteúdos da vitrine e
+//     junto, em cascata), a foto de perfil, o login e o cadastro. Com manter_vitrine, os conteúdos da vitrine e
 //     os arquivos deles ficam, e o cadastro fica arquivado (sem login nem contato).
 //
 // Regras: só com o acesso suspenso, ou de quem nunca teve login; e o nome digitado precisa
 // bater com o do cadastro. O Trello não é tocado (os cartões são da Bea).
 import { responder, exigirAdmin, rest, cabecalhosServidor, UUID } from '../../_lib/servidor.js';
-import { PASTAS } from '../../_lib/midias.js';
+import { PASTAS, CHAVE_PERFIL, chaveDaUrl } from '../../_lib/midias.js';
 
 async function carregar(env, clienteId) {
   const [cliente] = (await rest(env,
-    `clientes?select=id,nome,user_id,login_ativo,arquivado_em&id=eq.${clienteId}`)) ?? [];
+    `clientes?select=id,nome,user_id,login_ativo,arquivado_em,contato_foto_url&id=eq.${clienteId}`)) ?? [];
   if (!cliente || cliente.arquivado_em) return {};
   const conteudos = (await rest(env, `conteudos?select=id,status,na_vitrine&cliente_id=eq.${clienteId}`)) ?? [];
   const naVitrine = conteudos.filter((c) => c.status === 'aprovado' && c.na_vitrine);
@@ -103,6 +103,9 @@ export async function onRequestPost({ request, env }) {
     arquivos += objetos.length;
     bytes += objetos.reduce((soma, o) => soma + o.size, 0);
   }
+  // Foto de perfil de quem aprovava (o login vai embora junto).
+  const foto = chaveDaUrl(cliente.contato_foto_url);
+  if (CHAVE_PERFIL.test(foto)) await env.MIDIAS.delete(foto);
 
   // 2. Conteúdos (mídias, mensagens, notas internas e avisos vão junto, em cascata).
   for (let i = 0; i < apagar.length; i += 100) {
@@ -128,6 +131,7 @@ export async function onRequestPost({ request, env }) {
       corpo: {
         arquivado_em: new Date().toISOString(), user_id: null, login_ativo: false,
         email: null, whatsapp: null, drive_pasta_url: null, trello_board_id: null,
+        contato_nome: null, contato_foto_url: null,
       },
     });
   } else {

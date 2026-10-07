@@ -16,7 +16,7 @@ export const ROTAS = {
 export async function carregarPerfil(userId) {
   const [admin, cliente] = await Promise.all([
     supabase.from('admins').select('user_id').eq('user_id', userId).maybeSingle(),
-    supabase.from('clientes').select('id, nome, slug, foto_perfil').eq('user_id', userId).maybeSingle(),
+    supabase.from('clientes').select('id, nome, slug, foto_perfil, contato_nome, contato_foto_url').eq('user_id', userId).maybeSingle(),
   ]);
 
   if (admin.error) throw admin.error;

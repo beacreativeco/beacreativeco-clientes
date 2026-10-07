@@ -2,7 +2,7 @@
 
 No ar em `https://clientes.beacreativeco.com.br` desde 06/10/2026 (versão 1.0.0). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
 
-Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
+Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Desde 07/10/2026 o trabalho vai na branch `dev` (Preview em `https://dev.beacreativeco-clientes.pages.dev`) e só chega à `main` com "pode subir pra produção" (regras no `CLAUDE.md`).
 
 ## Ordem
 
@@ -87,17 +87,19 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada.
    - O teste achou uma falha da 0.9.0, corrigida na migração `20261015000000`: `mensagem_valida` recusava arquivos da conversa com a pasta na frente (imagem e áudio na conversa não enviavam)
 5c. [x] **Perfil da Bea** (no padrão do menu do avatar do LAEG-BIO; versão 1.2.0, migração `20261016000000`, já rodada)
    - **Falta testar com login:** foto, nome, dados da agência, troca de senha e troca de e-mail (esta só no ar); nome e foto da Bea na conversa do cliente
-   - Junto: "Entrar com o Google" no login (embaixo do Entrar), só para quem já tem acesso e com o mesmo e-mail; **falta** configurar o Google no Supabase (README, item 5) e testar, inclusive cliente convidado que ainda não criou senha
+   - Junto: "Entrar com o Google" no login (embaixo do Entrar), só para quem já tem acesso e com o mesmo e-mail; Google configurado no Supabase e testado em 07/10/2026
    - Foto ou iniciais no topo, abrindo o menu: nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
    - Meu perfil: foto, nome, e-mail (dá para trocar, com confirmação no e-mail novo) e troca de senha
    - Dados da agência: nome, WhatsApp, Instagram e e-mail de contato (usados no envio do link e nos e-mails aos clientes, quando essas partes entrarem)
    - Foto e nome da Bea nos balões da conversa, do lado do cliente
-5d. [ ] **Perfil do cliente** (mesmo estilo)
-   - Foto (ou logo) e nome de quem aprova os conteúdos; e-mail só leitura (quem troca é a Bea); troca de senha
-   - Foto e nome nos balões da conversa, do lado da Bea
+5d. [x] **Perfil do cliente** (mesmo estilo; na `dev`, migração `20261017000000`)
+   - **Falta:** rodar a migração no Supabase e testar no Preview (foto, nome, troca de senha, "Esqueci a senha atual"; nome e foto do cliente na conversa da Bea)
+   - Menu do avatar nas páginas do cliente (foto ou iniciais): nome e e-mail, "Meu perfil", "Sobre o sistema", "Sair"
+   - Meu perfil (`/cliente/perfil/`): foto (ou logo) e nome de quem aprova (`clientes.contato_nome` e `contato_foto_url`, nome pela função `salvar_meu_nome`); e-mail só leitura (quem troca é a Bea); troca de senha
+   - Foto e nome nos balões da conversa, do lado da Bea (sem nome, o do cadastro), e "… aprovou" com o nome
    - A foto e o @ da prévia dos posts continuam os que a Bea cadastrou (o cliente não mexe)
-   - Atalho para "Sobre o sistema" no menu do perfil
-   - Pastas no bucket (`trabalho/`, `aprovados/`, `vitrine/`), regra de 30 dias depois da aprovação, tela "Arquivo expirado, veja no Drive"
+   - `/api/perfil/foto` serve aos dois lados; excluir cliente apaga a foto dele do R2
+   - Junto, nos dois perfis: "Esqueci a senha atual" (manda o link de criar senha), para quem só entrou com o Google ou pelo convite e nunca teve senha
 5e. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
    - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
    - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato

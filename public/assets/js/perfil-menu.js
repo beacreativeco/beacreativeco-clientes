@@ -1,6 +1,6 @@
 // Menu do avatar no topo (padrão do LAEG-BIO): foto ou iniciais; ao tocar abre nome e e-mail,
 // "Meu perfil", "Sobre o sistema" e "Sair". Substitui o botão "Sair" do topo.
-// Painel da Bea agora; o cliente ganha o mesmo menu no item 5d.
+// Nos dois lados: painel da Bea e páginas do cliente (montado por ui.js).
 // A página Meu perfil avisa mudanças com o evento 'perfil-mudou' ({ nome, foto_url }).
 import { sair } from './auth.js';
 import { abrirSobre } from './sobre.js';

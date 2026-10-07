@@ -31,13 +31,13 @@ Em **Settings → Environment variables** (Production): `SUPABASE_URL` e `SUPABA
 2. **Authentication → Sign In / Providers**: desligar "Allow new users to sign up". Clientes entram só por convite.
 3. **Authentication → URL Configuration**:
    - Site URL: `https://clientes.beacreativeco.com.br`
-   - Redirect URLs: `https://clientes.beacreativeco.com.br/definir-senha/` e `http://localhost:8788/definir-senha/`
+   - Redirect URLs: `https://clientes.beacreativeco.com.br/definir-senha/` e `http://localhost:8788/definir-senha/` (convite e senha), `https://clientes.beacreativeco.com.br/` e `http://localhost:8788/` (volta do Google); para o Preview, `https://dev.beacreativeco-clientes.pages.dev/` e `https://dev.beacreativeco-clientes.pages.dev/definir-senha/`
 4. Criar a conta da Bea em **Authentication → Users → Add user** e depois, no SQL Editor:
    ```sql
    insert into public.admins (user_id)
    select id from auth.users where email = 'EMAIL-DA-BEA';
    ```
-5. **Entrar com o Google:** no Google Cloud Console, criar um cliente OAuth (Aplicativo da Web) com o URI de redirecionamento `https://<projeto>.supabase.co/auth/v1/callback`; em **Authentication → Sign In / Providers → Google**, ligar e colar o Client ID e o Client Secret. Manter "Allow new users to sign up" desligado.
+5. **Entrar com o Google:** no Google Cloud Console, configurar a tela de consentimento (externo, publicado) e criar um cliente OAuth (Aplicativo da Web) com o URI de redirecionamento `https://<projeto>.supabase.co/auth/v1/callback`; em **Authentication → Sign In / Providers → Google**, ligar e colar o Client ID e o Client Secret. Manter "Allow new users to sign up" desligado.
 6. Copiar a URL do projeto e a chave **anon/publishable** para `public/assets/js/config.js`.
 
 ## Rodar local

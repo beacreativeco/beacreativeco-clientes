@@ -540,6 +540,12 @@ a:focus-visible {
   opacity: 0.7;
 }
 
+.dica-link {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8125rem;
+}
+
 .campos-lado-a-lado {
   display: grid;
   gap: 0 16px;

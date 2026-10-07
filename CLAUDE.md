@@ -2,10 +2,20 @@
 
 Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos para os clientes aprovarem, com pré-visualização igual ao Instagram, prazos, calendário e conversa por conteúdo.
 
-- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). No ar desde 06/10/2026 (versão 1.0.0). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
+- Endereço: `clientes.beacreativeco.com.br` (projeto próprio no Cloudflare Pages, deploy automático da branch `main`). No ar desde 06/10/2026 (versão 1.0.0). Teste: `https://dev.beacreativeco-clientes.pages.dev` (branch `dev`, ver "Branches e ambientes"). Local: `npx wrangler pages dev public --port 8788 --r2 MIDIAS`.
 - Ordem das entregas em `ROADMAP.md`: ao fim de cada uma, atualizar o arquivo e dizer qual é a próxima. Não fazer push sem pedido.
 - Site institucional (outro repositório, não mexer daqui): `beacreativeco/beacreativeco` em `beacreativeco.com.br`
 - Documento de escopo completo: https://claude.ai/code/artifact/7e520d1f-902d-4adc-ac15-e2529fa60c38
+
+## Branches e ambientes (igual ao LAEG-BIO)
+
+- **Todo trabalho novo vai na branch `dev`. Nada direto na `main`.** Commits na `dev`; o push publica no Preview.
+- A Cloudflare publica a `dev` (Preview) em `https://dev.beacreativeco-clientes.pages.dev`, onde o Victor testa.
+- **Só juntar a `dev` na `main` quando o Victor disser "pode subir pra produção".** Aí, na `main`: subir a versão, entrada no `public/CHANGELOG.md`, commit `Versão X.Y.Z`, tag e Release (ver "Versão"). Depois, trazer a `main` de volta para a `dev`.
+- Na `dev`, o `ROADMAP.md` é atualizado a cada entrega, mas a versão e o CHANGELOG só mudam na subida para produção.
+- O Preview usa o **mesmo Supabase e o mesmo R2 da produção** (dados reais): testar com o cliente de teste (victordev, "quadro - teste" no Trello), nunca mexendo em conteúdo de cliente de verdade.
+- **Webhooks do Trello e e-mails para clientes reais só pela produção.** No Preview (e no localhost), nada registra webhook nem manda e-mail para cliente de verdade: `ehProducao(request)` em `functions/_lib/ambiente.js` (só o host `clientes.beacreativeco.com.br`) protege `/api/trello/webhooks`, e todo envio de e-mail novo (avisos, item 6) tem que passar pela mesma checagem. O convite (`/api/convidar`) é disparado à mão pela Bea: no Preview, só para e-mails de teste.
+- Cloudflare (Settings → Builds & deployments): branch de produção `main`; Preview com a `dev` liberada. As variáveis e o binding `MIDIAS` precisam existir também no ambiente Preview. No Supabase, as Redirect URLs incluem `https://dev.beacreativeco-clientes.pages.dev/` e `…/definir-senha/`.
 
 ## Stack
 
@@ -115,10 +125,10 @@ Versionamento semântico (MAJOR.MINOR.PATCH), igual ao do sistema do LAEG-BIO. H
 - **PATCH:** só correções. **MINOR:** algo novo ou mudança visível na tela. **MAJOR:** muda o jeito de usar ou exige migrar dados.
 - **Na dúvida entre MAJOR, MINOR e PATCH, perguntar ao Victor antes.** MAJOR sempre pergunta.
 - Até a publicação o sistema fica em **0.x** (cada entrega do `ROADMAP.md` sobe o MINOR, sem tag nem Release). **Na publicação vira 1.0.0.**
-- A partir do 1.0.0, a cada entrega:
+- A partir do 1.0.0, a cada subida para produção ("pode subir pra produção", ver "Branches e ambientes"):
   1. Adicionar a entrada no topo do `public/CHANGELOG.md`: `## [X.Y.Z] — dd/mm/aaaa`, seções `### Novidades` / `### Melhorias` / `### Correções` (só as que tiverem itens), um item por linha, sem formatação markdown, em português simples (quem lê é a Bea e os clientes, não quem programa).
   2. Commit `Versão X.Y.Z`.
-  3. `git tag vX.Y.Z` e, com autorização para push, `git push origin vX.Y.Z`.
+  3. `git tag vX.Y.Z` e `git push origin main vX.Y.Z` (a subida já é a autorização).
   4. Release no GitHub com a tag e o mesmo texto da entrada do CHANGELOG (`gh release create vX.Y.Z --title "X.Y.Z" --notes "..."`).
 - Créditos e manutenção da janela "Sobre": `public/assets/js/sobre.js` (`MANUTENCAO` muda se outra pessoa assumir; `DESENVOLVIMENTO` não muda). O crédito do login fica em `public/index.html` (`.credito-dev`).
 

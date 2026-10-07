@@ -20,6 +20,8 @@ export async function iniciarPagina(area, montar) {
       montarNavegacaoAdmin();
       // Se o menu falhar, o "Sair" antigo continua no topo: a página abre mesmo assim.
       await montarPerfilAdmin(acesso.session).catch(console.error);
+    } else {
+      await montarPerfilCliente(acesso).catch(console.error);
     }
     carregando.hidden = true;
     app.hidden = false;
@@ -67,6 +69,16 @@ async function montarPerfilAdmin(session) {
   if (error) console.error(error);
   const { montarMenuPerfil } = await import('./perfil-menu.js');
   montarMenuPerfil({ ...data, email: session.user.email }, { linkPerfil: '/admin/perfil/' });
+}
+
+// Cliente: o mesmo menu, com o nome e a foto de quem aprova (já vêm no perfil do login).
+async function montarPerfilCliente({ session, perfil }) {
+  const { montarMenuPerfil } = await import('./perfil-menu.js');
+  montarMenuPerfil({
+    nome: perfil.cliente.contato_nome,
+    foto_url: perfil.cliente.contato_foto_url,
+    email: session.user.email,
+  }, { linkPerfil: '/cliente/perfil/' });
 }
 
 function mostrarFalhaAoCarregar(container) {
