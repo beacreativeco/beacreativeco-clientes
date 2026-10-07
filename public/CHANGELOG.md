@@ -19,6 +19,29 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.6.0] — 07/10/2026
+
+### Novidades
+
+- A conversa agora é uma só por cliente, na aba Mensagens, e não mais dentro de cada conteúdo.
+- Clientes: nova aba Mensagens na barra, com a conversa com a Bea e o número de mensagens novas.
+- Bea: a aba Mensagens mostra a lista de clientes, com foto, última mensagem, data e mensagens novas, e a conversa ao lado (no celular, abre em tela cheia).
+- Dá para anexar um conteúdo a uma mensagem pelo clipe; ele aparece como um cartão no balão e abre ao tocar.
+- "Pedir ajuste" abre a conversa com o conteúdo já anexado: a próxima mensagem vira o pedido.
+- Aprovações e pedidos de ajuste aparecem como avisos no meio da conversa.
+
+### Melhorias
+
+- A tela do conteúdo mostra o último pedido de ajuste e o botão "Conversar sobre este conteúdo", que abre só as mensagens daquele conteúdo.
+- No celular, a conversa ocupa a tela toda e a caixa de texto fica logo acima do teclado.
+- Mensagens apagadas seguidas viram uma linha só, como "3 mensagens apagadas".
+- Imagens e áudios mandados na conversa sem um conteúdo anexado ficam guardados por 30 dias.
+
+### Correções
+
+- Os balões da conversa não passam mais da largura da tela, e textos e links longos quebram de linha.
+- A onda do áudio ocupa a largura do balão.
+
 ## [1.5.1] — 07/10/2026
 
 ### Correções
