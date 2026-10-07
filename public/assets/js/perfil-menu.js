@@ -5,6 +5,7 @@
 import { sair } from './auth.js';
 import { abrirSobre } from './sobre.js';
 import { modoInstalacao, instalarAgora } from './instalar.js';
+import { itemNotificacoes } from './sino.js';
 
 function el(tag, classe, ...filhos) {
   const no = document.createElement(tag);
@@ -91,7 +92,10 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
   aparencia.setAttribute('aria-label', 'Aparência');
   marcarAparencia();
 
-  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, aparencia, sobre, instalar, botaoSair);
+  // "Notificações" com o status (Ativadas ✓ / Ativar / Como liberar / Instalar).
+  const notificacoes = itemNotificacoes(() => fechar(), linkPerfil);
+
+  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, notificacoes, aparencia, sobre, instalar, botaoSair);
   menu.setAttribute('role', 'menu');
   menu.id = 'perfil-lista';
   menu.hidden = true;

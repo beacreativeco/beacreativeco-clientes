@@ -181,6 +181,9 @@ function mostrarConvite(manual) {
 // último "Agora não" tem mais de 30 dias.
 function talvezMostrar() {
   if (cartao || !modoInstalacao()) return;
+  // Um convite por vez: com a faixa de notificações na tela (sino.js), o de instalar espera
+  // outra visita. No iPhone a própria faixa já leva ao passo a passo de instalar.
+  if (document.querySelector('.faixa-notificacoes:not([hidden])')) return;
   if (ler(localStorage, CHAVE_NUNCA) === '1') return;
   if (ler(sessionStorage, CHAVE_SESSAO) === '1') return;
   const pausadoEm = Number(ler(localStorage, CHAVE_PAUSA)) || 0;

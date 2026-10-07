@@ -196,7 +196,21 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - [x] Entrega 3: prazo vencendo amanhã (migração `20261022000000`, rodada; `pg_cron` às 12h UTC = 9h de Brasília, job `push-prazos`, chama `/api/push/evento` com `{ tipo: 'prazos' }`)
      - Um aviso por conteúdo e prazo ("vence amanhã às HH:MM"); prazo mudado avisa de novo
      - Testado no Preview em 07/10/2026 disparando à mão (prazo do conteúdo de teste do victordev posto para 08/10 às 18h): chegou no Android
-   - **Falta:** iPhone com o sistema instalado; na subida para produção (1.7.0, MINOR), conferir o primeiro aviso de verdade às 9h
+   - **Falta:** iPhone com o sistema instalado; conferir o primeiro aviso de prazo de verdade às 9h (no ar desde a 1.7.0)
+11. [x] **Instalar no iPhone por qualquer navegador** (pedido de 07/10/2026; a Bea usa o Chrome)
+   - `navegadorIos()` no `instalar.js` lê o navegador (Safari, Chrome/CriOS, Edge/EdgiOS, Firefox/FxiOS) e a versão do iOS; o convite e o "Instalar o sistema" do menu mostram o caminho de cada um até "Adicionar à Tela de Início"
+   - Safari como alternativa só no iOS anterior ao 16.4 ou em navegador sem a opção (app do Google, navegadores internos do Instagram/Facebook etc.)
+   - Lembrete no convite: instalado, abre pelo ícone e as notificações funcionam igual, qualquer que seja o navegador
+   - Testado com user agents reais de cada navegador. **Falta:** conferir num iPhone com o Chrome
+12. [x] **Notificações à vista** (pedido de 07/10/2026; `sino.js`)
+   - Sino no topo, ao lado da foto, em todas as telas: pontinho de alerta enquanto não estiver ativado; depois, o número de novidades. Tocar abre o painel com o convite e a lista de novidades (decisão de 07/10: lista, não só o número): mensagens não lidas por conversa (Bea: com "Pediu ajuste"/"Aprovou" quando for o caso); cliente: também os conteúdos esperando aprovação
+   - Faixa no topo das telas iniciais (`/admin/` e `/cliente/`) enquanto não estiver ativado: "Ativar" e "Agora não" (esconde por um dia, guardado no aparelho)
+   - Menu do perfil: "Notificações" com o status ("Ativadas ✓" leva à seção do Meu perfil; "Ativar" ativa na hora)
+   - Permissão bloqueada: os mesmos lugares mostram "Como liberar", com o passo a passo do aparelho (iPhone, Android no navegador ou instalado, Chrome/Edge, Firefox, Safari no Mac) e "Já liberei"
+   - iPhone sem instalar: os mesmos lugares levam ao "Como instalar"
+   - Um convite por vez: com a faixa na tela, o convite automático de instalar espera outra visita
+   - A seção completa continua no Meu perfil (`#notificacoes`)
+   - Testado com dados de exemplo no computador e em 375px. **Falta:** testar no Preview (ativar pelo sino, pela faixa e pelo menu; bloquear e liberar)
 
 ## Já pronto antes deste roadmap
 

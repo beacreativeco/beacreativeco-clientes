@@ -4586,3 +4586,230 @@ div.convite-texto p { margin: 0; }
 }
 
 .notificacoes-aparelho .botao-link { flex: none; min-height: 44px; }
+
+/* ---------- Sino, faixa e "Como liberar" (sino.js) ---------- */
+.sino { position: relative; }
+
+.sino-botao {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--cor-moldura-texto);
+  cursor: pointer;
+}
+
+.sino-botao:hover { background: color-mix(in srgb, var(--cor-moldura-texto) 12%, transparent); }
+.sino-botao:focus-visible { outline: 2px solid var(--cor-indicador); outline-offset: 0; }
+.sino-botao[aria-expanded="true"] { background: color-mix(in srgb, var(--cor-moldura-texto) 16%, transparent); }
+
+.sino-botao svg,
+.faixa-notificacoes-icone svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Número de novidades; sem as notificações ativadas, um pontinho de alerta. */
+.sino-marca {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--cor-moldura);
+  border-radius: 999px;
+  background: var(--cor-indicador);
+  color: var(--espresso-900);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sino-marca.sino-ponto {
+  top: 9px;
+  right: 9px;
+  min-width: 0;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  background: #E8826B;
+}
+
+.sino-painel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -52px;
+  z-index: 20;
+  display: grid;
+  gap: var(--esp-2);
+  width: min(340px, calc(100vw - 2 * var(--espaco)));
+  max-height: min(70dvh, 520px);
+  overflow-y: auto;
+  padding: var(--esp-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra-3, 0 8px 24px rgb(0 0 0 / 0.16));
+}
+
+.sino-titulo {
+  margin: 0;
+  padding: 0 var(--esp-1);
+  font-size: var(--fs-grande);
+}
+
+.sino-oferta {
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-3);
+  border-radius: var(--raio-m);
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+  font-size: var(--fs-pequeno);
+}
+
+.sino-oferta p { margin: 0; }
+.sino-oferta .botao { justify-self: start; }
+
+.sino-lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sino-item {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding: var(--esp-2) var(--esp-2) var(--esp-2) var(--esp-5);
+  border-radius: var(--raio-m);
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+
+.sino-item::before {
+  content: "";
+  position: absolute;
+  left: var(--esp-2);
+  top: 1.05em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cor-acao);
+}
+
+.sino-item:hover,
+.sino-item:focus-visible { background: var(--cor-superficie-hover); outline: none; }
+
+.sino-item strong,
+.sino-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sino-item span {
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
+.sino-vazio {
+  margin: 0;
+  padding: var(--esp-2);
+  font-size: var(--fs-pequeno);
+  color: var(--cor-texto-2);
+}
+
+.sino-mais {
+  justify-self: end;
+  padding: var(--esp-2);
+  color: var(--cor-link);
+  font-size: var(--fs-pequeno);
+  font-weight: 600;
+}
+
+/* Faixa nas telas iniciais, enquanto as notificações não estiverem ativadas. */
+.faixa-notificacoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3) var(--esp-4);
+  margin: 0 0 var(--esp-5);
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--cor-borda);
+  border-left: 3px solid var(--cor-acao);
+  border-radius: var(--raio-m);
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+}
+
+.faixa-notificacoes[hidden] { display: none; }
+
+.faixa-notificacoes-icone { display: grid; flex: none; }
+
+.faixa-notificacoes p {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-pequeno);
+  font-weight: 500;
+}
+
+.faixa-notificacoes-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+}
+
+.faixa-notificacoes-acoes .botao-link { min-height: 44px; }
+
+/* Item "Notificações" no menu do perfil, com o status à direita. */
+.perfil-item.perfil-item-notificacoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.perfil-item-status {
+  font-size: var(--fs-legenda);
+  font-weight: 600;
+  color: var(--cor-link);
+}
+
+.perfil-item-status.perfil-item-status-ok { color: var(--cor-texto-2); }
+
+/* Janela "Como liberar": a moldura das janelas, mais estreita e sem formulário. */
+.dialogo.dialogo-pequeno[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 720px) {
+  .dialogo.dialogo-pequeno { max-width: 460px; }
+}
+
+.liberar-passos {
+  display: grid;
+  gap: var(--esp-2);
+  margin: var(--esp-3) 0;
+  padding-left: 1.4em;
+}
+
+.liberar-passos li::marker { color: var(--cor-acao); font-weight: 600; }

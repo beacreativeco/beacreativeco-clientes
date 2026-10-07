@@ -36,6 +36,11 @@ export async function iniciarPagina(area, montar) {
     iniciarInstalacao();
     // Notificações já ativadas neste aparelho: confirma a inscrição no banco.
     import('./notificacoes.js').then((m) => m.sincronizar()).catch(console.error);
+    // Sino no topo (ao lado da foto) e, nas telas iniciais, a faixa para ativar.
+    import('./sino.js').then((m) => {
+      m.montarSino(area);
+      if (location.pathname === '/admin/' || location.pathname === '/cliente/') m.montarFaixa(area);
+    }).catch(console.error);
     // Painel da Bea: contador de não lidas, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);

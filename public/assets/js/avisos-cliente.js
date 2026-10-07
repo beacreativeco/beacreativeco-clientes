@@ -26,4 +26,6 @@ async function recontar() {
   contador.textContent = total > 99 ? '99+' : String(total);
   contador.hidden = total === 0;
   contador.setAttribute('aria-label', `${total} não ${total === 1 ? 'lida' : 'lidas'}`);
+  // O sino do topo (sino.js) acompanha.
+  window.dispatchEvent(new CustomEvent('mensagens-mudaram', { detail: data }));
 }
