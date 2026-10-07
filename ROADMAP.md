@@ -153,7 +153,12 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Imagem e áudio sem conteúdo vão para `conversa/<cliente_id>/` (30 dias). **Falta:** criar no R2 a regra `apagar-conversa` (prefixo `conversa/`, 30 dias)
      - Testado com dados de exemplo (computador e 375px). **Falta:** testar no Preview com o victordev e num celular de verdade (teclado no Android e no iPhone)
      - A conversa continua também na tela do conteúdo (filtrada nele) até a Entrega 3
-   - [ ] Entrega 2: anexar conteúdo pelo clipe, "Pedir ajuste" abrindo a conversa com o conteúdo anexado, conversa filtrada com "Ver tudo", avisos de aprovação e pedido de ajuste
+   - [x] Entrega 2: conteúdos na conversa (só front, sem migração)
+     - Clipe na conversa inteira: "Imagem" ou "Conteúdo" (lista dos conteúdos do cliente, fora rascunho; folha embaixo no celular); o conteúdo escolhido fica em cima da caixa e vai com a próxima mensagem (texto, áudio ou imagem, que sobe na pasta do conteúdo)
+     - "Pedir ajuste" na tela do conteúdo do cliente abre `/cliente/mensagens/?conteudo=…&ajuste=1`: conversa inteira com o conteúdo anexado como "Pedido de ajuste"; a próxima mensagem vai por `pedir_ajuste` (recarregar não reabre o pedido)
+     - Conversa filtrada: `/admin/mensagens/?cliente=…&conteudo=…` e `/cliente/mensagens/?conteudo=…`, com a faixa "Só [título] · Ver tudo"
+     - Avisos no meio da conversa: "✦ … aprovou “título”" e "… pediu ajuste em “título”" (antes do balão do pedido); o cartão atualiza a situação quando chega aprovação ou pedido
+     - Testado com dados de exemplo em 375px. **Falta:** testar no Preview (pedido de ajuste de verdade, com texto, áudio e imagem, e o comentário no Trello)
    - [ ] Entrega 3: tela do conteúdo sem chat (último pedido de ajuste + "Conversar sobre este conteúdo (N)")
 
 ## Já pronto antes deste roadmap

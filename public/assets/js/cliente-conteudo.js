@@ -151,7 +151,10 @@ function ligarDecisao() {
     await decidir(aprovar, () => supabase.rpc('aprovar_conteudo', { p_conteudo_id: conteudo.id }), 'Conteúdo aprovado.');
   });
 
-  $('abrir-ajuste').addEventListener('click', () => conversa.pedirAjuste());
+  // "Pedir ajuste" abre a aba Mensagens com este conteúdo anexado: a próxima mensagem vira o pedido.
+  $('abrir-ajuste').addEventListener('click', () => {
+    window.location.href = `/cliente/mensagens/?conteudo=${conteudo.id}&ajuste=1`;
+  });
 }
 
 async function decidir(botao, chamada, sucesso) {

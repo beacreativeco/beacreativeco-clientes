@@ -1,5 +1,6 @@
 // Aba Mensagens da Bea: uma conversa por cliente. Computador: lista à esquerda e conversa à
 // direita. Celular: a lista é a página e a conversa abre em tela cheia (?cliente=<id>).
+// Com &conteudo=<id>, só a parte da conversa sobre aquele conteúdo ("Ver tudo" volta).
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina } from './ui.js';
@@ -7,7 +8,7 @@ import { criarConversa, acompanharTeclado } from './conversa.js';
 
 const $ = (id) => document.getElementById(id);
 let conversas = [];   // linhas de conversas_por_cliente()
-let aberta = null;    // { clienteId, conversa }
+let aberta = null;    // { clienteId, conteudoId, conversa }
 let aberturas = 0;    // trocar de cliente no meio do carregamento: vale a última escolha
 
 iniciarPagina('admin', async () => {
@@ -17,11 +18,11 @@ iniciarPagina('admin', async () => {
   $('busca').addEventListener('input', desenharLista);
 
   await carregarLista();
-  await abrir(new URLSearchParams(location.search).get('cliente'));
+  await abrirDoEndereco();
 
   // avisos-admin.js reconta a cada mensagem nova: a lista acompanha.
   window.addEventListener('mensagens-mudaram', () => carregarLista().catch(console.error));
-  window.addEventListener('popstate', () => abrir(new URLSearchParams(location.search).get('cliente')));
+  window.addEventListener('popstate', () => abrirDoEndereco().catch(console.error));
 
   // Voltar (celular): se a conversa foi aberta pela lista, volta no histórico.
   document.querySelector('.mensagens-voltar').addEventListener('click', (e) => {
@@ -72,7 +73,7 @@ function desenharLista() {
     a.addEventListener('click', (e) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey) return; // abrir em outra aba
       e.preventDefault();
-      if (aberta?.clienteId === c.cliente_id) return;
+      if (aberta?.clienteId === c.cliente_id && !aberta.conteudoId) return;
       history.pushState({ daLista: true }, '', a.href);
       abrir(c.cliente_id);
     });
@@ -91,8 +92,13 @@ function previa(c) {
 
 // ---------------------------------------------------------------- conversa
 
-async function abrir(clienteId) {
-  if (aberta?.clienteId === clienteId) return;
+function abrirDoEndereco() {
+  const busca = new URLSearchParams(location.search);
+  return abrir(busca.get('cliente'), busca.get('conteudo'));
+}
+
+async function abrir(clienteId, conteudoId = null) {
+  if (aberta?.clienteId === clienteId && aberta.conteudoId === conteudoId) return;
   aberta?.conversa.fechar();
   aberta = null;
   const vez = ++aberturas;
@@ -124,13 +130,18 @@ async function abrir(clienteId) {
 
   const conversa = criarConversa($('conversa'), {
     clienteId,
+    conteudoId,
     eu: 'bea',
     tela: true,
     linkDoConteudo: (id) => `/admin/conteudo/?id=${id}`,
     // Nome e foto de quem aprova (Meu perfil do cliente); sem nome, o do cadastro.
     perfilDoOutro: { nome: cadastro.data.contato_nome || cadastro.data.nome, foto_url: cadastro.data.contato_foto_url },
+    aoVerTudo: () => {
+      history.pushState({ daLista: history.state?.daLista }, '', `/admin/mensagens/?cliente=${clienteId}`);
+      abrir(clienteId).catch(console.error);
+    },
   });
-  aberta = { clienteId, conversa };
+  aberta = { clienteId, conteudoId, conversa };
   await conversa.carregar();
 }
 

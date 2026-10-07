@@ -3092,6 +3092,170 @@ a.conversa-cartao:focus-visible {
   font-size: var(--fs-mini);
 }
 
+/* Avisos automáticos no meio da conversa: aprovação e pedido de ajuste. */
+.conversa-evento-aprovado,
+.conversa-evento-ajuste {
+  max-width: 90%;
+  padding: 3px 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.conversa-evento-aprovado {
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+}
+
+.conversa-evento-ajuste {
+  background: var(--cor-erro-fundo);
+  color: var(--cor-erro-texto);
+}
+
+/* Conteúdo anexado à próxima mensagem (ou o pedido de ajuste), em cima da caixa de escrever. */
+.conversa-anexo {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 44px;
+  gap: var(--esp-2);
+  align-items: center;
+  margin: var(--esp-2) var(--esp-2) 0;
+  padding: 4px 0 4px 6px;
+  border: 1px solid var(--cor-borda);
+  border-left: 3px solid var(--cor-acao);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie);
+}
+
+.conversa-anexo.conversa-anexo-ajuste { border-left-color: var(--cor-erro); }
+
+.conversa-anexo .conversa-cartao-mini { width: 32px; height: 40px; }
+
+.conversa-anexo-texto {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.conversa-anexo-rotulo {
+  font-size: var(--fs-mini);
+  color: var(--cor-link);
+}
+
+.conversa-anexo-ajuste .conversa-anexo-rotulo { color: var(--cor-erro-texto); }
+
+.conversa-anexo-titulo {
+  overflow: hidden;
+  font-size: var(--fs-legenda);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversa-anexo-tirar {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--cor-texto-2);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.conversa-anexo-tirar:hover { color: var(--cor-texto); }
+.conversa-anexo-tirar:focus-visible { outline: 2px solid var(--cor-foco); outline-offset: -4px; }
+
+/* Menu do clipe: abre logo acima da caixa de escrever, do lado do clipe. */
+.conversa-menu-anexo { left: 8px; }
+
+/* Escolher o conteúdo a anexar: folha embaixo no celular, janela no computador. */
+.conversa-escolher {
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(80dvh, 640px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio-xg);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.conversa-escolher[open] { display: flex; flex-direction: column; }
+
+.conversa-escolher::backdrop { background: var(--cor-veu); }
+
+.conversa-escolher-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-3) var(--esp-2) var(--esp-5);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.conversa-escolher-cab h2 { margin: 0; font-size: var(--fs-subtitulo); }
+
+.conversa-visor-fechar.conversa-escolher-fechar {
+  position: static;
+  flex: none;
+  background: none;
+  color: var(--cor-texto);
+}
+
+.conversa-escolher-lista {
+  display: grid;
+  gap: var(--esp-2);
+  padding: var(--esp-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.conversa-escolher-item {
+  width: 100%;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.conversa-escolher-item:hover { background: var(--cor-superficie-hover); }
+.conversa-escolher-item:focus-visible { outline: 2px solid var(--cor-foco); outline-offset: 1px; }
+
+@media (max-width: 599px) {
+  .conversa-escolher {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto 0 0;
+    border-radius: var(--raio-xg) var(--raio-xg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Conversa filtrada num conteúdo: "Só: título · Ver tudo". */
+.conversa-filtro {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-width: 0;
+  padding: var(--esp-2) var(--esp-4);
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-destaque-fundo);
+  color: var(--cor-destaque-texto);
+  font-size: var(--fs-pequeno);
+}
+
+.conversa-filtro-titulo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversa-filtro .botao-link { flex: none; min-height: 44px; }
+
 /* Conversa que ocupa a tela toda (aba Mensagens): a lista cresce e a caixa fica embaixo. */
 .conversa.conversa-tela {
   display: flex;

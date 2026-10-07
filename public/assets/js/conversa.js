@@ -200,11 +200,12 @@ function miniaturaDoConteudo(info) {
  *   eu: 'cliente' | 'bea',
  *   tela?: boolean,                         // ocupa a altura toda (aba Mensagens)
  *   linkDoConteudo?: (id: string) => string, // para onde o cartão do conteúdo leva
- *   pedirAjuste?: (mensagem: {tipo: string, texto?: string}) => Promise<void>,
+ *   pedirAjuste?: (mensagem: {tipo: string, texto?: string}, conteudoId: string) => Promise<void>,
  *   aoChegar?: (mensagem: object) => void,   // mensagem nova da outra pessoa (tempo real)
+ *   aoVerTudo?: () => void,                  // conversa filtrada: "Ver tudo" (sem ele, sem a faixa)
  * }} opcoes
  */
-export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, perfilDoOutro }) {
+export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, aoVerTudo, perfilDoOutro }) {
   const outro = eu === 'bea' ? 'cliente' : 'bea';
   const nomeDoOutro = eu === 'bea' ? 'Cliente' : 'Bea';
   const situacoes = eu === 'bea' ? SITUACOES : SITUACOES_CLIENTE;
@@ -220,12 +221,21 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
       ? 'Nenhuma mensagem ainda. Escreva para o cliente por aqui.'
       : 'Alguma dúvida ou ideia? Escreva para a Bea por aqui.');
 
-  const avisoAjuste = el('div', 'conversa-aviso-ajuste',
-    el('p', null, 'Conte o que você quer mudar. Sua próxima mensagem vira o pedido de ajuste.'));
-  const cancelarAjuste = el('button', 'botao-link', 'Cancelar');
-  cancelarAjuste.type = 'button';
-  avisoAjuste.append(cancelarAjuste);
-  avisoAjuste.hidden = true;
+  // Conteúdo anexado à próxima mensagem (ou o pedido de ajuste), em cima da caixa de escrever.
+  const anexoMini = el('span', 'conversa-anexo-mini');
+  const anexoRotulo = el('strong', 'conversa-anexo-rotulo');
+  const anexoTitulo = el('span', 'conversa-anexo-titulo');
+  const tirarAnexo = el('button', 'conversa-anexo-tirar', '×');
+  tirarAnexo.type = 'button';
+  const anexoChip = el('div', 'conversa-anexo', anexoMini, el('span', 'conversa-anexo-texto', anexoRotulo, anexoTitulo), tirarAnexo);
+  anexoChip.hidden = true;
+
+  // Conversa filtrada num conteúdo: "Só: título · Ver tudo".
+  const filtroTitulo = el('strong', 'conversa-filtro-titulo');
+  const verTudo = el('button', 'botao-link', 'Ver tudo');
+  verTudo.type = 'button';
+  const faixaFiltro = el('div', 'conversa-filtro', el('span', null, 'Só'), filtroTitulo, verTudo);
+  faixaFiltro.hidden = !(conteudoId && aoVerTudo);
 
   const avisoEdicao = el('div', 'conversa-aviso-ajuste conversa-aviso-edicao', el('p', null, 'Editando mensagem'));
   const cancelarEdicao = el('button', 'botao-link', 'Cancelar');
@@ -246,7 +256,8 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   erro.hidden = true;
   const anexar = el('button', 'conversa-anexar', icone(ICONE_ANEXAR));
   anexar.type = 'button';
-  anexar.setAttribute('aria-label', 'Anexar imagem de referência');
+  anexar.setAttribute('aria-label', comCartoes ? 'Anexar imagem ou conteúdo' : 'Anexar imagem de referência');
+  anexar.setAttribute('aria-haspopup', comCartoes ? 'menu' : 'false');
   const seletor = el('input');
   seletor.type = 'file';
   seletor.accept = 'image/*';
@@ -278,7 +289,20 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   menu.setAttribute('role', 'menu');
   menu.hidden = true;
 
-  const raiz = el('div', `conversa${tela ? ' conversa-tela' : ''}`, lista, avisoAjuste, avisoEdicao, erro, form, barraGravando, menu);
+  // Clipe na conversa inteira: imagem ou conteúdo.
+  const menuAnexo = el('div', 'conversa-menu conversa-menu-anexo');
+  menuAnexo.setAttribute('role', 'menu');
+  menuAnexo.hidden = true;
+
+  // Escolher o conteúdo a anexar (os do cliente que ele pode ver).
+  const listaEscolher = el('div', 'conversa-escolher-lista');
+  const fecharEscolher = el('button', 'conversa-visor-fechar conversa-escolher-fechar', '×');
+  fecharEscolher.type = 'button';
+  fecharEscolher.setAttribute('aria-label', 'Fechar');
+  const escolher = el('dialog', 'conversa-escolher',
+    el('div', 'conversa-escolher-cab', el('h2', null, 'Anexar um conteúdo'), fecharEscolher), listaEscolher);
+
+  const raiz = el('div', `conversa${tela ? ' conversa-tela' : ''}`, faixaFiltro, lista, avisoEdicao, erro, anexoChip, form, barraGravando, menu, menuAnexo, escolher);
   alvo.replaceChildren(raiz);
 
   // id → { m, no, inicio }: a própria mensagem volta pelo Realtime (não duplica) e
@@ -289,6 +313,9 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   let ultimoDia = '';
   let modoAjuste = false;
   let editando = null;
+  // Conteúdo anexado à próxima mensagem (na conversa filtrada é sempre o do filtro).
+  let anexo = null;
+  const conteudoDaMensagem = () => conteudoId ?? anexo;
 
   // ------------------------------------------------------------ desenhar
 
@@ -337,7 +364,7 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     if (m.tipo === 'aprovacao') {
       const quem = m.autor === eu ? 'Você aprovou' : `${perfilDoOutro?.nome || nomeDoOutro} aprovou`;
       const titulo = comCartoes && m.conteudo_id ? conteudos.get(m.conteudo_id)?.titulo : null;
-      const evento = el('p', 'conversa-evento', `✦ ${quem}${titulo ? ` “${titulo}”` : ''}, ${hora(m.criado_em)}`);
+      const evento = el('p', 'conversa-evento conversa-evento-aprovado', `✦ ${quem}${titulo ? ` “${titulo}”` : ''}, ${hora(m.criado_em)}`);
       evento.dataset.id = m.id;
       return evento;
     }
@@ -413,7 +440,13 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
       }
       return;
     }
-    const inicio = !ultimo?.classList.contains('conversa-outro');
+    // Pedido de ajuste: um aviso no meio da conversa antes do balão com o pedido.
+    if (item.m.pedido_ajuste && comCartoes) {
+      const quem = item.m.autor === eu ? 'Você pediu ajuste' : `${perfilDoOutro?.nome || nomeDoOutro} pediu ajuste`;
+      const titulo = conteudos.get(item.m.conteudo_id)?.titulo;
+      lista.append(el('p', 'conversa-evento conversa-evento-ajuste', `${quem}${titulo ? ` em “${titulo}”` : ''}`));
+    }
+    const inicio = !lista.lastElementChild?.classList.contains('conversa-outro');
     if (!item.no || item.inicio !== inicio) item.no = balao(item.m, inicio);
     item.inicio = inicio;
     lista.append(item.no);
@@ -563,15 +596,17 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
         return;
       }
       if (modoAjuste) {
-        await pedirAjuste({ tipo: 'texto', texto });
+        await pedirAjuste({ tipo: 'texto', texto }, conteudoDaMensagem());
         definirModoAjuste(false);
         await carregar();
       } else {
         const { data, error } = await supabase.from('mensagens')
-          .insert({ cliente_id: clienteId, conteudo_id: conteudoId, autor: eu, tipo: 'texto', texto })
+          .insert({ cliente_id: clienteId, conteudo_id: conteudoDaMensagem(), autor: eu, tipo: 'texto', texto })
           .select().single();
         if (error) throw error;
+        await carregarConteudos([data.conteudo_id]);
         adicionar(data);
+        definirAnexo(null);
       }
       campo.value = '';
       ajustarAltura();
@@ -591,7 +626,7 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   async function subirArquivo(blob) {
     const { data: { session } } = await supabase.auth.getSession();
     // Com conteúdo, o arquivo fica na pasta dele; sem, na conversa do cliente (some em 30 dias).
-    const destino = conteudoId ? `conteudo_id=${conteudoId}` : `cliente_id=${clienteId}`;
+    const destino = conteudoDaMensagem() ? `conteudo_id=${conteudoDaMensagem()}` : `cliente_id=${clienteId}`;
     const resp = await fetch(`/api/conversa/arquivo?${destino}`, {
       method: 'PUT',
       headers: { 'Content-Type': blob.type, Authorization: `Bearer ${session?.access_token ?? ''}` },
@@ -606,15 +641,17 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   // Manda uma mensagem com arquivo; no modo "Pedir ajuste", ela vira o pedido.
   async function enviarComArquivo(mensagem) {
     if (modoAjuste) {
-      await pedirAjuste(mensagem);
+      await pedirAjuste(mensagem, conteudoDaMensagem());
       definirModoAjuste(false);
       await carregar();
       return;
     }
     const { data, error } = await supabase.from('mensagens')
-      .insert({ cliente_id: clienteId, conteudo_id: conteudoId, autor: eu, ...mensagem }).select().single();
+      .insert({ cliente_id: clienteId, conteudo_id: conteudoDaMensagem(), autor: eu, ...mensagem }).select().single();
     if (error) throw error;
+    await carregarConteudos([data.conteudo_id]);
     adicionar(data);
+    definirAnexo(null);
   }
 
   async function enviarImagens(arquivos) {
@@ -747,7 +784,88 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     }
   });
 
-  anexar.addEventListener('click', () => seletor.click());
+  // Clipe: na conversa filtrada, direto as imagens; na inteira, o menu (imagem ou conteúdo).
+  function itemDoAnexo(texto, acao) {
+    const b = el('button', 'conversa-menu-item', texto);
+    b.type = 'button';
+    b.setAttribute('role', 'menuitem');
+    b.addEventListener('click', () => { menuAnexo.hidden = true; acao(); });
+    return b;
+  }
+  menuAnexo.append(
+    itemDoAnexo('Imagem', () => seletor.click()),
+    itemDoAnexo('Conteúdo', () => abrirEscolher().catch(console.error)));
+  anexar.addEventListener('click', () => {
+    if (!comCartoes) return seletor.click();
+    menuAnexo.hidden = !menuAnexo.hidden;
+    if (!menuAnexo.hidden) {
+      menuAnexo.style.bottom = `${raiz.getBoundingClientRect().bottom - form.getBoundingClientRect().top + 4}px`;
+      menuAnexo.firstElementChild.focus();
+    }
+  });
+
+  async function abrirEscolher() {
+    mostrarErro('');
+    listaEscolher.replaceChildren(el('p', 'conversa-vazia', 'Carregando…'));
+    escolher.showModal();
+    const { data, error } = await supabase.from('conteudos')
+      .select(`${CAMPOS_CARTAO}, data_prevista`)
+      .eq('cliente_id', clienteId).neq('status', 'rascunho')
+      .order('atualizado_em', { ascending: false }).limit(60);
+    if (error) {
+      listaEscolher.replaceChildren(el('p', 'conversa-vazia', 'Não foi possível abrir os conteúdos. Tente de novo.'));
+      return console.error(error);
+    }
+    for (const c of data) conteudos.set(c.id, c);
+    if (!data.length) {
+      listaEscolher.replaceChildren(el('p', 'conversa-vazia', eu === 'bea'
+        ? 'Nenhum conteúdo enviado para este cliente ainda.'
+        : 'Nenhum conteúdo por aqui ainda.'));
+      return;
+    }
+    listaEscolher.replaceChildren(...data.map((c) => {
+      const situacao = situacoes[c.status];
+      const b = el('button', 'conversa-cartao conversa-escolher-item', miniaturaDoConteudo(c),
+        el('span', 'conversa-cartao-info',
+          el('span', 'conversa-cartao-titulo', c.titulo),
+          situacao ? el('span', `situacao ${situacao.classe}`, situacao.texto) : null));
+      b.type = 'button';
+      b.addEventListener('click', () => {
+        escolher.close();
+        definirAnexo(c.id);
+        campo.focus();
+      });
+      return b;
+    }));
+  }
+  fecharEscolher.addEventListener('click', () => escolher.close());
+  escolher.addEventListener('click', (e) => { if (e.target === escolher) escolher.close(); });
+
+  // Mostra (ou tira) o conteúdo anexado em cima da caixa de escrever.
+  function definirAnexo(id) {
+    if (!comCartoes) id = null; // na filtrada o conteúdo já é o do filtro
+    anexo = id;
+    mostrarAnexo();
+  }
+
+  function mostrarAnexo() {
+    const id = conteudoDaMensagem();
+    const visivel = Boolean(anexo) || (modoAjuste && Boolean(id));
+    anexoChip.hidden = !visivel;
+    raiz.classList.toggle('com-anexo', visivel);
+    if (!visivel) return;
+    const info = conteudos.get(id);
+    anexoChip.classList.toggle('conversa-anexo-ajuste', modoAjuste);
+    anexoMini.replaceChildren(miniaturaDoConteudo(info ?? null));
+    anexoRotulo.textContent = modoAjuste ? 'Pedido de ajuste' : 'Sobre o conteúdo';
+    anexoTitulo.textContent = info?.titulo ?? '';
+    tirarAnexo.setAttribute('aria-label', modoAjuste ? 'Cancelar o pedido de ajuste' : 'Tirar o conteúdo');
+  }
+  tirarAnexo.addEventListener('click', () => {
+    definirModoAjuste(false);
+    definirAnexo(null);
+  });
+
   seletor.addEventListener('change', () => {
     const arquivos = [...seletor.files];
     seletor.value = '';
@@ -757,11 +875,10 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   function definirModoAjuste(ligado) {
     if (ligado) sairDaEdicao();
     modoAjuste = ligado;
-    avisoAjuste.hidden = !ligado;
     raiz.classList.toggle('pedindo-ajuste', ligado);
     campo.placeholder = ligado ? 'O que você quer mudar?' : 'Mensagem';
+    mostrarAnexo();
   }
-  cancelarAjuste.addEventListener('click', () => definirModoAjuste(false));
 
   function entrarNaEdicao(m) {
     definirModoAjuste(false);
@@ -918,10 +1035,14 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   lista.addEventListener('scroll', fecharMenu, { passive: true });
   document.addEventListener('pointerdown', (e) => {
     if (!menu.hidden && !menu.contains(e.target) && !e.target.closest('.conversa-mais')) fecharMenu();
+    if (!menuAnexo.hidden && !menuAnexo.contains(e.target) && !anexar.contains(e.target)) menuAnexo.hidden = true;
   });
   raiz.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!menu.hidden) fecharMenu();
+    if (!menuAnexo.hidden) {
+      menuAnexo.hidden = true;
+      anexar.focus();
+    } else if (!menu.hidden) fecharMenu();
     else if (editando) sairDaEdicao();
   });
 
@@ -929,7 +1050,13 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
 
   // ------------------------------------------------------------ carregar e tempo real
 
+  verTudo.addEventListener('click', () => aoVerTudo?.());
+
   async function carregar() {
+    if (!faixaFiltro.hidden && !filtroTitulo.textContent) {
+      const { data: c } = await supabase.from('conteudos').select('titulo').eq('id', conteudoId).maybeSingle();
+      filtroTitulo.textContent = c?.titulo ?? 'Conteúdo';
+    }
     const { data, error } = await supabase.from('mensagens')
       .select('id, conteudo_id, autor, tipo, texto, arquivo_url, arquivo_expira_em, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
       .eq(conteudoId ? 'conteudo_id' : 'cliente_id', conteudoId ?? clienteId).order('criado_em');
@@ -968,11 +1095,21 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     carregar,
     /** Para de ouvir o tempo real (ao trocar de conversa sem sair da página). */
     fechar: () => supabase.removeChannel(canal),
-    /** "Pedir ajuste": a próxima mensagem vira o pedido. */
-    pedirAjuste() {
+    /** "Pedir ajuste" de um conteúdo: ele fica anexado e a próxima mensagem vira o pedido. */
+    async pedirAjuste(id = conteudoId) {
+      await carregarConteudos([id]);
+      if (comCartoes) anexo = id;
       definirModoAjuste(true);
-      // Rola até o título da conversa (centralizar cortava o título com o celular deitado).
-      (alvo.closest('section') ?? raiz).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!tela) {
+        // Rola até o título da conversa (centralizar cortava o título com o celular deitado).
+        (alvo.closest('section') ?? raiz).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      campo.focus({ preventScroll: true });
+    },
+    /** Anexa um conteúdo à próxima mensagem. */
+    async anexarConteudo(id) {
+      await carregarConteudos([id]);
+      definirAnexo(id);
       campo.focus({ preventScroll: true });
     },
     sairDoModoAjuste: () => definirModoAjuste(false),
