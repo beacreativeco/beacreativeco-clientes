@@ -68,7 +68,30 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
     b.setAttribute('role', 'menuitem');
   }
 
-  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, sobre, instalar, botaoSair);
+  // Aparência: claro, escuro ou do aparelho (tema.js guarda a escolha neste aparelho).
+  const opcoesAparencia = [['claro', 'Claro'], ['escuro', 'Escuro'], ['aparelho', 'Do aparelho']].map(([valor, texto]) => {
+    const b = el('button', 'perfil-aparencia-opcao', texto);
+    b.type = 'button';
+    b.dataset.valor = valor;
+    b.setAttribute('role', 'menuitemradio');
+    return b;
+  });
+  const marcarAparencia = () => {
+    const atual = window.beaTema?.escolha() ?? 'aparelho';
+    opcoesAparencia.forEach((b) => b.setAttribute('aria-checked', String(b.dataset.valor === atual)));
+  };
+  opcoesAparencia.forEach((b) => b.addEventListener('click', () => {
+    window.beaTema?.definir(b.dataset.valor);
+    marcarAparencia();
+  }));
+  const aparencia = el('div', 'perfil-aparencia',
+    el('span', 'perfil-aparencia-titulo', 'Aparência'),
+    el('div', 'perfil-aparencia-opcoes', ...opcoesAparencia));
+  aparencia.setAttribute('role', 'group');
+  aparencia.setAttribute('aria-label', 'Aparência');
+  marcarAparencia();
+
+  const menu = el('div', 'perfil-lista', cabecalho, meuPerfil, aparencia, sobre, instalar, botaoSair);
   menu.setAttribute('role', 'menu');
   menu.id = 'perfil-lista';
   menu.hidden = true;
@@ -82,7 +105,7 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
     botao.setAttribute('aria-label', `Perfil de ${atual.nome?.trim() || atual.email}`);
   }
 
-  const itens = () => [...menu.querySelectorAll('[role=menuitem]:not([hidden])')];
+  const itens = () => [...menu.querySelectorAll('[role=menuitem]:not([hidden]), [role=menuitemradio]')];
   function abrir() {
     menu.hidden = false;
     botao.setAttribute('aria-expanded', 'true');

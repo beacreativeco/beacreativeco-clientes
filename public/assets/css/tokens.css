@@ -1,0 +1,192 @@
+/* Design tokens do BeaCreative (direção "Estúdio", aprovada em 07/10/2026).
+   Um arquivo só para cores, tipografia, espaçamento, raios, sombras e movimento.
+   O resto do CSS usa só os tokens semânticos (--cor-…), nunca as cores cruas.
+
+   Modos: claro (padrão) e escuro. Quem decide é tema.js, que põe
+   data-tema="claro" | "escuro" no <html> antes da página aparecer: segue o aparelho,
+   a não ser que a pessoa tenha escolhido em "Aparência" (menu do avatar).
+   Contraste: todo par texto/fundo daqui passa no WCAG AA (4,5:1). */
+
+:root {
+  /* ---------- Paleta (referência; usar os tokens semânticos abaixo) ---------- */
+  --espresso-950: #120E0C;
+  --espresso-900: #1C1512;
+  --espresso-850: #271E19;
+  --espresso-800: #2F251F;
+  --espresso-750: #3A2E26;
+  --espresso-700: #4D3B31; /* a cor da marca */
+  --espresso-500: #6B574B;
+  --espresso-400: #957E6F;
+  --espresso-300: #C4B3A5;
+  --espresso-200: #D9CCC2;
+  --espresso-100: #EFE8E2;
+  --espresso-50: #F6F2EE;
+  --creme-marca: #FFF5E9;    /* a cor da marca, agora de apoio */
+
+  --periwinkle-900: #2B2F57;
+  --periwinkle-800: #3D447F;
+  --periwinkle-700: #4F579A;
+  --periwinkle-600: #5961B0; /* ação no claro: 5,6:1 com branco */
+  --periwinkle-500: #7B85CE; /* a cor da marca (decorativa: 3,45:1 com branco) */
+  --periwinkle-400: #9BA2DE; /* ação no escuro */
+  --periwinkle-300: #AEB4E3;
+  --periwinkle-200: #DADDF3;
+  --periwinkle-100: #E8EAF7;
+
+  /* ---------- Tipografia ---------- */
+  --fonte-titulo: "the-seasons", Georgia, "Times New Roman", serif;
+  --fonte-texto: "Poppins", system-ui, -apple-system, sans-serif;
+
+  /* Escala ~1,25 a partir de 16px; títulos em The Seasons, o resto em Poppins. */
+  --fs-display: clamp(2.5rem, 6vw, 3.5rem); /* título de página */
+  --fs-titulo: clamp(1.75rem, 4vw, 2.25rem);
+  --fs-subtitulo: 1.5rem;                   /* títulos de seção, nomes na lista */
+  --fs-grande: 1.125rem;
+  --fs-base: 1rem;
+  --fs-pequeno: 0.875rem;
+  --fs-legenda: 0.8125rem;
+  --fs-mini: 0.75rem;
+
+  --lh-titulo: 1.05;
+  --lh-texto: 1.55;
+  --tracking-titulo: -0.015em;
+
+  /* ---------- Espaçamento (base 4px) ---------- */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 20px;
+  --esp-6: 24px;
+  --esp-8: 32px;
+  --esp-10: 40px;
+  --esp-12: 48px;
+  --esp-16: 64px;
+  --largura-pagina: 1180px;
+  --largura-texto: 68ch;
+
+  /* ---------- Raios: menores por dentro, maiores por fora ---------- */
+  --raio-p: 6px;   /* chips, etiquetas */
+  --raio-m: 10px;  /* botões, campos */
+  --raio-g: 16px;  /* cartões, painéis */
+  --raio-xg: 24px; /* janelas, folhas do celular */
+  --raio-pilula: 999px;
+
+  /* ---------- Movimento ---------- */
+  --dur-rapida: 120ms;
+  --dur: 200ms;
+  --dur-lenta: 320ms;
+  --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --curva-mola: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* ---------- Camadas ---------- */
+  --z-topo: 10;
+  --z-barra: 15;
+  --z-aviso: 30;
+  --z-menu: 40;
+  --z-janela: 50;
+}
+
+/* ================================================================ claro */
+:root,
+:root[data-tema="claro"] {
+  color-scheme: light;
+
+  --cor-fundo: var(--espresso-50);
+  --cor-superficie: #FFFFFF;
+  --cor-superficie-2: #FBF8F5;     /* campos, áreas de apoio dentro de cartões */
+  --cor-superficie-hover: #F3EDE8;
+  --cor-texto: #2E231D;            /* 14:1 no fundo */
+  --cor-titulo: var(--espresso-700);
+  --cor-texto-2: var(--espresso-500); /* 5,9:1 no fundo */
+  --cor-borda: #E5DBD3;
+  --cor-borda-forte: #CDBFB4;
+
+  /* Moldura do app (topo e barra do celular): espresso nos dois modos. */
+  --cor-moldura: #2B201B;
+  --cor-moldura-texto: #F6EFE7;
+  --cor-moldura-texto-2: var(--espresso-200);
+  --cor-moldura-borda: transparent;
+  --cor-indicador: var(--periwinkle-300);
+
+  --cor-acao: var(--periwinkle-600);
+  --cor-acao-hover: var(--periwinkle-700);
+  --cor-acao-texto: #FFFFFF;
+  --cor-link: var(--periwinkle-700);
+  --cor-foco: var(--periwinkle-600);
+
+  /* Estados (fundo + texto, sempre em par) */
+  --cor-destaque-fundo: var(--periwinkle-100);
+  --cor-destaque-texto: var(--periwinkle-800);
+  --cor-neutro-fundo: var(--espresso-100);
+  --cor-neutro-texto: #5E4B40;
+  --cor-aviso-fundo: #FDF0E1;
+  --cor-aviso-texto: #7A4A12;
+  --cor-erro: #9A3B3B;
+  --cor-erro-fundo: #F6E3E1;
+  --cor-erro-texto: #8A3434;
+
+  --cor-balao-meu: #D9DCF3;        /* minhas mensagens na conversa */
+
+  --cor-esqueleto: #ECE4DD;
+  --cor-esqueleto-brilho: #F6F1EC;
+  --cor-veu: rgba(28, 21, 18, 0.45); /* fundo atrás das janelas */
+
+  /* Sombras com o tom do marrom, luz vindo de cima */
+  --sombra-1: 0 1px 2px rgba(43, 32, 27, 0.06);
+  --sombra-2: 0 1px 2px rgba(43, 32, 27, 0.06), 0 8px 24px rgba(43, 32, 27, 0.07);
+  --sombra-3: 0 2px 6px rgba(43, 32, 27, 0.08), 0 18px 44px rgba(43, 32, 27, 0.16);
+  --sombra-acao: 0 1px 0 rgba(43, 32, 27, 0.12), 0 6px 16px rgba(89, 97, 176, 0.28);
+
+  --logo-claro: 0; /* 1 = usar o logo claro (fundo escuro) */
+}
+
+/* ================================================================ escuro */
+:root[data-tema="escuro"] {
+  color-scheme: dark;
+
+  --cor-fundo: var(--espresso-900);
+  --cor-superficie: var(--espresso-850);
+  --cor-superficie-2: var(--espresso-800);
+  --cor-superficie-hover: var(--espresso-750);
+  --cor-texto: #F4ECE3;            /* 15:1 no fundo */
+  --cor-titulo: #F4ECE3;
+  --cor-texto-2: var(--espresso-300); /* 8:1 na superfície */
+  --cor-borda: #3A2E26;
+  --cor-borda-forte: #54453B;
+
+  --cor-moldura: var(--espresso-950);
+  --cor-moldura-texto: #F4ECE3;
+  --cor-moldura-texto-2: var(--espresso-300);
+  --cor-moldura-borda: #2E241E;
+  --cor-indicador: var(--periwinkle-300);
+
+  --cor-acao: var(--periwinkle-400);
+  --cor-acao-hover: var(--periwinkle-300);
+  --cor-acao-texto: var(--espresso-900); /* 7,4:1 */
+  --cor-link: var(--periwinkle-300);     /* 8:1 */
+  --cor-foco: var(--periwinkle-300);
+
+  --cor-destaque-fundo: #353A63;
+  --cor-destaque-texto: var(--periwinkle-200);
+  --cor-neutro-fundo: #3D3029;
+  --cor-neutro-texto: #E0D2C6;
+  --cor-aviso-fundo: #4A3518;
+  --cor-aviso-texto: #F5D3A6;
+  --cor-erro: #F2B8B0;
+  --cor-erro-fundo: #4A2622;
+  --cor-erro-texto: #F2B8B0;
+
+  --cor-balao-meu: #3D4373;
+
+  --cor-esqueleto: #2F251F;
+  --cor-esqueleto-brilho: #3A2E26;
+  --cor-veu: rgba(8, 6, 5, 0.65);
+
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sombra-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --sombra-3: 0 2px 6px rgba(0, 0, 0, 0.35), 0 18px 44px rgba(0, 0, 0, 0.5);
+  --sombra-acao: 0 6px 16px rgba(0, 0, 0, 0.35);
+
+  --logo-claro: 1;
+}

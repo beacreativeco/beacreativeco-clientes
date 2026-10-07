@@ -28,7 +28,7 @@
 .previa-alternar[aria-pressed="true"] {
   border-color: var(--periwinkle);
   background: var(--periwinkle);
-  color: var(--branco);
+  color: var(--cor-acao-texto);
 }
 
 /* Formatos possíveis com os arquivos escolhidos (Post, Carrossel, Story, Reels). */
@@ -39,7 +39,7 @@
   gap: 4px;
   padding: 3px;
   border-radius: 999px;
-  background: rgba(77, 59, 49, 0.08);
+  background: color-mix(in srgb, var(--cor-texto) 8%, transparent);
 }
 
 .previa-formato {
@@ -54,7 +54,7 @@
 
 .previa-formato[aria-pressed="true"] {
   background: var(--branco);
-  box-shadow: 0 1px 3px rgba(77, 59, 49, 0.2);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--cor-texto) 20%, transparent);
   font-weight: 600;
 }
 
@@ -129,7 +129,7 @@
   min-width: min(100%, 260px);
   overflow: hidden;
   border-radius: 14px;
-  box-shadow: 0 0 0 1px rgba(77, 59, 49, 0.25), 0 10px 30px rgba(77, 59, 49, 0.18);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cor-texto) 25%, transparent), 0 10px 30px color-mix(in srgb, var(--cor-texto) 18%, transparent);
   background: #000;
 }
 
@@ -633,7 +633,7 @@
 .ig-faixa-nome {
   padding: calc(var(--u) * 3) calc(var(--u) * 8);
   border-radius: 999px;
-  background: rgba(77, 59, 49, 0.85);
+  background: color-mix(in srgb, var(--cor-texto) 85%, transparent);
   color: #fff;
   font-size: max(10px, calc(var(--u) * 11));
   font-weight: 600;
@@ -846,7 +846,7 @@
 
 .previa-legenda-story .previa-legenda-story-aviso {
   margin-bottom: 4px;
-  color: rgba(77, 59, 49, 0.7);
+  color: color-mix(in srgb, var(--cor-texto) 70%, transparent);
   font-size: 0.75rem;
 }
 
