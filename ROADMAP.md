@@ -100,26 +100,26 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - A foto e o @ da prévia dos posts continuam os que a Bea cadastrou (o cliente não mexe)
    - `/api/perfil/foto` serve aos dois lados; excluir cliente apaga a foto dele do R2
    - Junto, nos dois perfis: "Esqueci a senha atual" (manda o link de criar senha), para quem só entrou com o Google ou pelo convite e nunca teve senha
-5e. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
-   - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
-   - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
-5f. [ ] **Prévia opcional** (Bea e cliente; só front, sem migração)
-   - Por padrão, os arquivos crus: imagens uma por vez (deslizar, como hoje no carrossel, sem moldura) e vídeo no player normal
+5e. [ ] **Prévia opcional** (Bea e cliente; só front, sem migração)
+   - Por padrão, os arquivos crus: imagens uma por vez (deslizar, sem moldura) e vídeo no player normal
    - Botão "Ver prévia" liga a simulação do Instagram (`previa-instagram.js`); "Ver arquivos" volta
-   - Formatos possíveis pelas mídias da versão atual: 1 vídeo → Reels ou Story; 1 imagem → Post ou Story; 2 ou mais → Carrossel (a decidir: mistura de imagem e vídeo, vários vídeos)
-   - A prévia abre no formato cadastrado pela Bea (se for possível), com seletor para comparar; trocar não grava nada no banco
+   - Quem vê escolhe quais arquivos entram na prévia (não precisa ser todos juntos); os formatos seguem a escolha: 1 vídeo → Reels ou Story; 1 imagem → Post ou Story; 2 ou mais → Carrossel
+   - A prévia abre no formato cadastrado pela Bea (se for possível com os arquivos), com seletor para comparar; nada disso grava no banco
    - "Ocultar interface" e "Áreas cobertas" (só Bea) continuam dentro da prévia
-5g. [ ] **Instalar o sistema como app** (PWA, no padrão do LAEG-BIO)
+5f. [ ] **Instalar o sistema como app** (PWA, no padrão do LAEG-BIO)
    - `site.webmanifest` com `display: standalone`, nome "BeaCreative" e ícones da marca (comuns e maskable), mais um service worker mínimo (rede primeiro, nunca guarda `/api/`)
    - Convite depois do login: Chrome/Edge (Android e computador) usam o botão do navegador; iPhone no Safari mostra o passo a passo (Compartilhar → Adicionar à Tela de Início); Chrome no iPhone orienta abrir no Safari
-   - "Fechar" (volta depois de um tempo, a decidir) e "Não mostrar de novo"; nada aparece se já estiver instalado
-   - "Instalar o sistema" no menu do avatar, para Bea e cliente (só quando dá para instalar)
-5h. [ ] **Enviar arquivos pro Trello e pro Drive** (só a Bea, no editor; migração nova)
+   - "Fechar" (volta depois de 30 dias, como no LAEG) e "Não mostrar de novo"; nada aparece se já estiver instalado
+   - "Instalar o sistema" no menu do avatar, para Bea e cliente, a qualquer momento (só quando dá para instalar)
+5g. [ ] **Enviar arquivos pro Trello e pro Drive** (só a Bea, no editor; migração nova)
    - Botões ao lado de cada arquivo; depois de enviado mostra "✓ No Trello" / "✓ No Drive" (com link), e mandar de novo pede confirmação
-   - Trello: anexa no cartão do conteúdo (`trello_card_id`), pelo servidor, a versão do sistema (a decidir: o que fazer acima do limite de anexo do plano do Trello)
-   - Drive: pasta do cadastro do cliente (`drive_pasta_url`), enviado direto do navegador da Bea para o Google (sem passar pelo limite das Functions); manda o original se ele ainda estiver na página, senão pede para escolher o arquivo original (ou manda a versão do sistema, avisando)
+   - Trello (plano grátis, anexo até 10 MB): pelo servidor, anexa no cartão do conteúdo (`trello_card_id`) a versão do sistema; acima de 10 MB anexa o link do arquivo no sistema
+   - Drive: login do Google só com a permissão `drive.file` + Google Picker (a Bea escolhe a pasta de cada cliente uma vez); envio direto do navegador para o Google, na pasta do cliente (`drive_pasta_url`); manda o original se ele ainda estiver na página, senão pede para escolher o arquivo original (ou manda a versão do sistema, avisando)
+   - Precisa: projeto no Google Cloud com Drive API e Picker API, OAuth client (origens da produção, do Preview e do localhost) e chave de API restrita aos domínios
    - Registro em `midias`: quando e o id do anexo/arquivo, e se foi o original
-   - A decidir: forma de login no Google para o Drive
+5h. [ ] **Envio do link para o cliente** (fase 1 do `CLAUDE.md`)
+   - WhatsApp com mensagem pronta (`wa.me`), e-mail, Instagram e copiar link
+   - Usa os dados da agência do perfil da Bea (5c): nome, WhatsApp, Instagram e e-mail de contato
 6. [ ] **Avisos por e-mail**
 7. [x] **Publicação (versão 1.0.0, 06/10/2026):** R2, Cloudflare Pages, variáveis, subdomínio e URLs no Supabase; tag `v1.0.0` e Release no GitHub
    - Testado no ar: upload, pasta `trabalho/`, aprovação do cliente movendo os arquivos para `aprovados/`
