@@ -165,7 +165,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Testado com dados de exemplo em 375px. **Falta:** testar tudo no Preview com o victordev e num celular de verdade; regra `apagar-conversa` no R2
    - Na subida para produção: MINOR (1.6.0), mudança visível sem mudar o jeito de aprovar
 
-10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano esperando aprovação do Victor
+10. [ ] **Notificações push** (pedido de 07/10/2026, depois da conversa por cliente da 1.6.0): avisos na barra do celular e do computador mesmo com o app fechado (Web Push, service worker e chaves VAPID). Plano aprovado em 07/10/2026 (aviso de prazo às 9h; aprovação avisa sempre, separada da mensagem)
    - Quando avisa:
      - Bea: mensagem nova de cliente (título = nome do cliente), pedido de ajuste e aprovação
      - Cliente: mensagem nova da Bea (título "BeaCreative"), conteúdo liberado para aprovação (novo ou nova versão) e prazo de aprovação vencendo amanhã
@@ -180,7 +180,13 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Permissão: só no botão "Ativar notificações", nunca sozinha. iPhone: só com o sistema instalado na tela de início (iOS 16.4+); fora dele, explica como instalar
    - Perfil (Bea e cliente): seção "Notificações" com ligar/desligar neste aparelho, "Enviar notificação de teste" e a lista dos aparelhos com "Remover". Na aba Mensagens da Bea, "Avisar no navegador" vira o mesmo "Ativar notificações"
    - Segredos: `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` como Secret no Cloudflare (Production e Preview) e no `.dev.vars`; a chave pública VAPID vai em `config.js`
-   - [ ] Entrega 1: chaves, tabela, envio, service worker, seção Notificações e teste (só o "Enviar notificação de teste" dispara)
+   - [x] Entrega 1: chaves, tabela, envio, service worker, seção Notificações e teste (só o "Enviar notificação de teste" dispara)
+     - `functions/_lib/webpush.js`: criptografia conferida byte a byte com o exemplo da RFC 8291 e assinatura VAPID verificada com a chave pública
+     - Migração `20261020000000` (`push_aparelhos` + `registrar_aparelho`); `POST /api/push/teste`; `sw.js` mostra o aviso e abre a tela ao tocar (no Safari sempre mostra: o WebKit cancela quem recebe push sem aviso)
+     - `notificacoes.js`: ativar (permissão só no toque), desligar, testar, lista de aparelhos com "Remover"; ao abrir uma página logada confirma a inscrição; "Sair" tira o aparelho da conta
+     - Aba Mensagens da Bea: "Avisar no navegador" virou "Ativar notificações"
+     - Chave pública em `config.js`; `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` gerados no `.dev.vars`
+     - **Falta:** rodar a migração, criar os 3 Secrets no Cloudflare (Production e Preview) e testar no Preview (Android, computador e iPhone instalado)
    - [ ] Entrega 2: avisos automáticos de mensagem, aprovação, pedido de ajuste e conteúdo liberado (gatilhos + `/api/push/evento`)
    - [ ] Entrega 3: prazo vencendo amanhã (`pg_cron` + `/api/push/prazos`)
 

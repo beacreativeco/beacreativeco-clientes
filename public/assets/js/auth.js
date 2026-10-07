@@ -97,6 +97,8 @@ export function erroDoGoogle() {
 }
 
 export async function sair() {
+  // Este aparelho para de receber os avisos desta conta (antes de perder o login).
+  await import('./notificacoes.js').then((m) => m.esquecerEsteAparelho()).catch(console.error);
   await supabase.auth.signOut();
   window.location.replace(ROTAS.login);
 }

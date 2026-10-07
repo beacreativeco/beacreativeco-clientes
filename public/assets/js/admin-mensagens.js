@@ -3,7 +3,8 @@
 // Com &conteudo=<id>, só a parte da conversa sobre aquele conteúdo ("Ver tudo" volta).
 import { supabase } from './supabase.js';
 import { sair } from './auth.js';
-import { iniciarPagina } from './ui.js';
+import { iniciarPagina, avisar } from './ui.js';
+import { situacaoNesteAparelho, ativar } from './notificacoes.js';
 import { criarConversa, acompanharTeclado } from './conversa.js';
 
 const $ = (id) => document.getElementById(id);
@@ -13,7 +14,7 @@ let aberturas = 0;    // trocar de cliente no meio do carregamento: vale a últi
 
 iniciarPagina('admin', async () => {
   $('sair').addEventListener('click', sair);
-  ligarNotificacoes();
+  ligarNotificacoes().catch(console.error);
   acompanharTeclado();
   $('busca').addEventListener('input', desenharLista);
 
@@ -184,22 +185,30 @@ function quando(iso) {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
-// A permissão do navegador só pode ser pedida num clique da Bea.
-function ligarNotificacoes() {
+// "Ativar notificações": push de verdade (chega com o sistema fechado). A permissão só é
+// pedida neste toque. Ativado (ou ativável só pelo perfil, como no iPhone sem instalar):
+// o botão some e a explicação fica na seção Notificações do Meu perfil.
+async function ligarNotificacoes() {
   const botao = $('ativar-notificacoes');
   const info = $('notificacoes-info');
-  if (!('Notification' in window)) return;
-
-  const mostrar = () => {
-    botao.hidden = Notification.permission !== 'default';
-    info.hidden = Notification.permission === 'default';
-    info.textContent = Notification.permission === 'granted'
-      ? 'O navegador avisa quando um cliente escrever, mesmo com o painel em outra aba.'
-      : 'Os avisos do navegador estão bloqueados. Para liberar, use o cadeado ao lado do endereço do site.';
+  const mostrar = async () => {
+    const situacao = await situacaoNesteAparelho();
+    botao.hidden = situacao !== 'pode-ativar';
+    info.hidden = situacao !== 'bloqueado';
+    info.textContent = 'As notificações estão bloqueadas neste navegador. Para liberar, use o cadeado ao lado do endereço do site.';
   };
   botao.addEventListener('click', async () => {
-    await Notification.requestPermission();
-    mostrar();
+    botao.disabled = true;
+    try {
+      await ativar();
+      avisar('Notificações ativadas. Para testar ou desligar, vá em Meu perfil.');
+    } catch (err) {
+      console.error(err);
+      avisar(err.code === 'P0001' ? err.message : 'Não foi possível ativar agora. Tente de novo.', 'erro');
+    } finally {
+      botao.disabled = false;
+      await mostrar();
+    }
   });
-  mostrar();
+  await mostrar();
 }

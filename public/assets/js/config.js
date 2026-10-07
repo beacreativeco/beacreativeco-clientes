@@ -10,3 +10,7 @@ export const SUPABASE_ANON_KEY = 'sb_publishable_ihe5BwV3tW0q9vnvcJQSEw_QVdJR-oM
 export const GOOGLE_CLIENT_ID = '493593349658-k0289urhpknpt5moe7jpr9ht64bl65aj.apps.googleusercontent.com';
 export const GOOGLE_API_KEY = 'AIzaSyBZAC81PQJahcPPSFDH-JGBuhh-ZwybDGM';
 export const GOOGLE_APP_ID = '493593349658';
+
+// Notificações push (Web Push): chave PÚBLICA VAPID, usada pelo navegador para se inscrever.
+// A privada fica só no servidor (VAPID_PRIVATE_KEY, Secret no Cloudflare e .dev.vars).
+export const VAPID_PUBLIC_KEY = 'BKrZRkcQlvIzUTEOq4Y8_4kkWMtZjHZKYQASlMyqI1RWHoiiA2ZFUN6bNaKnyKL_N_99ZW2ur7aP7mnYLL4o6vM';

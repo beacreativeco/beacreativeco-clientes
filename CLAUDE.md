@@ -54,7 +54,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Regras de segurança (inegociáveis)
 
-- `service_role` do Supabase, chaves do R2, Trello e e-mail NUNCA vão para o front nem para o Git. Ficam em variáveis de ambiente do Cloudflare Pages e em `.dev.vars` local (no `.gitignore`).
+- `service_role` do Supabase, chaves do R2, Trello, e-mail e a chave privada VAPID (`VAPID_PRIVATE_KEY`) NUNCA vão para o front nem para o Git. Ficam em variáveis de ambiente do Cloudflare Pages e em `.dev.vars` local (no `.gitignore`).
 - No front só entra a URL do projeto e a chave `anon`/publishable do Supabase.
 - Todo acesso a dados é protegido por RLS (Row Level Security) no Postgres:
   - Cliente só lê os próprios conteúdos com status diferente de `rascunho`, nunca `observacao_interna`.
@@ -88,6 +88,13 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Editar/apagar mensagem só por `editar_mensagem` (só texto, até 15 min) e `apagar_mensagem` (até 48 h); só as próprias, nunca aprovação nem pedido de ajuste. Ninguém tem UPDATE/DELETE direto em `mensagens` (a Bea só lê tudo e insere como `bea`). Apagada vira "Mensagem apagada" no lugar. Com arquivo, apagar passa por `/api/conversa/apagar`, que chama a função com o login de quem pediu e tira o arquivo do R2.
 - Arquivos da conversa sobem por `PUT /api/conversa/arquivo?conteudo_id=` (Bea ou cliente dono, fora de rascunho) ou `?cliente_id=` (sem conteúdo; JPEG até 8 MB, áudio M4A/WEBM até 5 MB) e a mensagem é criada depois pelo navegador (o RLS confere a pasta). `POST /api/conversa/limpar` (só admin) apaga a pasta `conversa/` do conteúdo antes de excluir um rascunho.
 - Bea: "Mensagens" no topo de todo o painel (`avisos-admin.js`, ligado por `ui.js`), aba Mensagens em `/admin/mensagens/` (`conversas_por_cliente`; `caixa_de_mensagens` só fica para a versão antiga), aviso clicável levando à conversa do cliente e notificação do navegador (permissão pedida na Caixa). Listas recebem o evento `mensagens-mudaram`.
+
+## Notificações push
+
+- Web Push com VAPID, sem pacote npm: `functions/_lib/webpush.js` (criptografia `aes128gcm` da RFC 8291 e JWT ES256 com o WebCrypto). `avisarUsuario(env, userId, { titulo, corpo, url, tag })` manda para todos os aparelhos da pessoa e apaga os que respondem 404/410.
+- Aparelhos em `push_aparelhos` (cada um vê e remove os seus; inclui só por `registrar_aparelho`). Front em `public/assets/js/notificacoes.js` (seção "Notificações" do Meu perfil, Bea e cliente); permissão pedida só no toque em "Ativar notificações". iPhone/iPad: só com o sistema instalado na tela de início.
+- `public/sw.js` mostra o aviso (mesma `tag` substitui) e, ao tocar, abre `url` (só caminhos do próprio site). Com a tela do aviso aberta e em foco, não mostra, exceto no Safari (o WebKit cancela a inscrição de quem recebe push sem aviso).
+- Chave pública em `config.js` (`VAPID_PUBLIC_KEY`); `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` como Secret no Cloudflare (Production e Preview) e no `.dev.vars`.
 
 ## Modelo de dados (base)
 

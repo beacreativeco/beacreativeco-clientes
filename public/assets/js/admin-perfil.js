@@ -6,6 +6,7 @@ import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { ocupado, avisarMudanca, ligarFoto, ligarSenha } from './perfil-comum.js';
+import { montarSecaoNotificacoes } from './notificacoes.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -13,6 +14,7 @@ let perfil; // { nome, foto_url, email }
 let desenharFoto;
 
 iniciarPagina('admin', async ({ session }) => {
+  montarSecaoNotificacoes(document.getElementById('secao-notificacoes'), avisar).catch(console.error);
   $('sair').addEventListener('click', sair); // só se o menu do avatar não montar
   const [admin, agencia] = await Promise.all([
     supabase.from('admins').select('nome, foto_url').eq('user_id', session.user.id).maybeSingle(),

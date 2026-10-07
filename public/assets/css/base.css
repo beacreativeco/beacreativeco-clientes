@@ -4498,3 +4498,78 @@ a.conversa-cartao:focus-visible {
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
+
+/* ---------- Notificações (seção do Meu perfil, notificacoes.js) ---------- */
+.notificacoes {
+  display: grid;
+  gap: var(--esp-4);
+}
+
+.notificacoes-estado {
+  margin: 0;
+  max-width: var(--largura-texto);
+  color: var(--cor-texto-2);
+}
+
+.notificacoes-estado.notificacoes-ativo {
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+.notificacoes-estado.notificacoes-ativo::before {
+  content: "✦ ";
+  color: var(--cor-acao);
+}
+
+.notificacoes-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-3) var(--esp-4);
+}
+
+.notificacoes-subtitulo {
+  margin: 0 0 var(--esp-2);
+  font-family: var(--fonte-texto);
+  font-size: var(--fs-pequeno);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cor-texto-2);
+}
+
+.notificacoes-aparelhos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.notificacoes-aparelho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+  min-width: 0;
+  padding: var(--esp-2) 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.notificacoes-aparelho-info {
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.notificacoes-aparelho-info strong {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notificacoes-aparelho-info span {
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
+.notificacoes-aparelho .botao-link { flex: none; min-height: 44px; }

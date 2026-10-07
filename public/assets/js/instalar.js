@@ -29,12 +29,12 @@ function gravar(armazenamento, chave, valor) {
   try { armazenamento.setItem(chave, valor); } catch { /* sem armazenamento */ }
 }
 
-function jaInstalado() {
+export function jaInstalado() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
 // iPadOS se apresenta como Mac; o toque denuncia.
-function ehIos() {
+export function ehIos() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }

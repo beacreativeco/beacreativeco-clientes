@@ -34,6 +34,8 @@ export async function iniciarPagina(area, montar) {
     import('./sobre.js').then((m) => m.ligarRodapeSobre(app)).catch(console.error);
     // App na tela inicial: registra o service worker e agenda o convite para instalar.
     iniciarInstalacao();
+    // Notificações já ativadas neste aparelho: confirma a inscrição no banco.
+    import('./notificacoes.js').then((m) => m.sincronizar()).catch(console.error);
     // Painel da Bea: contador de não lidas, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);

@@ -5,6 +5,7 @@ import { supabase } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar } from './ui.js';
 import { ocupado, avisarMudanca, ligarFoto, ligarSenha } from './perfil-comum.js';
+import { montarSecaoNotificacoes } from './notificacoes.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,6 +13,7 @@ let perfil; // { nome, foto_url, email }
 let desenharFoto;
 
 iniciarPagina('cliente', async ({ session, perfil: acesso }) => {
+  montarSecaoNotificacoes(document.getElementById('secao-notificacoes'), avisar).catch(console.error);
   $('sair').addEventListener('click', sair); // só se o menu do avatar não montar
   perfil = {
     nome: acesso.cliente.contato_nome,
