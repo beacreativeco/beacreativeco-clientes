@@ -1,6 +1,7 @@
-// POST /api/push/evento   { tipo: 'mensagem' | 'conteudo_liberado', id }
-// Chamado pelo próprio banco (gatilhos com pg_net, migração 20261021000000), com o segredo
-// no cabeçalho X-Push-Segredo. Relê a linha no banco, decide quem avisar e manda o push.
+// POST /api/push/evento   { tipo: 'mensagem' | 'conteudo_liberado', id } ou { tipo: 'prazos' }
+// Chamado pelo próprio banco (gatilhos com pg_net, migração 20261021000000; 'prazos' pelo
+// pg_cron todo dia às 9h de Brasília, migração 20261022000000), com o segredo no cabeçalho
+// X-Push-Segredo. Relê no banco, decide quem avisar e manda o push.
 //
 // Cada evento é reservado em push_eventos antes de enviar: o banco chama a produção e o
 // Preview, e só o primeiro envia. Fora da produção, só clientes de teste (PUSH_SO_CLIENTES,
@@ -86,12 +87,40 @@ async function conteudoLiberado(env, id, podeCliente) {
   });
 }
 
+// Brasília é UTC−3 o ano todo (sem horário de verão desde 2019).
+const BRASILIA_MS = 3 * 60 * 60 * 1000;
+
+// Prazo de aprovação vencendo amanhã (de 0h a 24h de amanhã, horário de Brasília), para o
+// cliente que ainda não decidiu. Um aviso por conteúdo e prazo (mudou o prazo: avisa de novo).
+async function prazos(env, podeCliente) {
+  const hoje = new Date(Date.now() - BRASILIA_MS);
+  const inicio = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate() + 1) + BRASILIA_MS);
+  const fim = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
+  const lista = (await rest(env, 'conteudos?select=id,titulo,cliente_id,prazo_aprovacao'
+    + `&status=eq.em_aprovacao&prazo_aprovacao=gte.${inicio.toISOString()}&prazo_aprovacao=lt.${fim.toISOString()}`)) ?? [];
+
+  let enviados = 0;
+  for (const c of lista.filter((x) => podeCliente(x.cliente_id))) {
+    const [cliente] = (await rest(env, `clientes?select=user_id,login_ativo&id=eq.${c.cliente_id}`)) ?? [];
+    if (!cliente?.user_id || !cliente.login_ativo) continue;
+    if (!(await reservar(env, `prazo:${c.id}:${c.prazo_aprovacao}`))) continue;
+    const hora = new Date(c.prazo_aprovacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    enviados += await avisarUsuario(env, cliente.user_id, {
+      titulo: 'BeaCreative',
+      corpo: `O prazo para aprovar “${c.titulo}” vence amanhã às ${hora}.`,
+      url: `/cliente/conteudo/?id=${c.id}`,
+      tag: `conteudo-${c.id}`,
+    });
+  }
+  return enviados;
+}
+
 export async function onRequestPost({ request, env, waitUntil }) {
   if (!env.PUSH_SEGREDO || !env.VAPID_PRIVATE_KEY) return responder(500, 'Notificações não configuradas no servidor.');
   if (!mesmoSegredo(request.headers.get('X-Push-Segredo'), env.PUSH_SEGREDO)) return responder(401, 'Segredo inválido.');
 
   const { tipo, id } = (await request.json().catch(() => null)) ?? {};
-  if (!UUID.test(id ?? '')) return responder(400, 'Evento inválido.');
+  if (tipo !== 'prazos' && !UUID.test(id ?? '')) return responder(400, 'Evento inválido.');
 
   const testes = new Set((env.PUSH_SO_CLIENTES ?? '').split(',').map((s) => s.trim()).filter(Boolean));
   const podeCliente = ehProducao(request) ? () => true : (clienteId) => testes.has(clienteId);
@@ -99,6 +128,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const tarefa = {
     mensagem: () => mensagem(env, id, podeCliente),
     conteudo_liberado: () => conteudoLiberado(env, id, podeCliente),
+    prazos: () => prazos(env, podeCliente),
   }[tipo];
   if (!tarefa) return responder(400, 'Evento desconhecido.');
 
