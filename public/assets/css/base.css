@@ -197,8 +197,10 @@ a {
 }
 
 .campo input::placeholder,
-.campo textarea::placeholder {
-  color: color-mix(in srgb, var(--cor-texto-2) 75%, transparent);
+.campo textarea::placeholder,
+.conversa-campo::placeholder {
+  color: var(--cor-texto-2);
+  opacity: 1; /* o Firefox clareia o placeholder por conta própria */
 }
 
 .campo input[aria-invalid="true"],
@@ -252,7 +254,8 @@ textarea:focus-visible {
 }
 
 .botao:disabled {
-  opacity: 0.6;
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
   cursor: wait;
   box-shadow: none;
 }
@@ -545,7 +548,8 @@ textarea:focus-visible {
 }
 
 .botao-secundario:disabled {
-  opacity: 0.5;
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-2);
   cursor: wait;
 }
 
@@ -682,7 +686,7 @@ textarea:focus-visible {
 
 .cliente-meta {
   font-size: 0.875rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
   overflow-wrap: anywhere;
 }
 
@@ -693,7 +697,7 @@ textarea:focus-visible {
 }
 
 .situacao.ativo { color: var(--periwinkle-escuro); }
-.situacao.sem-acesso { opacity: 0.6; }
+.situacao.sem-acesso { color: var(--cor-texto-2); }
 .situacao.suspenso { color: var(--erro); }
 
 .cliente-acoes {
@@ -978,7 +982,7 @@ textarea:focus-visible {
 .subtitulo {
   margin: 4px 0 0;
   font-size: 0.875rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 a.cliente-nome {
@@ -993,10 +997,10 @@ a.cliente-nome:hover {
 }
 
 /* ---------- Situação de um conteúdo ---------- */
-.situacao.rascunho { opacity: 0.6; }
+.situacao.rascunho { color: var(--cor-texto-2); }
 .situacao.aguardando { color: var(--espresso); }
 .situacao.ajuste { color: var(--erro); }
-.situacao.postado { opacity: 0.6; }
+.situacao.postado { color: var(--cor-texto-2); }
 .situacao.aprovado { color: var(--periwinkle-escuro); }
 
 /* ---------- Agenda do cliente ---------- */
@@ -1061,7 +1065,7 @@ a.cliente-nome:hover {
 
 .agenda-formato {
   font-size: 0.875rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .agenda-link .situacao {
@@ -1153,7 +1157,7 @@ a.cliente-nome:hover {
 
 .contador {
   font-size: 0.8125rem;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .contador.passou {
@@ -1311,14 +1315,14 @@ a.cliente-nome:hover {
 .zona-excluir p {
   margin: 0 0 12px;
   font-size: 0.875rem;
-  opacity: 0.8;
+  color: var(--cor-texto-2);
 }
 
 .zona-excluir .botao-perigo { border-color: var(--erro); }
 
 .excluir-aviso p { margin: 0; }
 .excluir-aviso ul { margin: 6px 0 8px; padding-left: 20px; }
-.excluir-aviso .dica { opacity: 0.85; }
+.excluir-aviso .dica { color: inherit; }
 
 .excluir-vitrine {
   display: grid;
@@ -1344,7 +1348,7 @@ a.cliente-nome:hover {
 .excluir-vitrine input { margin-top: 4px; accent-color: var(--erro); }
 
 .botao-excluir { background: var(--erro); }
-.botao-excluir:disabled { opacity: 0.45; cursor: not-allowed; }
+.botao-excluir:disabled { background: var(--cor-neutro-fundo); color: var(--cor-neutro-texto); box-shadow: none; cursor: not-allowed; }
 
 #prazo-info {
   margin-top: 12px;
@@ -1425,7 +1429,7 @@ a.cliente-nome:hover {
 }
 
 .midia-tamanho {
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .midia-acoes {
@@ -1494,7 +1498,8 @@ a.cliente-nome:hover {
 }
 
 .botao-icone:disabled {
-  opacity: 0.3;
+  color: var(--cor-texto-2);
+  border-color: var(--cor-borda);
   cursor: default;
 }
 
@@ -1607,7 +1612,7 @@ a.cliente-nome:hover {
   max-width: 46ch;
   margin-top: 8px;
   font-size: 1rem;
-  opacity: 0.85;
+  color: var(--cor-texto-2);
 }
 
 .cliente-grupo {
@@ -1619,7 +1624,7 @@ a.cliente-nome:hover {
   margin-bottom: 12px;
 }
 
-.situacao.ajuste-cliente { color: var(--espresso); opacity: 0.75; }
+.situacao.ajuste-cliente { color: var(--cor-texto-2); }
 
 /* Um conteúdo: título, prévia (o destaque) e a decisão.
    Celular: uma coluna, decisão presa no pé da tela. Computador: prévia à esquerda. */
@@ -1745,7 +1750,7 @@ a.cliente-nome:hover {
 .cc-mensagem-quem {
   margin: 0;
   font-size: 0.8125rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .cc-mensagem-texto {
@@ -1833,7 +1838,7 @@ a.cliente-nome:hover {
   max-width: 32ch;
   font-size: 0.875rem;
   text-align: center;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .conversa-dia,
@@ -1907,7 +1912,7 @@ a.cliente-nome:hover {
 
 .conversa-apagada .conversa-texto {
   font-style: italic;
-  opacity: 0.6;
+  color: var(--cor-texto-2);
 }
 
 .conversa-apagada .conversa-hora { margin-top: 0; }
@@ -1986,7 +1991,7 @@ a.cliente-nome:hover {
 .conversa-menu-pergunta {
   margin: 4px 12px 6px;
   font-size: 0.8125rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .editando .conversa-campo { border-color: var(--periwinkle); }
@@ -1996,7 +2001,7 @@ a.cliente-nome:hover {
   margin-top: 1px;
   font-size: 0.625rem;
   text-align: right;
-  opacity: 0.6;
+  color: var(--cor-texto-2);
 }
 
 .conversa-aviso-ajuste {
@@ -2035,7 +2040,7 @@ a.cliente-nome:hover {
   min-height: 42px;
   max-height: 160px;
   padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--cor-texto) 40%, transparent);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: 21px;
   background: var(--branco);
   color: var(--espresso);
@@ -2074,7 +2079,7 @@ a.cliente-nome:hover {
   outline-offset: 2px;
 }
 
-.conversa-enviar:disabled { opacity: 0.6; cursor: wait; }
+.conversa-enviar:disabled { background: var(--cor-neutro-fundo); color: var(--cor-neutro-texto); cursor: wait; }
 
 .conversa-icone,
 .conversa-icone svg {
@@ -2152,7 +2157,7 @@ a.cliente-nome:hover {
 .caixa-cliente { font-weight: 600; }
 
 .caixa-quando,
-.caixa-titulo { font-size: 0.875rem; opacity: 0.75; }
+.caixa-titulo { font-size: 0.875rem; color: var(--cor-texto-2); }
 
 .caixa-previa {
   overflow: hidden;
@@ -2208,13 +2213,13 @@ a.cliente-nome:hover {
   outline-offset: 2px;
 }
 
-.conversa-enviando { opacity: 0.6; }
+.conversa-enviando { opacity: 0.85; }
 
 .conversa-expirado {
   margin: 0 0 4px;
   font-size: 0.875rem;
   font-style: italic;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .conversa-visor {
@@ -2305,7 +2310,7 @@ a.cliente-nome:hover {
   flex-basis: 100%;
   padding: 0 4px;
   font-size: 0.8125rem;
-  opacity: 0.8;
+  color: var(--cor-texto-2);
 }
 
 .gravando-aviso:empty { display: none; }
@@ -2402,7 +2407,7 @@ a.cliente-nome:hover {
   font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 /* Celular: a conversa ocupa a largura toda, sem a caixa em volta, e o título é menor. */
@@ -2433,7 +2438,7 @@ a.cliente-nome:hover {
   font-size: 0.75rem;
   line-height: 1;
   text-decoration: none;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .credito-dev-simbolo { display: block; flex: none; width: 17px; height: 17px; }
@@ -2481,7 +2486,7 @@ a.cliente-nome:hover {
   color: var(--espresso);
   font: inherit;
   font-size: 0.75rem;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -2529,7 +2534,7 @@ a.cliente-nome:hover {
   margin: 6px 0 0;
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .sobre-novidades-botao {
@@ -2586,7 +2591,7 @@ a.cliente-nome:hover {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .sobre-novidades ul { margin: 0; padding-left: 18px; }
@@ -2947,7 +2952,7 @@ a.cliente-nome:hover {
 
 .cal-linha-meta {
   font-size: 0.8125rem;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .cal-linha .situacao {
@@ -2957,7 +2962,7 @@ a.cliente-nome:hover {
 }
 
 .cal-linha.situacao-rascunho .cal-linha-titulo,
-.cal-linha.situacao-rascunho .cal-linha-meta { opacity: 0.6; }
+.cal-linha.situacao-rascunho .cal-linha-meta { color: var(--cor-texto-2); }
 
 .editor-trello {
   display: flex;
@@ -2988,12 +2993,12 @@ a.cliente-nome:hover {
 }
 
 .cal-trello .botao-secundario { white-space: nowrap; }
-.cal-trello .botao-secundario:disabled { opacity: 0.6; cursor: wait; }
+.cal-trello .botao-secundario:disabled { color: var(--cor-texto-2); cursor: wait; }
 
 .cal-trello-status {
   margin: 0;
   font-size: 0.8125rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .cal-trello-avisos {
@@ -3052,7 +3057,7 @@ a.cliente-nome:hover {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    opacity: 0.7;
+    color: var(--cor-texto-2);
   }
 
   .cal-dia {
@@ -3067,7 +3072,7 @@ a.cliente-nome:hover {
   }
 
   .cal-dia.fora-do-mes { background: transparent; }
-  .cal-dia.fora-do-mes > * { opacity: 0.45; }
+  .cal-dia.fora-do-mes > * { color: var(--cor-texto-2); }
 
   .cal-numero {
     align-self: flex-start;
@@ -3109,7 +3114,7 @@ a.cliente-nome:hover {
     display: block;
     margin-top: 1px;
     font-size: 0.6875rem;
-    opacity: 0.7;
+    color: var(--cor-texto-2);
   }
   .cal-item:focus-visible { outline: 2px solid var(--periwinkle); outline-offset: 1px; }
 
@@ -3125,7 +3130,7 @@ a.cliente-nome:hover {
   .cal-item.situacao-rascunho {
     border-left-style: dashed;
     background: var(--branco);
-    opacity: 0.7;
+    color: var(--cor-texto-2);
   }
 
   .cal-item.situacao-aprovado .cal-item-titulo::before {
@@ -3139,7 +3144,7 @@ a.cliente-nome:hover {
   .cal-item.situacao-postado {
     background: transparent;
     border-left-style: solid;
-    opacity: 0.55;
+    color: var(--cor-texto-2);
   }
 }
 
@@ -3209,6 +3214,7 @@ a.cliente-nome:hover {
 }
 
 .perfil-lista {
+  color: var(--cor-texto); /* não herda o creme do topo */
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -3249,7 +3255,7 @@ a.cliente-nome:hover {
 
 .perfil-email {
   font-size: 0.8125rem;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
 }
 
 .perfil-item {
@@ -3396,7 +3402,8 @@ a.cliente-nome:hover {
 }
 
 .botao-google:disabled {
-  opacity: 0.6;
+  color: var(--cor-texto-2);
+  border-color: var(--cor-borda);
   cursor: wait;
 }
 
@@ -3406,7 +3413,7 @@ a.cliente-nome:hover {
   gap: 12px;
   margin: 20px 0 16px;
   font-size: 0.8125rem;
-  opacity: 0.7;
+  color: var(--cor-texto-2);
 }
 
 .separador-ou::before,
@@ -3503,7 +3510,7 @@ a.cliente-nome:hover {
   font: inherit;
   font-size: 0.8rem;
   text-decoration: underline;
-  opacity: 0.75;
+  color: var(--cor-texto-2);
   cursor: pointer;
 }
 
@@ -3592,4 +3599,12 @@ a.cliente-nome:hover {
 .painel-nav .nao-lidas {
   background: var(--cor-indicador);
   color: var(--espresso-900);
+}
+
+/* Sem nome no perfil: convite para preencher, levando ao Meu perfil. */
+.perfil-adicionar-nome {
+  color: var(--cor-link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }

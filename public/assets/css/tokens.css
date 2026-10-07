@@ -100,7 +100,7 @@
   --cor-titulo: var(--espresso-700);
   --cor-texto-2: var(--espresso-500); /* 5,9:1 no fundo */
   --cor-borda: #E5DBD3;
-  --cor-borda-forte: #CDBFB4;
+  --cor-borda-forte: #968375; /* 3:1 nas superfícies (bordas de campos) */
 
   /* Moldura do app (topo e barra do celular): espresso nos dois modos. */
   --cor-moldura: #2B201B;
@@ -153,7 +153,7 @@
   --cor-titulo: #F4ECE3;
   --cor-texto-2: var(--espresso-300); /* 8:1 na superfície */
   --cor-borda: #3A2E26;
-  --cor-borda-forte: #54453B;
+  --cor-borda-forte: #85725F; /* 3:1 nas superfícies */
 
   --cor-moldura: var(--espresso-950);
   --cor-moldura-texto: #F4ECE3;

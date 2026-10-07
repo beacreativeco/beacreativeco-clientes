@@ -100,7 +100,15 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
   function desenhar() {
     desenharAvatar(avatarBotao, atual);
     desenharAvatar(avatarGrande, atual);
-    nome.textContent = atual.nome?.trim() || 'Sem nome';
+    // Sem nome: convite para preencher, levando ao Meu perfil (onde se troca o nome).
+    if (atual.nome?.trim()) {
+      nome.textContent = atual.nome.trim();
+    } else {
+      const adicionar = el('a', 'perfil-adicionar-nome', 'Adicionar seu nome');
+      adicionar.href = linkPerfil;
+      adicionar.setAttribute('role', 'menuitem');
+      nome.replaceChildren(adicionar);
+    }
     email.textContent = atual.email;
     botao.setAttribute('aria-label', `Perfil de ${atual.nome?.trim() || atual.email}`);
   }
