@@ -135,7 +135,8 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - 8.1 [x] Tokens (`tokens.css`), claro e escuro (`tema.js`), "Aparência" no menu do avatar, botões e escala tipográfica; todos os pares de cor passam no WCAG AA
    - 8.2 [x] Navegação: topo espresso com abas e indicador da ativa; barra embaixo no celular (Bea e cliente); transições entre telas (View Transitions, indicador desliza)
      - Cliente: Para aprovar, Aprovados (`/cliente/?ver=aprovados`) e Perfil. **Falta:** ver a barra num celular de verdade e as páginas do cliente logado
-   - 8.3 [ ] Estados: esqueletos no carregamento, telas vazias com ação, erros claros
+   - 8.3 [x] Estados: esqueleto da própria tela no carregamento (lista, agenda, editor, calendário, perfil), telas vazias com ação (`data-aciona`), falha ao abrir com "Tentar de novo" (diz quando é falta de internet), avisos com ícone
+     - **Falta:** ver a tela de falha de verdade (só aparece com erro de conexão)
    - 8.4 [ ] Formulários e janelas ("Editar cliente" em seções, botões sempre visíveis)
    - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
    - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
