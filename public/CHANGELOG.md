@@ -19,6 +19,21 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.8.0] — 07/10/2026
+
+### Novidades
+
+- Sino no topo, ao lado da foto: mostra as novidades (mensagens novas e, para os clientes, os conteúdos esperando aprovação) e, enquanto as notificações não estiverem ativadas, um pontinho com o convite para ativar.
+- Nas telas iniciais, uma faixa convida a ativar as notificações; "Agora não" esconde por um dia.
+- No menu do perfil, a opção "Notificações" mostra se estão ativadas ou leva a ativar.
+- Se as notificações estiverem bloqueadas no navegador, o sistema mostra o passo a passo para liberar.
+
+### Melhorias
+
+- No iPhone, o convite para instalar mostra o caminho certo no Safari, no Chrome, no Edge e no Firefox; o Safari só é sugerido quando o navegador não tem a opção ou o iPhone é antigo.
+- Depois de instalado, o sistema abre pelo ícone e as notificações funcionam igual, qualquer que seja o navegador usado para instalar.
+- Os convites aparecem um de cada vez.
+
 ## [1.7.0] — 07/10/2026
 
 ### Novidades
