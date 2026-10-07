@@ -285,8 +285,14 @@ textarea:focus-visible {
 .topo .titulo {
   display: block;
   line-height: 0;
-  margin-right: auto; /* sem abas (celular): o avatar vai para a direita */
 }
+
+/* Computador: logo, abas logo depois dele, e o avatar na ponta direita. */
+.topo .painel-nav { margin-right: auto; }
+
+/* Celular (abas na barra de baixo) ou página sem abas: o avatar vai para a direita. */
+.topo .titulo:last-child,
+.topo .titulo:has(+ :not(.painel-nav)) { margin-right: auto; }
 
 /* A moldura é escura nos dois modos: sempre o logo claro. */
 .topo .titulo .logo {
@@ -2398,6 +2404,8 @@ a.cliente-nome:hover {
 
 /* Celular: a navegação desce e vira a barra do app, com ícone e nome. */
 @media (max-width: 719px) {
+  .topo .titulo { margin-right: auto; }
+
   body.com-navegacao {
     --altura-barra: calc(64px + env(safe-area-inset-bottom));
     padding-bottom: var(--altura-barra);
