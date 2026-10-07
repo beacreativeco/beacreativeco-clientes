@@ -186,7 +186,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - `notificacoes.js`: ativar (permissão só no toque), desligar, testar, lista de aparelhos com "Remover"; ao abrir uma página logada confirma a inscrição; "Sair" tira o aparelho da conta
      - Aba Mensagens da Bea: "Avisar no navegador" virou "Ativar notificações"
      - Chave pública em `config.js`; `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` e `PUSH_SEGREDO` gerados no `.dev.vars`
-     - **Falta:** rodar a migração, criar os 3 Secrets no Cloudflare (Production e Preview) e testar no Preview (Android, computador e iPhone instalado)
+     - Migração rodada e Secrets gravados (Production e Preview, pelo `wrangler pages secret put`, direto do `.dev.vars`). Testado no Preview em 07/10/2026: teste chegou no Chrome do Android (victordev) e no Chrome do Windows (Bea). **Falta:** iPhone com o sistema instalado
    - [ ] Entrega 2: avisos automáticos de mensagem, aprovação, pedido de ajuste e conteúdo liberado (gatilhos + `/api/push/evento`)
    - [ ] Entrega 3: prazo vencendo amanhã (`pg_cron` + `/api/push/prazos`)
 
