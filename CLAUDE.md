@@ -63,6 +63,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 ## Perfis
 
+- App instalável (PWA): `site.webmanifest` (standalone, ícones comuns e maskable) e `sw.js`, que não guarda cache (sem build não há como versionar o cache; tudo vem da rede, só a navegação sem internet ganha uma página). Convite e item "Instalar o sistema" do menu do avatar em `instalar.js` (ligado por `ui.js`), no padrão do LAEG-BIO: "Agora não" pausa 30 dias, "Não mostrar de novo" desliga o convite automático.
 - Entrar com o Google (`entrarComGoogle` em `auth.js`): o cadastro de novos usuários fica desligado no Supabase, então só entra o Google cujo e-mail já tem acesso (o Supabase junta as duas formas de entrar na mesma conta). Conta sem acesso volta ao login com o aviso (`erroDoGoogle`).
 
 | Perfil | Acesso |
