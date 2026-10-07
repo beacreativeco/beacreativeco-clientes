@@ -19,6 +19,15 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.5.1] — 07/10/2026
+
+### Correções
+
+- Na aba Mensagens pelo celular, a página não rola mais para o lado e a barra de navegação de baixo volta a aparecer.
+- As prévias das mensagens ficam em até duas linhas, com "…" no fim.
+- Cada conversa da aba Mensagens aparece como um cartão, com o cliente, a data, o conteúdo e a marca de não lida.
+- No celular, o botão "Avisar no navegador" virou um sino e não aperta mais o título.
+
 ## [1.5.0] — 07/10/2026
 
 ### Novidades
