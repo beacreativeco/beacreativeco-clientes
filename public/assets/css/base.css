@@ -264,21 +264,47 @@ textarea:focus-visible {
 }
 
 /* ---------- Topo das áreas logadas ---------- */
+/* Moldura do app (direção Estúdio): espresso nos dois modos, com as abas dentro no
+   computador. Fica no topo da tela ao rolar, e parada nas transições entre telas. */
 .topo {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topo);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px var(--espaco);
-  border-bottom: 1px solid var(--espresso);
+  gap: var(--esp-8);
+  min-height: 60px;
+  padding: 0 max(var(--espaco), calc((100% - var(--largura-pagina)) / 2 + var(--esp-6)));
+  padding-top: env(safe-area-inset-top);
+  background: var(--cor-moldura);
+  color: var(--cor-moldura-texto);
+  border-bottom: 1px solid var(--cor-moldura-borda);
+  view-transition-name: topo;
 }
 
 .topo .titulo {
   display: block;
   line-height: 0;
+  margin-right: auto; /* sem abas (celular): o avatar vai para a direita */
 }
 
+/* A moldura é escura nos dois modos: sempre o logo claro. */
 .topo .titulo .logo {
   height: 24px;
+  content: url("/assets/img/logo-beacreative-claro.svg");
+}
+
+.topo .botao-link { color: var(--cor-moldura-texto); }
+
+.topo .perfil-botao .avatar {
+  background: var(--cor-indicador);
+  color: var(--espresso-900);
+}
+
+.topo .perfil-botao:focus-visible { outline-color: var(--cor-indicador); }
+
+.topo .perfil-botao[aria-expanded="true"] .avatar {
+  box-shadow: 0 0 0 2px var(--cor-moldura), 0 0 0 4px var(--cor-indicador);
 }
 
 .conteudo-pagina {
@@ -294,7 +320,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  min-height: 100vh;
+  min-height: calc(100dvh - 60px - var(--altura-barra, 0px));
 }
 
 .marca-monograma {
@@ -619,7 +645,7 @@ textarea:focus-visible {
   position: fixed;
   left: var(--espaco);
   right: var(--espaco);
-  bottom: var(--espaco);
+  bottom: calc(var(--espaco) + var(--altura-barra, 0px));
   max-width: 420px;
   margin: 0 auto;
   padding: 12px 16px;
@@ -789,7 +815,7 @@ a.cliente-nome:hover {
     grid-column: 2;
     grid-row: 1 / span 2;
     position: sticky;
-    top: 24px;
+    top: calc(60px + 24px); /* abaixo do topo fixo */
     margin: 0;
     padding-top: 0;
     border-top: 0;
@@ -1335,12 +1361,12 @@ a.cliente-nome:hover {
 
 .cc-decisao {
   position: sticky;
-  bottom: 0;
+  bottom: var(--altura-barra, 0px); /* acima da barra de navegação do celular */
   z-index: 2;
   margin: 0 calc(var(--espaco) * -1) 24px;
-  padding: 12px var(--espaco) calc(12px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--espresso);
-  background: var(--creme);
+  padding: 12px var(--espaco) 12px;
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
 }
 
 /* Escrevendo o pedido: a barra solta do pé para o teclado do celular não cobrir o texto. */
@@ -1438,7 +1464,7 @@ a.cliente-nome:hover {
 
   .cc-previa {
     position: sticky;
-    top: 24px;
+    top: calc(60px + 24px); /* abaixo do topo fixo */
     align-self: start;
   }
 
@@ -2311,37 +2337,160 @@ a.cliente-nome:hover {
 .sobre-fechar { width: 100%; }
 
 /* ---------- Navegação do painel da Bea (Clientes · Calendário · Mensagens) ---------- */
+/* ---------- Navegação (ui.js): abas no topo / barra embaixo no celular ---------- */
 .painel-nav {
   display: flex;
-  gap: 4px;
-  padding: 0 var(--espaco);
-  border-bottom: 1px solid color-mix(in srgb, var(--cor-texto) 25%, transparent);
-  overflow-x: auto;
-  scrollbar-width: none;
+  align-self: stretch;
+  gap: var(--esp-1);
 }
 
 .painel-nav a {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 10px 10px;
-  border-bottom: 2px solid transparent;
-  color: inherit;
-  font-size: 0.875rem;
+  gap: var(--esp-2);
+  padding: 0 var(--esp-3);
+  color: var(--cor-moldura-texto-2);
+  font-size: var(--fs-pequeno);
+  font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
-  opacity: 0.75;
+  transition: color var(--dur) var(--curva);
 }
 
-.painel-nav a:hover { opacity: 1; }
+.painel-nav a:hover { color: var(--cor-moldura-texto); }
 
 .painel-nav a[aria-current="page"] {
-  border-bottom-color: var(--periwinkle);
+  color: var(--cor-moldura-texto);
   font-weight: 600;
-  opacity: 1;
 }
 
-.painel-nav a:focus-visible { outline: 2px solid var(--periwinkle); outline-offset: -2px; }
+/* Indicador da aba ativa: uma barra periwinkle embaixo. Na troca de tela ele desliza
+   da aba antiga para a nova (view-transition-name igual nas duas páginas). */
+.nav-indicador {
+  position: absolute;
+  left: var(--esp-3);
+  right: var(--esp-3);
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--cor-indicador);
+  view-transition-name: indicador-aba;
+}
+
+.painel-nav a:focus-visible {
+  outline: 2px solid var(--cor-indicador);
+  outline-offset: -4px;
+  border-radius: var(--raio-m);
+}
+
+.nav-icone { display: none; }
+
+.nav-icone svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Celular: a navegação desce e vira a barra do app, com ícone e nome. */
+@media (max-width: 719px) {
+  body.com-navegacao {
+    --altura-barra: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: var(--altura-barra);
+  }
+
+  .painel-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-barra);
+    gap: 0;
+    height: var(--altura-barra);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--cor-moldura);
+    border-top: 1px solid var(--cor-moldura-borda);
+    view-transition-name: barra;
+  }
+
+  .painel-nav a {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    padding: 0 var(--esp-1);
+    font-size: var(--fs-mini);
+  }
+
+  .nav-icone {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .painel-nav a[aria-current="page"] .nav-icone { color: var(--cor-indicador); }
+
+  /* Na barra, o indicador fica em cima, sobre o ícone ativo. */
+  .nav-indicador {
+    top: 0;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    width: 32px;
+    margin-left: -16px;
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* O contador de não lidas vira uma bolinha no canto do ícone. */
+  .painel-nav .nao-lidas {
+    position: absolute;
+    top: 8px;
+    left: calc(50% + 6px);
+  }
+}
+
+/* ---------- Transições entre telas (Bea e cliente) ---------- */
+/* O navegador cruza o conteúdo de uma página para a outra; topo e barra ficam parados e o
+   indicador da aba desliza. Navegador sem suporte: troca normal, sem animação. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: var(--dur) var(--curva) both sai-tela;
+}
+
+::view-transition-new(root) {
+  animation: var(--dur-lenta) var(--curva) both entra-tela;
+}
+
+::view-transition-group(indicador-aba) {
+  animation-duration: var(--dur-lenta);
+  animation-timing-function: var(--curva-mola);
+}
+
+@keyframes sai-tela {
+  to { opacity: 0; }
+}
+
+@keyframes entra-tela {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+/* O conteúdo aparece com um leve deslizar quando termina de carregar. */
+#app:not([hidden]) {
+  animation: var(--dur-lenta) var(--curva) both entra-tela;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
 
 /* ---------- Calendário da Bea ---------- */
 .calendario-pagina { max-width: 1200px; }
@@ -2968,7 +3117,7 @@ a.cliente-nome:hover {
   position: fixed;
   left: var(--espaco);
   right: var(--espaco);
-  bottom: var(--espaco);
+  bottom: calc(var(--espaco) + var(--altura-barra, 0px));
   z-index: 15; /* acima do toast, abaixo do menu do avatar */
   display: grid;
   gap: 10px;
@@ -3132,4 +3281,10 @@ a.cliente-nome:hover {
   color: var(--cor-texto);
   font-weight: 600;
   box-shadow: var(--sombra-1);
+}
+
+/* Contador de não lidas sobre a moldura escura */
+.painel-nav .nao-lidas {
+  background: var(--cor-indicador);
+  color: var(--espresso-900);
 }

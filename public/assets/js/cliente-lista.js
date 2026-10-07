@@ -25,11 +25,30 @@ iniciarPagina('cliente', async ({ perfil }) => {
     aprovado: data.filter((c) => c.status === 'aprovado').reverse(),
   };
 
-  desenharGrupo('secao-aprovar', grupos.em_aprovacao);
-  desenharGrupo('secao-ajuste', grupos.ajuste_solicitado);
-  desenharGrupo('secao-aprovados', grupos.aprovado);
-  document.getElementById('resumo').textContent = resumo(grupos.em_aprovacao.length, data.length);
-  document.getElementById('lista-vazia').hidden = data.length > 0;
+  // Duas vistas, pela barra de navegação: "Para aprovar" (padrão) e "Aprovados".
+  const aprovados = new URLSearchParams(location.search).get('ver') === 'aprovados';
+  if (aprovados) {
+    document.title = 'Aprovados · BeaCreative';
+    document.getElementById('saudacao').textContent = 'Aprovados';
+    desenharGrupo('secao-aprovar', []);
+    desenharGrupo('secao-ajuste', []);
+    desenharGrupo('secao-aprovados', grupos.aprovado);
+    document.getElementById('titulo-aprovados').hidden = true; // o título da página já diz
+    document.getElementById('resumo').textContent = grupos.aprovado.length
+      ? `${grupos.aprovado.length} ${grupos.aprovado.length === 1 ? 'conteúdo aprovado' : 'conteúdos aprovados'}, do mais recente para o mais antigo.`
+      : '';
+    mostrarVazio(!grupos.aprovado.length, 'Nenhum conteúdo aprovado ainda. Quando você aprovar, ele fica guardado aqui.');
+  } else {
+    desenharGrupo('secao-aprovar', grupos.em_aprovacao);
+    desenharGrupo('secao-ajuste', grupos.ajuste_solicitado);
+    desenharGrupo('secao-aprovados', []);
+    const pendentes = grupos.em_aprovacao.length + grupos.ajuste_solicitado.length;
+    document.getElementById('resumo').textContent = resumo(grupos.em_aprovacao.length);
+    mostrarVazio(!pendentes, data.length
+      ? 'Nada esperando você agora. Quando a Bea enviar um conteúdo novo, ele aparece aqui.'
+      : 'Ainda não tem conteúdo por aqui. Quando a Bea enviar o primeiro para você aprovar, ele aparece nesta página.',
+    grupos.aprovado.length ? { texto: 'Ver os aprovados', href: '/cliente/?ver=aprovados' } : null);
+  }
 
   // Mensagens novas da Bea: número em cada conteúdo, atualizado na hora.
   await atualizarNaoLidas();
@@ -44,11 +63,23 @@ async function atualizarNaoLidas() {
   document.querySelectorAll('.agenda').forEach((agenda) => marcarNaoLidas(agenda, data));
 }
 
-function resumo(paraAprovar, total) {
+function resumo(paraAprovar) {
   if (paraAprovar === 1) return 'Tem 1 conteúdo esperando sua aprovação.';
   if (paraAprovar > 1) return `Tem ${paraAprovar} conteúdos esperando sua aprovação.`;
-  if (total) return 'Nada para aprovar agora. Quando a Bea enviar um conteúdo novo, ele aparece aqui.';
-  return ''; // sem nenhum conteúdo: a tela vazia (com o monograma) explica
+  return ''; // nada para aprovar: a tela vazia explica
+}
+
+// Tela vazia com o monograma, o texto e (se houver para onde ir) uma ação.
+function mostrarVazio(mostrar, texto, acao = null) {
+  const vazio = document.getElementById('lista-vazia');
+  vazio.hidden = !mostrar;
+  if (!mostrar) return;
+  vazio.querySelector('p').textContent = texto;
+  vazio.querySelector('.vazio-acao')?.remove();
+  if (acao) {
+    const a = Object.assign(document.createElement('a'), { href: acao.href, textContent: acao.texto, className: 'botao-secundario vazio-acao' });
+    vazio.append(a);
+  }
 }
 
 function textoDaSituacao(c) {
