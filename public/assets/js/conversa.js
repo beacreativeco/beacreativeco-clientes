@@ -1,9 +1,12 @@
-// Conversa por conteúdo, estilo WhatsApp (página do cliente e editor da Bea).
+// Conversa da Bea com um cliente, estilo WhatsApp (aba Mensagens dos dois lados), ou só a
+// parte dela sobre um conteúdo (filtro, na tela do conteúdo). Cada mensagem pode carregar
+// o conteúdo de que fala, mostrado como um cartão no balão.
 // Balões dos dois lados, separação por dia, links clicáveis, tempo real (Supabase
 // Realtime) e "lida" quando a conversa está na tela.
 import { supabase } from './supabase.js';
 import { avisar } from './ui.js';
 import { otimizarImagem } from './otimizar.js';
+import { SITUACOES, SITUACOES_CLIENTE, expirou } from './conteudos.js';
 import { gravar, gravacaoDisponivel, motivoDoErro, relogio, LIMITE_SEGUNDOS, BARRAS_ONDA } from './gravador.js';
 
 const LIMITE_TEXTO = 2000;
@@ -164,25 +167,58 @@ function rotuloDoDia(iso) {
   return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
+// ------------------------------------------------------------ cartão do conteúdo
+
+const CAMPOS_CARTAO = 'id, titulo, status, versao_atual, midias(tipo, arquivo_url, versao, ordem, expira_em)';
+const ICONE_VIDEO = '<path d="M9 7.5v9l7.5-4.5z" fill="currentColor"/>';
+
+// Miniatura: a primeira imagem da versão atual. Vídeo, expirado ou sem arquivo: um quadro
+// com o símbolo (sem carregar vídeo só para a miniatura).
+function miniaturaDoConteudo(info) {
+  const caixa = el('span', 'conversa-cartao-mini');
+  const primeira = (info?.midias ?? [])
+    .filter((m) => m.versao === info.versao_atual)
+    .sort((a, b) => a.ordem - b.ordem)[0];
+  if (primeira?.tipo === 'imagem' && !expirou(primeira.expira_em)) {
+    const img = el('img');
+    img.src = primeira.arquivo_url;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.addEventListener('error', () => img.remove(), { once: true });
+    caixa.append(img);
+  } else {
+    caixa.append(primeira?.tipo === 'video' ? icone(ICONE_VIDEO) : '✦');
+  }
+  return caixa;
+}
+
 /**
  * @param {HTMLElement} alvo
  * @param {{
- *   conteudoId: string,
+ *   clienteId: string,                      // de quem é a conversa
+ *   conteudoId?: string,                    // só a parte da conversa sobre este conteúdo
  *   eu: 'cliente' | 'bea',
+ *   tela?: boolean,                         // ocupa a altura toda (aba Mensagens)
+ *   linkDoConteudo?: (id: string) => string, // para onde o cartão do conteúdo leva
  *   pedirAjuste?: (mensagem: {tipo: string, texto?: string}) => Promise<void>,
  *   aoChegar?: (mensagem: object) => void,   // mensagem nova da outra pessoa (tempo real)
  * }} opcoes
  */
-export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, perfilDoOutro }) {
+export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, perfilDoOutro }) {
   const outro = eu === 'bea' ? 'cliente' : 'bea';
   const nomeDoOutro = eu === 'bea' ? 'Cliente' : 'Bea';
+  const situacoes = eu === 'bea' ? SITUACOES : SITUACOES_CLIENTE;
+  // Na conversa filtrada todas as mensagens são do mesmo conteúdo: sem cartão.
+  const comCartoes = !conteudoId;
 
   const lista = el('div', 'conversa-lista');
   lista.setAttribute('role', 'log');
   lista.setAttribute('aria-live', 'polite');
-  const vazia = el('p', 'conversa-vazia', eu === 'bea'
-    ? 'Nenhuma mensagem ainda. Escreva para o cliente por aqui.'
-    : 'Alguma dúvida ou ideia? Escreva para a Bea por aqui.');
+  const vazia = el('p', 'conversa-vazia', conteudoId
+    ? 'Nenhuma mensagem sobre este conteúdo ainda.'
+    : eu === 'bea'
+      ? 'Nenhuma mensagem ainda. Escreva para o cliente por aqui.'
+      : 'Alguma dúvida ou ideia? Escreva para a Bea por aqui.');
 
   const avisoAjuste = el('div', 'conversa-aviso-ajuste',
     el('p', null, 'Conte o que você quer mudar. Sua próxima mensagem vira o pedido de ajuste.'));
@@ -242,12 +278,14 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
   menu.setAttribute('role', 'menu');
   menu.hidden = true;
 
-  const raiz = el('div', 'conversa', lista, avisoAjuste, avisoEdicao, erro, form, barraGravando, menu);
+  const raiz = el('div', `conversa${tela ? ' conversa-tela' : ''}`, lista, avisoAjuste, avisoEdicao, erro, form, barraGravando, menu);
   alvo.replaceChildren(raiz);
 
-  // id → { m, no }: a própria mensagem volta pelo Realtime (não duplica) e
-  // edição/exclusão trocam o balão no lugar.
+  // id → { m, no, inicio }: a própria mensagem volta pelo Realtime (não duplica) e
+  // edição/exclusão trocam o balão no lugar. `no` é o balão já desenhado (null: desenhar).
   const mensagens = new Map();
+  // Conteúdos dos cartões: id → dados (null: o cliente não pode ver, voltou para a Bea).
+  const conteudos = new Map();
   let ultimoDia = '';
   let modoAjuste = false;
   let editando = null;
@@ -276,10 +314,32 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
     return el('span', 'conversa-autor', foto, perfilDoOutro.nome || nomeDoOutro);
   }
 
+  // Cartão do conteúdo da mensagem: miniatura, título e situação; tocar abre o conteúdo.
+  function cartao(id) {
+    const info = conteudos.get(id);
+    if (!info) {
+      const indisponivel = el('span', 'conversa-cartao conversa-cartao-off', miniaturaDoConteudo(null),
+        el('span', 'conversa-cartao-info', el('span', 'conversa-cartao-titulo', 'Conteúdo em revisão pela Bea')));
+      indisponivel.dataset.conteudo = id;
+      return indisponivel;
+    }
+    const situacao = situacoes[info.status];
+    const a = el('a', 'conversa-cartao', miniaturaDoConteudo(info),
+      el('span', 'conversa-cartao-info',
+        el('span', 'conversa-cartao-titulo', info.titulo),
+        situacao ? el('span', `situacao ${situacao.classe}`, situacao.texto) : null));
+    a.href = linkDoConteudo?.(id) ?? '#';
+    a.dataset.conteudo = id;
+    return a;
+  }
+
   function balao(m, inicio = false) {
     if (m.tipo === 'aprovacao') {
       const quem = m.autor === eu ? 'Você aprovou' : `${perfilDoOutro?.nome || nomeDoOutro} aprovou`;
-      return el('p', 'conversa-evento', `✦ ${quem}, ${hora(m.criado_em)}`);
+      const titulo = comCartoes && m.conteudo_id ? conteudos.get(m.conteudo_id)?.titulo : null;
+      const evento = el('p', 'conversa-evento', `✦ ${quem}${titulo ? ` “${titulo}”` : ''}, ${hora(m.criado_em)}`);
+      evento.dataset.id = m.id;
+      return evento;
     }
     const lado = m.autor === eu ? 'meu' : 'outro';
     const corpo = el('div', `conversa-balao conversa-${lado}`);
@@ -290,6 +350,8 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
       corpo.append(el('p', 'conversa-texto', m.autor === eu ? 'Você apagou esta mensagem' : 'Mensagem apagada'));
     } else {
       if (m.pedido_ajuste) corpo.append(el('span', 'conversa-etiqueta', 'Pedido de ajuste'));
+      if (comCartoes && m.conteudo_id) corpo.append(cartao(m.conteudo_id));
+      if (m.tipo === 'audio') corpo.classList.add('conversa-com-audio');
       // Já apagado pela exclusão automática (aprovados/, 30 dias depois): só o aviso.
       const sumiu = m.arquivo_url && m.arquivo_expira_em && new Date(m.arquivo_expira_em) <= new Date();
       if (sumiu) corpo.append(el('p', 'conversa-expirado', m.tipo === 'audio' ? 'Áudio expirado' : 'Imagem expirada'));
@@ -326,36 +388,102 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
     return botao;
   }
 
+  // Apagadas seguidas (de qualquer pessoa) viram uma linha discreta só.
+  function linhaDeApagadas(quantas) {
+    const linha = el('p', 'conversa-apagadas', quantas === 1 ? 'Mensagem apagada' : `${quantas} mensagens apagadas`);
+    linha.dataset.quantas = String(quantas);
+    return linha;
+  }
+
+  // Põe uma mensagem no fim da lista (com o dia, se mudou). Um balão da outra pessoa começa
+  // uma sequência (com o nome) depois de um balão meu, de um evento, do dia ou de apagadas.
+  function anexarNoFim(item) {
+    const dia = new Date(item.m.criado_em).toDateString();
+    if (dia !== ultimoDia) {
+      ultimoDia = dia;
+      lista.append(el('p', 'conversa-dia', rotuloDoDia(item.m.criado_em)));
+    }
+    const ultimo = lista.lastElementChild;
+    if (item.m.apagada_em) {
+      item.no = null;
+      if (ultimo?.classList.contains('conversa-apagadas')) {
+        ultimo.replaceWith(linhaDeApagadas(Number(ultimo.dataset.quantas) + 1));
+      } else {
+        lista.append(linhaDeApagadas(1));
+      }
+      return;
+    }
+    const inicio = !ultimo?.classList.contains('conversa-outro');
+    if (!item.no || item.inicio !== inicio) item.no = balao(item.m, inicio);
+    item.inicio = inicio;
+    lista.append(item.no);
+  }
+
+  // Redesenha a lista inteira (os balões já prontos são reaproveitados). Usado ao carregar
+  // e quando uma mensagem é apagada (ela entra num grupo de apagadas).
+  function desenharTudo() {
+    lista.replaceChildren();
+    ultimoDia = '';
+    const ordem = [...mensagens.values()].sort((a, b) => a.m.criado_em.localeCompare(b.m.criado_em));
+    ordem.forEach(anexarNoFim);
+    if (!ordem.length) lista.append(vazia);
+  }
+
   // Edição ou exclusão (minha ou da outra pessoa, pelo Realtime): troca o balão no lugar.
   function atualizar(m) {
     const atual = mensagens.get(m.id);
     if (!atual) return;
     const novo = { ...atual.m, ...m };
-    const no = balao(novo, atual.inicio);
-    atual.no.replaceWith(no);
-    mensagens.set(m.id, { m: novo, no, inicio: atual.inicio });
+    const apagouAgora = Boolean(novo.apagada_em) && !atual.m.apagada_em;
+    atual.m = novo;
     if (menuDe === m.id) fecharMenu();
     if (editando?.id === m.id && novo.apagada_em) sairDaEdicao();
+    if (apagouAgora) {
+      desenharTudo();
+      return;
+    }
+    if (!atual.no) return;
+    const no = balao(novo, atual.inicio);
+    atual.no.replaceWith(no);
+    atual.no = no;
   }
 
+  // Mensagem nova (enviada aqui ou chegando pelo Realtime): sempre a mais recente.
   function adicionar(m) {
     if (mensagens.has(m.id)) return false;
     vazia.remove();
-    const dia = new Date(m.criado_em).toDateString();
-    if (dia !== ultimoDia) {
-      ultimoDia = dia;
-      lista.append(el('p', 'conversa-dia', rotuloDoDia(m.criado_em)));
-    }
-    // Começa uma sequência da outra pessoa? (depois de um balão meu, de um evento ou do dia)
-    const inicio = !lista.lastElementChild?.classList.contains('conversa-outro');
-    const no = balao(m, inicio);
-    mensagens.set(m.id, { m, no, inicio });
-    lista.append(no);
+    const item = { m, no: null, inicio: false };
+    mensagens.set(m.id, item);
+    anexarNoFim(item);
     return true;
+  }
+
+  // Busca os conteúdos dos cartões que ainda não estão na memória, ou de novo quando a
+  // situação de um deles muda (aprovação ou pedido de ajuste chegando).
+  async function carregarConteudos(ids, deNovo = false) {
+    if (!comCartoes) return;
+    const faltam = [...new Set(ids.filter((id) => id && (deNovo || !conteudos.has(id))))];
+    if (!faltam.length) return;
+    const { data, error } = await supabase.from('conteudos').select(CAMPOS_CARTAO).in('id', faltam);
+    if (error) return console.error(error);
+    for (const id of faltam) conteudos.set(id, data.find((c) => c.id === id) ?? null);
+    if (deNovo) {
+      lista.querySelectorAll('.conversa-cartao').forEach((velho) => {
+        if (faltam.includes(velho.dataset.conteudo)) velho.replaceWith(cartao(velho.dataset.conteudo));
+      });
+    }
   }
 
   const pertoDoFim = () => lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80;
   const rolarProFim = () => { lista.scrollTop = lista.scrollHeight; };
+
+  // Quem está no fim da conversa continua no fim quando a lista muda de tamanho: a página
+  // aparecendo depois de carregar, o teclado do celular abrindo ou uma imagem terminando
+  // de carregar. Quem subiu para ler algo antigo não é puxado para baixo.
+  let colado = true;
+  lista.addEventListener('scroll', () => { colado = pertoDoFim(); }, { passive: true });
+  new ResizeObserver(() => { if (colado) rolarProFim(); }).observe(lista);
+  lista.addEventListener('load', () => { if (colado) rolarProFim(); }, true);
 
   // ------------------------------------------------------------ lida
 
@@ -371,11 +499,15 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
       return;
     }
     marcandoAgora = true;
-    supabase.rpc('marcar_conversa_lida', { p_conteudo_id: conteudoId })
+    // Na conversa filtrada, só as mensagens deste conteúdo ficam lidas; na inteira, todas.
+    const chamada = conteudoId
+      ? supabase.rpc('marcar_conversa_lida', { p_conteudo_id: conteudoId })
+      : supabase.rpc('marcar_conversa_do_cliente_lida', { p_cliente_id: clienteId });
+    chamada
       .then(({ error }) => {
         if (error) return console.error(error);
         // Os contadores de não lidas (topo do painel) se atualizam.
-        window.dispatchEvent(new CustomEvent('conversa-lida', { detail: conteudoId }));
+        window.dispatchEvent(new CustomEvent('conversa-lida', { detail: { clienteId, conteudoId } }));
       })
       .finally(() => {
         marcandoAgora = false;
@@ -436,7 +568,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
         await carregar();
       } else {
         const { data, error } = await supabase.from('mensagens')
-          .insert({ conteudo_id: conteudoId, autor: eu, tipo: 'texto', texto })
+          .insert({ cliente_id: clienteId, conteudo_id: conteudoId, autor: eu, tipo: 'texto', texto })
           .select().single();
         if (error) throw error;
         adicionar(data);
@@ -458,7 +590,9 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
 
   async function subirArquivo(blob) {
     const { data: { session } } = await supabase.auth.getSession();
-    const resp = await fetch(`/api/conversa/arquivo?conteudo_id=${conteudoId}`, {
+    // Com conteúdo, o arquivo fica na pasta dele; sem, na conversa do cliente (some em 30 dias).
+    const destino = conteudoId ? `conteudo_id=${conteudoId}` : `cliente_id=${clienteId}`;
+    const resp = await fetch(`/api/conversa/arquivo?${destino}`, {
       method: 'PUT',
       headers: { 'Content-Type': blob.type, Authorization: `Bearer ${session?.access_token ?? ''}` },
       body: blob,
@@ -478,7 +612,7 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
       return;
     }
     const { data, error } = await supabase.from('mensagens')
-      .insert({ conteudo_id: conteudoId, autor: eu, ...mensagem }).select().single();
+      .insert({ cliente_id: clienteId, conteudo_id: conteudoId, autor: eu, ...mensagem }).select().single();
     if (error) throw error;
     adicionar(data);
   }
@@ -797,19 +931,25 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
 
   async function carregar() {
     const { data, error } = await supabase.from('mensagens')
-      .select('id, autor, tipo, texto, arquivo_url, arquivo_expira_em, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
-      .eq('conteudo_id', conteudoId).order('criado_em');
+      .select('id, conteudo_id, autor, tipo, texto, arquivo_url, arquivo_expira_em, duracao_s, onda, pedido_ajuste, criado_em, editada_em, apagada_em')
+      .eq(conteudoId ? 'conteudo_id' : 'cliente_id', conteudoId ?? clienteId).order('criado_em');
     if (error) throw error;
-    data.forEach(adicionar);
-    if (!mensagens.size) lista.append(vazia);
+    await carregarConteudos(data.map((m) => m.conteudo_id));
+    mensagens.clear();
+    for (const m of data) mensagens.set(m.id, { m, no: null, inicio: false });
+    desenharTudo();
     rolarProFim();
     marcarLida();
   }
 
-  const canal = supabase.channel(`conversa-${conteudoId}`)
+  const filtro = conteudoId ? `conteudo_id=eq.${conteudoId}` : `cliente_id=eq.${clienteId}`;
+  const canal = supabase.channel(`conversa-${conteudoId ?? clienteId}`)
     .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'mensagens', filter: `conteudo_id=eq.${conteudoId}` },
-      ({ new: m }) => {
+      { event: 'INSERT', schema: 'public', table: 'mensagens', filter: filtro },
+      async ({ new: m }) => {
+        // Aprovação ou pedido de ajuste: a situação do conteúdo mudou (o cartão acompanha).
+        const mudouSituacao = m.tipo === 'aprovacao' || m.pedido_ajuste;
+        await carregarConteudos([m.conteudo_id], mudouSituacao);
         const estavaNoFim = pertoDoFim();
         if (!adicionar(m)) return;
         if (estavaNoFim || m.autor === eu) rolarProFim();
@@ -819,13 +959,15 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
         }
       })
     .on('postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'mensagens', filter: `conteudo_id=eq.${conteudoId}` },
+      { event: 'UPDATE', schema: 'public', table: 'mensagens', filter: filtro },
       ({ new: m }) => atualizar(m))
     .subscribe();
   window.addEventListener('pagehide', () => supabase.removeChannel(canal));
 
   return {
     carregar,
+    /** Para de ouvir o tempo real (ao trocar de conversa sem sair da página). */
+    fechar: () => supabase.removeChannel(canal),
     /** "Pedir ajuste": a próxima mensagem vira o pedido. */
     pedirAjuste() {
       definirModoAjuste(true);
@@ -835,4 +977,23 @@ export function criarConversa(alvo, { conteudoId, eu, pedirAjuste, aoChegar, per
     },
     sairDoModoAjuste: () => definirModoAjuste(false),
   };
+}
+
+/**
+ * Conversa em tela cheia no celular: a parte visível da tela (acima do teclado) vira
+ * --vv-altura e --vv-topo no <html>, e o CSS prende a conversa nela. No Android a viewport
+ * com interactive-widget=resizes-content já encolhe a página; no iPhone (Safari ignora essa
+ * opção) é isto que mantém a caixa de texto logo acima do teclado.
+ */
+export function acompanharTeclado() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const raiz = document.documentElement;
+  const ajustar = () => {
+    raiz.style.setProperty('--vv-altura', `${vv.height}px`);
+    raiz.style.setProperty('--vv-topo', `${vv.offsetTop}px`);
+  };
+  vv.addEventListener('resize', ajustar);
+  vv.addEventListener('scroll', ajustar);
+  ajustar();
 }

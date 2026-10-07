@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/assets/css/base.css">
   <title>Mensagens · BeaCreative</title>
 </head>
-<body>
+<body class="pagina-mensagens">
   <header class="topo">
     <a class="titulo titulo-link" href="/admin/"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></a>
     <button id="sair" class="botao-link" type="button">Sair</button>
@@ -30,43 +30,45 @@
   </div>
 
   <div id="app" hidden>
-    <main class="conteudo-pagina">
-
-      <div class="cabecalho-secao">
-        <div>
-          <h1>Mensagens</h1>
-          <p id="resumo" class="subtitulo"></p>
+    <main class="mensagens-pagina">
+      <section class="mensagens-lista" aria-labelledby="titulo-mensagens">
+        <div class="mensagens-lista-cab">
+          <div class="cabecalho-secao">
+            <div>
+              <h1 id="titulo-mensagens">Mensagens</h1>
+              <p id="resumo" class="subtitulo"></p>
+            </div>
+            <button id="ativar-notificacoes" class="botao-secundario botao-sino" type="button" aria-label="Avisar no navegador" data-dica="Avisar no navegador" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span class="botao-texto">Avisar no navegador</span></button>
+          </div>
+          <p id="notificacoes-info" class="dica" hidden></p>
+          <input id="busca" class="mensagens-busca" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente" autocomplete="off">
         </div>
-        <button id="ativar-notificacoes" class="botao-secundario botao-sino" type="button" aria-label="Avisar no navegador" data-dica="Avisar no navegador" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2H4.5z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span class="botao-texto">Avisar no navegador</span></button>
-      </div>
-      <p id="notificacoes-info" class="dica" hidden></p>
-
-      <div id="caixa-vazia" class="vazio" hidden>
-        <img class="marca-monograma" src="/assets/img/monograma.png" alt="" width="205" height="256">
-        <p>Nenhuma conversa ainda. Quando um cliente escrever, aprovar ou pedir ajuste, aparece aqui.</p>
-        <a class="botao-secundario vazio-acao" href="/admin/">Ver os clientes</a>
-      </div>
-      <ol id="caixa" class="caixa"></ol>
+        <ol id="conversas" class="conversas"></ol>
+        <p id="conversas-vazia" class="conversas-vazia" hidden>Nenhum cliente com esse nome.</p>
+      </section>
+      <section id="painel-conversa" class="mensagens-conversa" aria-label="Conversa">
+        <header id="conversa-cab" class="mensagens-conversa-cab" hidden>
+          <a class="mensagens-voltar" href="/admin/mensagens/" aria-label="Voltar para as conversas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></a>
+          <span id="conversa-foto" class="conversa-foto"></span>
+          <span class="mensagens-conversa-quem"><strong id="conversa-nome"></strong><span id="conversa-sub"></span></span>
+          <a id="conversa-cliente" class="botao-link" href="/admin/">Ver cliente</a>
+        </header>
+        <div id="conversa" class="mensagens-conversa-corpo" hidden></div>
+        <p id="conversa-escolha" class="mensagens-escolha">Escolha um cliente para ver a conversa.</p>
+      </section>
     </main>
   </div>
-
   <template id="modelo-conversa">
-    <li class="caixa-item">
-      <a class="caixa-link">
-        <span class="caixa-topo">
-          <span class="caixa-ponto" aria-hidden="true"></span>
-          <span class="caixa-cliente"></span>
-          <span class="caixa-quando"></span>
-        </span>
-        <span class="caixa-titulo"></span>
-        <span class="caixa-rodape">
-          <span class="caixa-previa"></span>
-          <span class="nao-lidas" hidden></span>
-        </span>
+    <li>
+      <a class="conversa-item">
+        <span class="conversa-foto"></span>
+        <span class="conversa-nome"></span>
+        <span class="conversa-quando"></span>
+        <span class="conversa-previa"></span>
+        <span class="nao-lidas" hidden></span>
       </a>
     </li>
   </template>
-
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script type="module" src="/assets/js/admin-mensagens.js"></script>

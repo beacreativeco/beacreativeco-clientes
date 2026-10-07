@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#2B201B">
+  <link rel="stylesheet" href="https://use.typekit.net/gaz7bkg.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="/assets/js/tema.js"></script>
+  <link rel="stylesheet" href="/assets/css/tokens.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <title>Mensagens · BeaCreative</title>
+</head>
+<body class="pagina-mensagens">
+  <header class="topo">
+    <span class="titulo"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></span>
+    <button id="sair" class="botao-link" type="button">Sair</button>
+  </header>
+
+  <div id="carregando" class="carregando" role="status">
+    <span class="so-leitor">Carregando…</span>
+  </div>
+
+  <div id="app" hidden>
+    <main class="mensagens-pagina so-conversa">
+      <section class="mensagens-conversa" aria-label="Conversa com a Bea">
+        <header class="mensagens-conversa-cab">
+          <a class="mensagens-voltar" href="/cliente/" aria-label="Voltar para os conteúdos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"/></svg></a>
+          <span id="conversa-foto" class="conversa-foto"></span>
+          <span class="mensagens-conversa-quem"><strong id="conversa-nome">Bea</strong><span>BeaCreative</span></span>
+        </header>
+        <div id="conversa" class="mensagens-conversa-corpo"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="/assets/js/cliente-mensagens.js"></script>
+</body>
+</html>

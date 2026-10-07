@@ -144,6 +144,18 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - 8.5 [ ] Telas do cliente e microinteração do ✦ Aprovado
    - 8.6 [ ] Demais telas da Bea (editor, calendário, mensagens, perfil)
 
+9. [ ] **Conversa por cliente** (pedido de 07/10/2026; plano e rascunhos: https://claude.ai/artifact/X67MYmy3D7DndaGdX91jaw). A conversa sai da tela do conteúdo e vira uma só por cliente, na aba Mensagens; cada mensagem pode carregar o conteúdo de que fala
+   - [x] Entrega 1: conversa por cliente (migração `20261019000000`, já rodada; compatível com a 1.5.1 no ar)
+     - Banco: `mensagens.cliente_id` (preenchido nas antigas pelo conteúdo), `conteudo_id` opcional (conteúdo excluído: a mensagem fica), `so_bea` (escrita num rascunho: o cliente nunca vê; conteúdo retirado da aprovação: a conversa continua visível), `leituras_cliente`, `marcar_conversa_do_cliente_lida`, `conversas_por_cliente`
+     - Bea: `/admin/mensagens/` com lista de clientes (foto, nome, última mensagem com "…", data, não lidas, busca) e conversa ao lado; no celular, lista → conversa em tela cheia, sem topo nem barra de baixo
+     - Cliente: aba Mensagens (`/cliente/mensagens/`) com a conversa direto e o número de não lidas na barra
+     - Cartão do conteúdo no balão (miniatura, título, situação; abre o conteúdo); aprovação com o título; apagadas seguidas viram "N mensagens apagadas"; balões até 80%, sem rolagem lateral; onda do áudio na largura do balão; a conversa fica no fim quando a tela muda (teclado, página aparecendo)
+     - Imagem e áudio sem conteúdo vão para `conversa/<cliente_id>/` (30 dias). **Falta:** criar no R2 a regra `apagar-conversa` (prefixo `conversa/`, 30 dias)
+     - Testado com dados de exemplo (computador e 375px). **Falta:** testar no Preview com o victordev e num celular de verdade (teclado no Android e no iPhone)
+     - A conversa continua também na tela do conteúdo (filtrada nele) até a Entrega 3
+   - [ ] Entrega 2: anexar conteúdo pelo clipe, "Pedir ajuste" abrindo a conversa com o conteúdo anexado, conversa filtrada com "Ver tudo", avisos de aprovação e pedido de ajuste
+   - [ ] Entrega 3: tela do conteúdo sem chat (último pedido de ajuste + "Conversar sobre este conteúdo (N)")
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão

@@ -37,6 +37,8 @@ export async function iniciarPagina(area, montar) {
     // Painel da Bea: contador de não lidas, avisos e notificação de mensagens novas.
     if (area === 'admin') {
       import('./avisos-admin.js').then((m) => m.iniciarAvisosAdmin()).catch(console.error);
+    } else {
+      import('./avisos-cliente.js').then((m) => m.iniciarAvisosCliente()).catch(console.error);
     }
   } catch (err) {
     console.error(err);
@@ -46,7 +48,7 @@ export async function iniciarPagina(area, montar) {
 
 // Navegação dos dois lados: abas no topo (computador) e barra embaixo (celular), o mesmo
 // elemento; o CSS decide onde ele fica. A aba ativa leva o indicador (que desliza na troca).
-// O contador de não lidas no "Mensagens" da Bea é pendurado por avisos-admin.js.
+// O contador de não lidas no "Mensagens" é pendurado por avisos-admin.js / avisos-cliente.js.
 const ICONES_NAV = {
   clientes: '<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.9-3.1 3-4.8 5.5-4.8s4.6 1.7 5.5 4.8"/><path d="M15.5 5.6a3.2 3.2 0 0 1 0 5.8"/><path d="M17.5 14.6c1.5.6 2.6 2 3 4.4"/>',
   calendario: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
@@ -65,6 +67,7 @@ const NAVEGACAO = {
   cliente: [
     { texto: 'Para aprovar', href: '/cliente/', icone: 'aprovar', ativo: (p, ver) => (p === '/cliente/' && ver !== 'aprovados') || p.startsWith('/cliente/conteudo/') },
     { texto: 'Aprovados', href: '/cliente/?ver=aprovados', icone: 'aprovados', ativo: (p, ver) => p === '/cliente/' && ver === 'aprovados' },
+    { texto: 'Mensagens', href: '/cliente/mensagens/', icone: 'mensagens', ativo: (p) => p.startsWith('/cliente/mensagens/') },
     { texto: 'Perfil', href: '/cliente/perfil/', icone: 'perfil', ativo: (p) => p.startsWith('/cliente/perfil/') },
   ],
 };

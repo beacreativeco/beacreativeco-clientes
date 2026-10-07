@@ -3,7 +3,7 @@
 // Quem decide se pode é o banco: chamamos apagar_mensagem com o login de quem pediu
 // (não com a chave secreta), então valem as mesmas regras da tela.
 import { responder, UUID } from '../../_lib/servidor.js';
-import { CHAVE_CONVERSA, chaveDaUrl } from '../../_lib/midias.js';
+import { CHAVE_CONVERSA, CHAVE_CONVERSA_CLIENTE, chaveDaUrl } from '../../_lib/midias.js';
 import { SUPABASE_ANON_KEY } from '../../../public/assets/js/config.js';
 
 export async function onRequestPost({ request, env }) {
@@ -27,6 +27,6 @@ export async function onRequestPost({ request, env }) {
   }
 
   const chave = chaveDaUrl(corpo);
-  if (env.MIDIAS && CHAVE_CONVERSA.test(chave)) await env.MIDIAS.delete(chave);
+  if (env.MIDIAS && (CHAVE_CONVERSA.test(chave) || CHAVE_CONVERSA_CLIENTE.test(chave))) await env.MIDIAS.delete(chave);
   return responder(200, null, { ok: true });
 }

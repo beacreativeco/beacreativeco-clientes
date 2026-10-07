@@ -1,7 +1,8 @@
 // POST /api/conversa/limpar  { conteudo_id }   (só a admin)
-// Antes de excluir um rascunho: tira do R2 todos os arquivos da conversa dele
-// (o banco apaga as mensagens em cascata, mas não alcança o armazenamento).
-import { responder, exigirAdmin, UUID } from '../../_lib/servidor.js';
+// Antes de excluir um rascunho: tira do R2 todos os arquivos da conversa dele. As mensagens
+// escritas só para a Bea (no rascunho) vão embora; as que o cliente já viu (o conteúdo foi
+// retirado da aprovação) ficam na conversa dele, sem o conteúdo, com o arquivo como expirado.
+import { responder, exigirAdmin, rest, UUID } from '../../_lib/servidor.js';
 import { PASTAS } from '../../_lib/midias.js';
 
 export async function onRequestPost({ request, env }) {
@@ -23,6 +24,11 @@ export async function onRequestPost({ request, env }) {
       cursor = pagina.truncated ? pagina.cursor : undefined;
     } while (cursor);
   }
+
+  await rest(env, `mensagens?conteudo_id=eq.${conteudoId}&so_bea=is.true`, { metodo: 'DELETE', retornar: false });
+  await rest(env, `mensagens?conteudo_id=eq.${conteudoId}&arquivo_url=not.is.null`, {
+    metodo: 'PATCH', retornar: false, corpo: { arquivo_expira_em: new Date().toISOString() },
+  });
 
   return responder(200, null, { apagados });
 }

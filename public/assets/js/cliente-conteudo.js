@@ -47,6 +47,7 @@ iniciarPagina('cliente', async ({ perfil }) => {
 
   // "Pedir ajuste" abre a conversa: a próxima mensagem do cliente vira o pedido.
   conversa = criarConversa($('conversa'), {
+    clienteId: cliente.id,
     conteudoId: conteudo.id,
     eu: 'cliente',
     perfilDoOutro: bea.data ?? null,

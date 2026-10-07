@@ -102,3 +102,23 @@ export async function exigirAcessoConversa(request, env, conteudoId) {
   }
   return { autor: 'cliente' };
 }
+
+/**
+ * Quem pode escrever na conversa de um cliente (mensagem sem conteúdo): a admin, ou o
+ * próprio cliente com o login ativo. Devolve { autor } ou { resposta }.
+ */
+export async function exigirAcessoConversaDoCliente(request, env, clienteId) {
+  const { usuario, resposta } = await usuarioDaSessao(request, env);
+  if (resposta) return { resposta };
+
+  const admins = await rest(env, `admins?select=user_id&user_id=eq.${usuario.id}`);
+  if (admins?.length) {
+    const [existe] = (await rest(env, `clientes?select=id&id=eq.${clienteId}`)) ?? [];
+    return existe ? { autor: 'bea' } : { resposta: responder(404, 'Cliente não encontrado.') };
+  }
+
+  const [cliente] = (await rest(env,
+    `clientes?select=id&user_id=eq.${usuario.id}&login_ativo=is.true&id=eq.${clienteId}`)) ?? [];
+  if (!cliente) return { resposta: responder(403, 'Você não tem acesso a esta conversa.') };
+  return { autor: 'cliente' };
+}

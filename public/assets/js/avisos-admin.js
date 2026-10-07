@@ -15,9 +15,11 @@ export async function iniciarAvisosAdmin() {
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, async ({ new: m }) => {
       await recontar();
       if (m.autor !== 'cliente') return;
-      // Já está com a conversa deste conteúdo aberta: ela mesma mostra a mensagem.
-      const aqui = new URLSearchParams(location.search).get('id');
-      if (location.pathname.startsWith('/admin/conteudo/') && aqui === m.conteudo_id && !document.hidden) return;
+      // Já está com esta conversa aberta (do cliente ou do conteúdo): ela mesma mostra a mensagem.
+      const busca = new URLSearchParams(location.search);
+      const naConversa = location.pathname.startsWith('/admin/mensagens/') && busca.get('cliente') === m.cliente_id;
+      const noConteudo = location.pathname.startsWith('/admin/conteudo/') && m.conteudo_id && busca.get('id') === m.conteudo_id;
+      if ((naConversa || noConteudo) && !document.hidden) return;
       await avisarMensagem(m);
     })
     .subscribe();
@@ -46,20 +48,22 @@ async function recontar() {
 }
 
 async function avisarMensagem(m) {
-  const { data: c } = await supabase.from('conteudos')
-    .select('titulo, clientes(nome)').eq('id', m.conteudo_id).single();
-  const quem = c?.clientes?.nome ?? 'Cliente';
-  const titulo = c?.titulo ? ` em "${c.titulo}"` : '';
+  const [cliente, conteudo] = await Promise.all([
+    supabase.from('clientes').select('nome').eq('id', m.cliente_id).maybeSingle(),
+    m.conteudo_id ? supabase.from('conteudos').select('titulo').eq('id', m.conteudo_id).maybeSingle() : {},
+  ]);
+  const quem = cliente.data?.nome ?? 'Cliente';
+  const titulo = conteudo.data?.titulo ? ` em "${conteudo.data.titulo}"` : '';
   const resumo = m.tipo === 'aprovacao' ? `${quem} aprovou${titulo}.`
     : m.pedido_ajuste ? `${quem} pediu ajuste${titulo}.`
     : `Nova mensagem de ${quem}${titulo}.`;
-  const destino = `/admin/conteudo/?id=${m.conteudo_id}#conversa`;
+  const destino = `/admin/mensagens/?cliente=${m.cliente_id}`;
 
   avisar(resumo, 'ok', destino);
 
   // Aba em segundo plano: notificação do navegador (se a Bea permitiu na Caixa de mensagens).
   if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
-    const n = new Notification('BeaCreative', { body: m.texto ? `${resumo}\n${m.texto.slice(0, 120)}` : resumo, tag: m.conteudo_id });
+    const n = new Notification('BeaCreative', { body: m.texto ? `${resumo}\n${m.texto.slice(0, 120)}` : resumo, tag: m.cliente_id });
     n.onclick = () => { window.focus(); location.href = destino; };
   }
 }

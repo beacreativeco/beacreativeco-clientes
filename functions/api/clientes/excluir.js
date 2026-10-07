@@ -3,8 +3,8 @@
 // GET  /api/clientes/excluir?cliente_id=<uuid>
 //   → resumo: { nome, pode, comuns: { conteudos, arquivos, mb }, vitrine: { conteudos, arquivos, mb } }
 // POST /api/clientes/excluir  { cliente_id, nome, manter_vitrine }
-//   → apaga os arquivos no R2 (todas as pastas), os conteúdos (conversas, mídias e notas vão
-//     junto, em cascata), a foto de perfil, o login e o cadastro. Com manter_vitrine, os conteúdos da vitrine e
+//   → apaga os arquivos no R2 (todas as pastas e a conversa/<cliente_id>/), os conteúdos (mídias e
+//     notas vão junto, em cascata), a conversa, a foto de perfil, o login e o cadastro. Com manter_vitrine, os conteúdos da vitrine e
 //     os arquivos deles ficam, e o cadastro fica arquivado (sem login nem contato).
 //
 // Regras: só com o acesso suspenso, ou de quem nunca teve login; e o nome digitado precisa
@@ -23,19 +23,28 @@ async function carregar(env, clienteId) {
 
 const podeExcluir = (cliente) => !cliente.user_id || cliente.login_ativo === false;
 
+async function chavesComPrefixo(env, prefixo) {
+  const objetos = [];
+  let cursor;
+  do {
+    const pagina = await env.MIDIAS.list({ prefix: prefixo, cursor });
+    objetos.push(...pagina.objects);
+    cursor = pagina.truncated ? pagina.cursor : undefined;
+  } while (cursor);
+  return objetos;
+}
+
 // Todas as chaves de um conteúdo, nas três pastas e nas antigas (sem pasta).
 async function chavesDoConteudo(env, conteudoId) {
   const objetos = [];
   for (const prefixo of [...PASTAS.map((p) => `${p}/`), '']) {
-    let cursor;
-    do {
-      const pagina = await env.MIDIAS.list({ prefix: `${prefixo}${conteudoId}/`, cursor });
-      objetos.push(...pagina.objects);
-      cursor = pagina.truncated ? pagina.cursor : undefined;
-    } while (cursor);
+    objetos.push(...await chavesComPrefixo(env, `${prefixo}${conteudoId}/`));
   }
   return objetos;
 }
+
+// Imagens e áudios mandados na conversa sem conteúdo (conversa/<cliente_id>/).
+const chavesDaConversa = (env, clienteId) => chavesComPrefixo(env, `conversa/${clienteId}/`);
 
 const mb = (bytes) => Math.round((bytes / 1024 / 1024) * 100) / 100;
 
@@ -58,6 +67,10 @@ export async function onRequestGet({ request, env }) {
       grupo.arquivos++;
       grupo.bytes += o.size;
     }
+  }
+  for (const o of env.MIDIAS ? await chavesDaConversa(env, clienteId) : []) {
+    soma.comuns.arquivos++;
+    soma.comuns.bytes += o.size;
   }
   const pronto = ({ bytes, ...resto }) => ({ ...resto, mb: mb(bytes) });
   return responder(200, null, {
@@ -94,8 +107,8 @@ export async function onRequestPost({ request, env }) {
   // 1. Arquivos no R2 (antes do banco: se algo falhar no meio, dá para rodar de novo).
   let arquivos = 0;
   let bytes = 0;
-  for (const c of apagar) {
-    const objetos = await chavesDoConteudo(env, c.id);
+  for (const listar of [...apagar.map((c) => () => chavesDoConteudo(env, c.id)), () => chavesDaConversa(env, clienteId)]) {
+    const objetos = await listar();
     for (let i = 0; i < objetos.length; i += 1000) {
       const lote = objetos.slice(i, i + 1000);
       await env.MIDIAS.delete(lote.map((o) => o.key));
@@ -107,11 +120,13 @@ export async function onRequestPost({ request, env }) {
   const foto = chaveDaUrl(cliente.contato_foto_url);
   if (CHAVE_PERFIL.test(foto)) await env.MIDIAS.delete(foto);
 
-  // 2. Conteúdos (mídias, mensagens, notas internas e avisos vão junto, em cascata).
+  // 2. Conteúdos (mídias, notas internas e avisos vão junto, em cascata) e a conversa. As
+  // mensagens ficam sem conteúdo quando ele é apagado; só as dos conteúdos da vitrine ficam.
   for (let i = 0; i < apagar.length; i += 100) {
     const ids = apagar.slice(i, i + 100).map((c) => c.id).join(',');
     await rest(env, `conteudos?id=in.(${ids})`, { metodo: 'DELETE', retornar: false });
   }
+  await rest(env, `mensagens?cliente_id=eq.${clienteId}&conteudo_id=is.null`, { metodo: 'DELETE', retornar: false });
 
   // 3. Login.
   if (cliente.user_id) {

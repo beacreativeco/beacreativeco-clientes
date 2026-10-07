@@ -18,6 +18,10 @@ export const LIMITE_MB = { imagem: 8, video: 300 };
 export const PASTAS = ['trabalho', 'aprovados', 'vitrine'];
 export const DIAS_APROVADOS = 30;
 
+// Conversa sem conteúdo (imagem ou áudio mandado direto na conversa do cliente):
+//   conversa/<cliente_id>/<uuid>.<ext>  →  o R2 apaga DIAS_CONVERSA dias depois (regra "conversa/").
+export const DIAS_CONVERSA = 30;
+
 const ID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const PREFIXO = `(?:(${PASTAS.join('|')})\\/)?`;
 
@@ -26,6 +30,9 @@ export const CHAVE = new RegExp(`^${PREFIXO}(${ID})\\/${ID}\\.(jpg|png|webp|mp4|
 
 // Arquivos da conversa (áudio, imagem de referência): [pasta/]<conteudo_id>/conversa/<uuid>.<ext>
 export const CHAVE_CONVERSA = new RegExp(`^${PREFIXO}(${ID})\\/conversa\\/${ID}\\.(jpg|m4a|webm|mp4)$`);
+
+// Arquivos da conversa do cliente, sem conteúdo: conversa/<cliente_id>/<uuid>.<ext>
+export const CHAVE_CONVERSA_CLIENTE = new RegExp(`^conversa\\/(${ID})\\/${ID}\\.(jpg|m4a|webm)$`);
 
 /** Em que pasta os arquivos de um conteúdo devem estar, pela situação dele. */
 export function pastaDoConteudo({ status, na_vitrine: naVitrine }) {
@@ -40,8 +47,9 @@ export function pastaDaChave(chave) {
 
 /** Quando um arquivo gravado agora nesta pasta some (null: não some). */
 export function expiraEm(pasta, desde = new Date()) {
-  if (pasta !== 'aprovados') return null;
-  return new Date(desde.getTime() + DIAS_APROVADOS * 24 * 60 * 60 * 1000).toISOString();
+  const dias = { aprovados: DIAS_APROVADOS, conversa: DIAS_CONVERSA }[pasta];
+  if (!dias) return null;
+  return new Date(desde.getTime() + dias * 24 * 60 * 60 * 1000).toISOString();
 }
 
 /** A mesma chave em outra pasta. */

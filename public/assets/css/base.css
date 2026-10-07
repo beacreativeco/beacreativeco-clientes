@@ -2236,8 +2236,10 @@ a.cliente-nome:hover {
 
 .conversa-balao {
   position: relative;
-  max-width: min(80%, 420px);
+  min-width: 0;
+  max-width: min(80%, 520px);
   padding: 5px 9px 3px;
+  overflow-wrap: anywhere;
   border-radius: 10px;
   font-size: 0.875rem;
   line-height: 1.35;
@@ -2504,52 +2506,113 @@ a.cliente-nome:hover {
   text-decoration: underline;
 }
 
-/* ---------- Caixa de mensagens (Bea) ---------- */
-/* Cada conversa é um cartão tocável: cliente, data, título do conteúdo, prévia em até duas
-   linhas com "…" e o indicador de não lida. Nada aqui pode alargar a página no celular:
-   os itens flex/grade têm min-width: 0 e o texto quebra ou é cortado. */
-.caixa {
+/* ---------- Aba Mensagens (Bea e cliente) ---------- */
+/* Computador: lista de clientes à esquerda e a conversa à direita, na altura da tela.
+   Celular: a lista é a página; a conversa abre por cima, em tela cheia, sem topo nem barra
+   de baixo, e acompanha o teclado (--vv-altura/--vv-topo, de acompanharTeclado()).
+   Nada aqui pode alargar a página: itens flex/grade com min-width: 0 e texto cortado. */
+.pagina-mensagens .rodape-sistema { display: none; }
+
+.mensagens-pagina {
   display: grid;
-  gap: var(--esp-2);
-  margin: var(--esp-4) 0 0;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  height: calc(100dvh - 60px - env(safe-area-inset-top));
+  max-width: var(--largura-pagina);
+  margin: 0 auto;
+  border-inline: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.mensagens-pagina.so-conversa { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+
+.mensagens-lista {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--cor-borda);
+}
+
+.mensagens-lista-cab {
+  display: grid;
+  gap: var(--esp-3);
+  padding: var(--esp-5) var(--esp-4) var(--esp-3);
+}
+
+.mensagens-lista-cab .cabecalho-secao { margin: 0; }
+.mensagens-lista-cab h1 { font-size: var(--fs-titulo); }
+.mensagens-lista-cab .dica { margin: 0; }
+
+.mensagens-busca {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-m);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.mensagens-busca:focus { outline: 2px solid var(--cor-foco); outline-offset: 0; }
+
+.conversas {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
   padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   list-style: none;
 }
 
-.caixa-item { min-width: 0; }
+.conversas-vazia {
+  padding: var(--esp-6) var(--esp-4);
+  font-size: var(--fs-pequeno);
+  color: var(--cor-texto-2);
+}
 
-.caixa-link {
+.conversa-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-areas: "foto nome quando" "foto previa contador";
+  column-gap: var(--esp-3);
+  row-gap: 2px;
+  align-items: center;
   min-width: 0;
-  padding: var(--esp-4);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-g);
-  background: var(--cor-superficie);
+  padding: var(--esp-3) var(--esp-4);
+  border-bottom: 1px solid var(--cor-borda);
   color: inherit;
   text-decoration: none;
-  transition: background-color var(--dur) var(--curva), border-color var(--dur) var(--curva),
-    transform var(--dur-rapida) var(--curva);
+  transition: background-color var(--dur) var(--curva);
 }
 
-.caixa-link:hover {
-  border-color: var(--cor-borda-forte);
-  background: var(--cor-superficie-hover);
+.conversa-item:hover { background: var(--cor-superficie-hover); }
+.conversa-item[aria-current="true"] { background: var(--cor-destaque-fundo); }
+
+.conversa-item:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: -2px;
 }
 
-.caixa-link:active { transform: scale(0.99); }
-
-.caixa-topo,
-.caixa-rodape {
-  display: flex;
-  align-items: center;
-  gap: var(--esp-2);
-  min-width: 0;
+.conversa-foto {
+  grid-area: foto;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
+  font-weight: 600;
 }
 
-.caixa-cliente {
-  flex: 1;
+.conversa-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+.conversa-nome {
+  grid-area: nome;
   min-width: 0;
   overflow: hidden;
   font-weight: 600;
@@ -2557,13 +2620,16 @@ a.cliente-nome:hover {
   white-space: nowrap;
 }
 
-.caixa-quando {
-  flex: none;
-  font-size: var(--fs-legenda);
+.conversa-quando {
+  grid-area: quando;
+  justify-self: end;
+  font-size: var(--fs-mini);
   color: var(--cor-texto-2);
 }
 
-.caixa-titulo {
+.conversa-previa {
+  grid-area: previa;
+  min-width: 0;
   overflow: hidden;
   font-size: var(--fs-pequeno);
   color: var(--cor-texto-2);
@@ -2571,37 +2637,122 @@ a.cliente-nome:hover {
   white-space: nowrap;
 }
 
-.caixa-rodape { align-items: flex-start; }
+.conversa-item .nao-lidas { grid-area: contador; justify-self: end; }
+.conversa-item.tem-novas .conversa-previa { color: var(--cor-texto); font-weight: 600; }
+.conversa-item.tem-novas .conversa-quando { color: var(--cor-link); font-weight: 600; }
 
-/* Prévia: até duas linhas, com "…" no fim; palavras e links longos quebram em vez de alargar. */
-.caixa-previa {
+/* Lado da conversa */
+.mensagens-conversa {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--creme);
+}
+
+.mensagens-conversa-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-height: 60px;
+  padding: var(--esp-2) var(--esp-4);
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+}
+
+.mensagens-conversa-cab .conversa-foto { width: 40px; height: 40px; }
+
+.mensagens-conversa-quem {
+  display: grid;
   flex: 1;
   min-width: 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  line-height: 1.25;
+}
+
+.mensagens-conversa-quem strong {
   overflow: hidden;
-  overflow-wrap: anywhere;
-  font-size: var(--fs-pequeno);
-  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.caixa-rodape .nao-lidas { flex: none; margin-top: 1px; }
+.mensagens-conversa-quem span {
+  overflow: hidden;
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* Não lida: bolinha periwinkle antes do nome, prévia em negrito e borda de destaque. */
-.caixa-ponto {
-  flex: none;
+.mensagens-conversa-cab .botao-link { flex: none; font-size: var(--fs-pequeno); }
+
+.mensagens-voltar {
   display: none;
-  width: 8px;
-  height: 8px;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin-left: calc(var(--esp-2) * -1);
   border-radius: 50%;
-  background: var(--cor-acao);
+  color: inherit;
 }
 
-.caixa-item.tem-novas .caixa-ponto { display: block; }
-.caixa-item.tem-novas .caixa-previa { font-weight: 600; }
-.caixa-item.tem-novas .caixa-link { border-color: var(--cor-acao); }
+.mensagens-voltar svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mensagens-voltar:focus-visible { outline: 2px solid var(--cor-foco); }
+
+.mensagens-conversa-corpo { flex: 1; min-height: 0; }
+
+.mensagens-escolha {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  padding: var(--esp-6);
+  font-size: var(--fs-pequeno);
+  color: var(--cor-texto-2);
+  text-align: center;
+}
+
+@media (max-width: 719px) {
+  .mensagens-pagina,
+  .mensagens-pagina.so-conversa {
+    display: block;
+    height: auto;
+    border: 0;
+    background: none;
+  }
+
+  .mensagens-lista { border: 0; }
+  .mensagens-lista-cab { padding: var(--esp-5) var(--espaco) var(--esp-3); }
+  .conversas { overflow: visible; }
+  .conversa-item { padding-inline: var(--espaco); }
+  .mensagens-conversa { display: none; }
+
+  /* Conversa aberta: tela cheia, do tamanho da parte visível (acima do teclado). */
+  body.conversa-aberta { padding-bottom: 0; overflow: hidden; }
+  body.conversa-aberta .topo,
+  body.conversa-aberta .mensagens-lista { display: none; }
+
+  body.conversa-aberta .mensagens-conversa {
+    position: fixed;
+    top: var(--vv-topo, 0px);
+    left: 0;
+    right: 0;
+    z-index: var(--z-barra);
+    display: flex;
+    height: var(--vv-altura, 100dvh);
+  }
+
+  body.conversa-aberta .mensagens-conversa-cab { padding-top: max(var(--esp-2), env(safe-area-inset-top)); }
+  .mensagens-voltar { display: grid; }
+}
 
 /* "Avisar no navegador": no celular vira só o sino (44px), com a dica. */
 .botao-sino svg {
@@ -2774,7 +2925,8 @@ a.cliente-nome:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: min(250px, 64vw);
+  width: 100%;
+  min-width: 0;
   padding-top: 2px;
 }
 
@@ -2827,8 +2979,9 @@ a.cliente-nome:hover {
 }
 
 .audio-barras span {
-  flex: 1;
-  max-width: 3px;
+  flex: 1 1 0;
+  min-width: 2px;
+  max-width: 4px;
   height: var(--altura);
   border-radius: 2px;
   background: color-mix(in srgb, var(--cor-texto) 30%, transparent);
@@ -2861,6 +3014,103 @@ a.cliente-nome:hover {
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--cor-texto-2);
+}
+
+/* Balão de áudio: largura fixa (até 80%), e a onda se estica nela. */
+.conversa-balao.conversa-com-audio { width: min(80%, 340px); }
+
+/* Apagadas seguidas viram uma linha discreta só. */
+.conversa-apagadas {
+  align-self: center;
+  margin: 2px 0;
+  font-size: var(--fs-mini);
+  font-style: italic;
+  color: var(--cor-texto-2);
+}
+
+/* Cartão do conteúdo dentro do balão: miniatura, título e situação. */
+.conversa-cartao {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--esp-2);
+  align-items: center;
+  margin: 2px 0 4px;
+  padding: 5px;
+  border-radius: var(--raio-m);
+  background: color-mix(in srgb, var(--cor-superficie) 70%, transparent);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+a.conversa-cartao:hover { background: var(--cor-superficie); }
+
+a.conversa-cartao:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: 1px;
+}
+
+.conversa-cartao-off { opacity: 0.75; }
+
+.conversa-cartao-mini {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 50px;
+  overflow: hidden;
+  border-radius: var(--raio-p);
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
+  font-size: var(--fs-pequeno);
+}
+
+.conversa-cartao-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.conversa-cartao-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.conversa-cartao-titulo {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--fs-legenda);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.conversa-cartao .situacao {
+  grid-area: auto;
+  justify-self: start;
+  padding: 1px 8px 1px 6px;
+  font-size: var(--fs-mini);
+}
+
+/* Conversa que ocupa a tela toda (aba Mensagens): a lista cresce e a caixa fica embaixo. */
+.conversa.conversa-tela {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.conversa-tela .conversa-lista {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  padding: var(--esp-3) var(--esp-3) var(--esp-2);
+}
+
+.conversa-tela .conversa-escrever {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
 
 /* Celular: a conversa ocupa a largura toda, sem a caixa em volta, e o título é menor. */

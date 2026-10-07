@@ -132,6 +132,7 @@ function mostrarLinksExternos() {
 async function abrirConversa() {
   document.getElementById('secao-conversa').hidden = false;
   const conversa = criarConversa(document.getElementById('conversa'), {
+    clienteId: cliente.id,
     conteudoId: conteudo.id,
     eu: 'bea',
     // Nome e foto de quem aprova (Meu perfil do cliente); sem nome, o do cadastro.

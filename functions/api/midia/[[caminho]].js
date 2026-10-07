@@ -1,9 +1,10 @@
 // GET /api/midia/<conteudo_id>/<uuid>.<ext>        → mostra o arquivo (com Range para vídeo)
 // GET /api/midia/<conteudo_id>/conversa/<uuid>.<ext> → imagem ou áudio da conversa
+// GET /api/midia/conversa/<cliente_id>/<uuid>.<ext> → imagem ou áudio da conversa sem conteúdo
 // GET /api/midia/perfil/<uuid>.jpg                    → foto de perfil
 // GET /api/midia/<conteudo_id>/<uuid>.<ext>?download=1 → baixa o original com o nome do arquivo
 // Sem login: a chave é impossível de adivinhar (decisão registrada no CLAUDE.md).
-import { CHAVE, CHAVE_CONVERSA, CHAVE_PERFIL, tipoDaChave } from '../../_lib/midias.js';
+import { CHAVE, CHAVE_CONVERSA, CHAVE_CONVERSA_CLIENTE, CHAVE_PERFIL, tipoDaChave } from '../../_lib/midias.js';
 
 export async function onRequestGet(contexto) {
   return entregar(contexto, true);
@@ -17,7 +18,7 @@ async function entregar({ request, env, params }, comCorpo) {
   if (!env.MIDIAS) return new Response('Armazenamento de arquivos não configurado.', { status: 500 });
 
   const chave = [].concat(params.caminho ?? []).join('/');
-  if (!CHAVE.test(chave) && !CHAVE_CONVERSA.test(chave) && !CHAVE_PERFIL.test(chave)) return new Response('Arquivo não encontrado.', { status: 404 });
+  if (![CHAVE, CHAVE_CONVERSA, CHAVE_CONVERSA_CLIENTE, CHAVE_PERFIL].some((r) => r.test(chave))) return new Response('Arquivo não encontrado.', { status: 404 });
 
   // Lemos o Range nós mesmos (o formato de `objeto.range` varia entre o R2 e o simulador local).
   const trecho = lerRange(request.headers.get('range'));
