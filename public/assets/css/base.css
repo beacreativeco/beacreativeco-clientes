@@ -4365,6 +4365,19 @@ a.conversa-cartao:focus-visible {
   line-height: 1.5;
 }
 
+div.convite-texto {
+  display: grid;
+  gap: var(--esp-2);
+}
+
+div.convite-texto p { margin: 0; }
+
+/* Lembrete depois do passo a passo (ex.: instalado, tanto faz o navegador). */
+.convite-nota {
+  font-size: var(--fs-legenda);
+  color: var(--cor-texto-2);
+}
+
 .convite-icone-compartilhar {
   display: inline-flex;
   width: 1.15em;

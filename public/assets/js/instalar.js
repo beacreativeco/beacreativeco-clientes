@@ -1,9 +1,10 @@
 // Instalar o sistema como app (PWA), no padrão do LAEG-BIO. Três caminhos, pelo navegador:
 //   - 'prompt': Chrome/Edge (Android e computador) disparam beforeinstallprompt; o evento fica
 //     guardado e "Instalar" chama o prompt() dele;
-//   - 'ios-safari': iPhone/iPad no Safari não têm botão automático: o convite ensina
-//     Compartilhar → "Adicionar à Tela de Início";
-//   - 'ios-outro': Chrome/Firefox/Edge no iPhone não instalam: o convite orienta abrir no Safari.
+//   - iPhone/iPad não têm botão automático: o convite ensina o caminho do navegador em uso
+//     ('ios-safari', 'ios-chrome', 'ios-edge', 'ios-firefox'; desde o iOS 16.4 todos instalam
+//     pelo Compartilhar → "Adicionar à Tela de Início");
+//   - 'ios-pelo-safari': navegador sem a opção, ou iOS anterior ao 16.4: orienta abrir no Safari.
 // Fora disso (Firefox/Safari no computador) não há o que oferecer, e nada aparece.
 // Já instalado (abrindo como app, ou appinstalled neste aparelho): nada também.
 //
@@ -39,12 +40,37 @@ export function ehIos() {
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
-/** Como dá para instalar aqui ('prompt', 'ios-safari', 'ios-outro'), ou null. */
+/**
+ * Navegador e versão do iOS pelo user agent. Desde o iOS 16.4, Chrome, Edge e Firefox
+ * também instalam ("Adicionar à Tela de Início" no Compartilhar) e o app instalado recebe
+ * notificações igual ao instalado pelo Safari. Antes disso, só o Safari instala.
+ * iPad em modo computador não informa a versão: conta como atual.
+ * @returns {{ navegador: 'safari'|'chrome'|'edge'|'firefox'|'outro', ios: number|null }}
+ */
+export function navegadorIos(ua = navigator.userAgent) {
+  const versao = ua.match(/OS (\d+)[_.](\d+)/);
+  const ios = versao ? Number(versao[1]) + Number(versao[2]) / 100 : null;
+  const navegador = /CriOS/.test(ua) ? 'chrome' : /EdgiOS/.test(ua) ? 'edge' : /FxiOS/.test(ua) ? 'firefox'
+    : /OPiOS|OPT\/|GSA\/|DuckDuckGo|YaBrowser|FBAN|FBAV|Instagram|Line\//.test(ua) ? 'outro' : 'safari';
+  return { navegador, ios };
+}
+
+/** iOS 16.4 ou mais novo (ou versão desconhecida, como no iPad em modo computador). */
+const iosAtual = (ios) => ios == null || ios >= 16.04;
+
+/**
+ * Como dá para instalar aqui, ou null:
+ * 'prompt' (Chrome/Edge no Android e no computador), 'ios-safari', 'ios-chrome', 'ios-edge',
+ * 'ios-firefox', ou 'ios-pelo-safari' (navegador sem a opção, ou iOS anterior ao 16.4).
+ */
 export function modoInstalacao() {
   if (jaInstalado() || ler(localStorage, CHAVE_INSTALADO) === '1') return null;
   if (eventoInstalar) return 'prompt';
-  if (ehIos()) return /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(navigator.userAgent) ? 'ios-outro' : 'ios-safari';
-  return null;
+  if (!ehIos()) return null;
+  const { navegador, ios } = navegadorIos();
+  if (navegador === 'safari') return 'ios-safari';
+  if (navegador === 'outro' || !iosAtual(ios)) return 'ios-pelo-safari';
+  return `ios-${navegador}`;
 }
 
 // O item do menu do avatar aparece e some junto com a possibilidade de instalar.
@@ -75,14 +101,33 @@ function iconeCompartilhar() {
   return span;
 }
 
+// O passo a passo de cada navegador no iPhone, e o lembrete de que, instalado, tanto faz por
+// qual navegador foi: o app abre pelo ícone e as notificações funcionam igual.
 function textoDoModo(modo) {
   const forte = (t) => el('strong', null, t);
-  if (modo === 'ios-safari') {
-    return el('p', 'convite-texto', 'Toque em ', iconeCompartilhar(), ' e depois em ', forte('“Adicionar à Tela de Início”'), '.');
+  const adicionar = forte('“Adicionar à Tela de Início”');
+  const passos = {
+    'ios-safari': ['Toque em ', iconeCompartilhar(), ' (Compartilhar) e depois em ', adicionar, '.'],
+    'ios-chrome': ['Toque em ', iconeCompartilhar(), ' (Compartilhar), na barra de endereço, e depois em ', adicionar, '.'],
+    'ios-edge': ['Toque no menu ', forte('⋯'), ' embaixo, depois em ', iconeCompartilhar(), ' (Compartilhar) e em ', adicionar, '.'],
+    'ios-firefox': ['Toque no menu ', forte('≡'), ', depois em ', iconeCompartilhar(), ' (Compartilhar) e em ', adicionar, '.'],
+  }[modo];
+  if (passos) {
+    const { ios } = navegadorIos();
+    return el('div', 'convite-texto',
+      el('p', null, ...passos),
+      el('p', 'convite-nota', iosAtual(ios)
+        ? 'Depois de instalado, o sistema abre pelo ícone na tela de início e as notificações funcionam igual, não importa o navegador usado para instalar.'
+        : 'Depois de instalado, o sistema abre pelo ícone na tela de início. As notificações precisam do iOS 16.4 ou mais novo (Ajustes → Geral → Atualização de Software).'));
   }
-  if (modo === 'ios-outro') {
-    return el('p', 'convite-texto', 'No iPhone, a instalação é pelo ', forte('Safari'), ': abra este endereço nele, toque em ',
-      iconeCompartilhar(), ' e depois em ', forte('“Adicionar à Tela de Início”'), '.');
+  if (modo === 'ios-pelo-safari') {
+    const { navegador, ios } = navegadorIos();
+    const motivo = navegador !== 'outro' && !iosAtual(ios)
+      ? 'Neste iPhone (iOS anterior ao 16.4), só o Safari instala o sistema.'
+      : 'Este navegador não tem a opção de instalar.';
+    return el('div', 'convite-texto',
+      el('p', null, motivo, ' Abra este endereço no ', forte('Safari'), ', toque em ', iconeCompartilhar(), ' (Compartilhar) e depois em ', adicionar, '.'),
+      el('p', 'convite-nota', 'Depois de instalado, o sistema abre pelo ícone na tela de início.'));
   }
   return el('p', 'convite-texto', 'Abra direto da tela inicial, como um aplicativo, sem procurar o endereço.');
 }

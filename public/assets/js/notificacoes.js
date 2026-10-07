@@ -119,7 +119,7 @@ const TEXTOS = {
   ativo: 'Ativadas neste aparelho. Os avisos chegam mesmo com o sistema fechado.',
   'pode-ativar': 'Receba um aviso na barra de notificações quando chegar mensagem ou novidade nos conteúdos, mesmo com o sistema fechado.',
   bloqueado: 'As notificações estão bloqueadas neste navegador. Para liberar, use o cadeado ao lado do endereço do site (no app instalado, os ajustes do aparelho) e volte aqui.',
-  'instalar-iphone': 'No iPhone e no iPad, as notificações só funcionam com o sistema instalado na tela de início: no Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início". Depois abra pelo ícone e ative aqui.',
+  'instalar-iphone': 'No iPhone e no iPad, as notificações só funcionam com o sistema instalado na tela de início (dá para instalar pelo Safari, pelo Chrome, pelo Edge ou pelo Firefox). Toque em "Como instalar" para ver o passo a passo do seu navegador; depois abra pelo ícone e ative aqui.',
   'sem-suporte': 'Este navegador não recebe notificações. No computador, use o Chrome, o Edge, o Firefox ou o Safari; no celular, o Chrome (Android) ou o app instalado (iPhone).',
 };
 
