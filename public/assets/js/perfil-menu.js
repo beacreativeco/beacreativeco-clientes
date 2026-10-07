@@ -107,6 +107,7 @@ export function montarMenuPerfil(perfil, { linkPerfil }) {
 
   const itens = () => [...menu.querySelectorAll('[role=menuitem]:not([hidden]), [role=menuitemradio]')];
   function abrir() {
+    marcarAparencia(); // pode ter mudado em outra aba ou pelo aparelho
     menu.hidden = false;
     botao.setAttribute('aria-expanded', 'true');
     itens()[0].focus();
