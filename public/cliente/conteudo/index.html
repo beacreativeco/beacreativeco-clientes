@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/assets/css/previa.css">
   <title>Conteúdo · BeaCreative</title>
 </head>
-<body>
+<body class="pagina-tela-conteudo">
   <header class="topo">
     <a class="titulo titulo-link" href="/cliente/"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></a>
     <button id="sair" class="botao-link" type="button">Sair</button>
@@ -31,36 +31,52 @@
   </div>
 
   <div id="app" hidden>
-    <main class="conteudo-pagina cliente-conteudo">
-      <nav id="trilha" class="trilha" aria-label="Você está aqui" hidden></nav>
-
-      <div class="cc-grade">
-        <div class="cc-cabecalho">
-          <h1 id="titulo"></h1>
-          <p id="situacao" class="situacao"></p>
-          <p id="detalhes" class="subtitulo"></p>
+    <main class="conteudo-pagina tela-conteudo tc-cliente" data-aba="previa">
+      <!-- Celular: abas no topo. Computador: as duas partes lado a lado (tela-conteudo.js). -->
+      <div class="tc-abas">
+        <a class="tc-voltar" aria-label="Voltar para os conteúdos"></a>
+        <div class="tc-abas-lista" role="tablist" aria-label="Este conteúdo">
+          <button class="tc-aba" type="button" data-aba="previa" id="aba-previa" aria-controls="painel-previa">Prévia</button>
+          <button class="tc-aba" type="button" data-aba="conversa" id="aba-conversa" aria-controls="painel-conversa">Conversa <span class="nao-lidas" hidden></span></button>
         </div>
+      </div>
 
-        <div id="previa" class="cc-previa"></div>
+      <div class="tc-grade">
+        <div id="painel-previa" class="tc-parte-previa cc-previa-parte" role="tabpanel" aria-labelledby="aba-previa">
+          <nav id="trilha" class="trilha" aria-label="Você está aqui" hidden></nav>
 
-        <div class="cc-lado">
+          <div class="cc-cabecalho">
+            <h1 id="titulo"></h1>
+            <p id="situacao" class="situacao"></p>
+            <p id="detalhes" class="subtitulo"></p>
+          </div>
+
           <p id="prazo" class="cc-prazo" hidden></p>
+
+          <div id="previa" class="cc-previa"></div>
+
           <a id="drive" class="cc-drive" target="_blank" rel="noopener" hidden>Ver os arquivos originais no Drive</a>
 
           <div id="aviso" class="aviso erro" role="alert" hidden></div>
+
+          <p id="resultado" class="cc-resultado" hidden></p>
 
           <section id="decisao" class="cc-decisao" aria-label="Sua decisão" hidden>
             <div class="cc-decisao-botoes">
               <button id="aprovar" class="botao cc-aprovar" type="button">✦ Aprovado</button>
               <button id="abrir-ajuste" class="botao-secundario" type="button">Pedir ajuste</button>
             </div>
-
           </section>
-
-          <p id="resultado" class="cc-resultado" hidden></p>
-
-          <section id="secao-conversa" class="resumo-conversa" aria-label="Conversa sobre este conteúdo"></section>
         </div>
+
+        <section id="painel-conversa" class="tc-parte-conversa" role="tabpanel" aria-labelledby="aba-conversa">
+          <header class="tc-conversa-cab">
+            <span id="conversa-foto" class="conversa-foto" aria-hidden="true"></span>
+            <span class="tc-conversa-quem"><strong id="conversa-nome">Bea</strong><span>Conversa sobre este conteúdo</span></span>
+            <a class="botao-link" href="/cliente/mensagens/">Todas as mensagens</a>
+          </header>
+          <div class="tc-conversa-corpo"></div>
+        </section>
       </div>
     </main>
   </div>

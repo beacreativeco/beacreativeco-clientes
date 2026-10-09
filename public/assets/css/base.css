@@ -1250,20 +1250,16 @@ a.cliente-nome:hover {
 }
 
 @media (min-width: 1080px) {
-  .editor {
+  .editor { max-width: 1100px; }
+
+  .editor[data-aba="editar"] .tc-grade {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;
     column-gap: 48px;
     align-items: start;
-    max-width: 1100px;
   }
 
-  .editor > .trilha,
-  .editor > .editor-form { grid-column: 1; }
-
-  .previa-painel {
-    grid-column: 2;
-    grid-row: 1 / span 2;
+  .editor[data-aba="editar"] .previa-painel {
     position: sticky;
     top: calc(60px + 24px); /* abaixo do topo fixo */
     margin: 0;
@@ -2004,25 +2000,9 @@ a.cliente-nome:hover {
 
 
 
-/* Um conteúdo: título, prévia (o destaque) e a decisão.
-   Celular: uma coluna, decisão presa no pé da tela. Computador: prévia à esquerda. */
-.cliente-conteudo {
-  max-width: 1000px;
-}
-
-.cc-grade {
-  display: grid;
-  grid-template-areas:
-    "cabecalho"
-    "previa"
-    "lado";
-  gap: 24px;
-  margin-top: 16px;
-}
-
-.cc-cabecalho { grid-area: cabecalho; }
-.cc-previa { grid-area: previa; }
-.cc-lado { grid-area: lado; min-width: 0; }
+/* Um conteúdo visto pelo cliente: título, prévia (o destaque), a decisão e a conversa
+   (o leiaute das partes fica em "Tela do conteúdo com a conversa"). */
+.cc-cabecalho { margin-bottom: var(--esp-5); }
 
 .cc-cabecalho h1 {
   font-size: clamp(2rem, 8vw, 2.75rem);
@@ -2031,6 +2011,8 @@ a.cliente-nome:hover {
 }
 
 .cc-cabecalho .situacao { margin: 0; }
+
+.cc-previa { margin-bottom: var(--esp-4); }
 
 .cc-cabecalho .subtitulo::first-letter { text-transform: uppercase; }
 
@@ -2137,83 +2119,412 @@ a.cliente-nome:hover {
   overflow-wrap: anywhere;
 }
 
-@media (min-width: 900px) {
-  .cc-grade {
-    grid-template-columns: 340px minmax(0, 1fr);
-    grid-template-areas:
-      "previa cabecalho"
-      "previa lado";
-    grid-template-rows: auto 1fr;
-    column-gap: 56px;
-    row-gap: 20px;
-  }
+/* ---------- Tela do conteúdo com a conversa (tela-conteudo.js) ---------- */
+/* Computador: prévia (na Bea, na aba "Conversa") à esquerda e a conversa à direita, do
+   ponto em que começa até o pé da tela (--tc-acima, medido no JS), com a caixa de escrever
+   sempre à vista. Celular: abas "Prévia | Conversa" ("Editar | Conversa" na Bea); a
+   conversa ocupa a tela toda (sem topo nem barra de baixo) e acompanha o teclado, com a
+   miniatura do conteúdo em cima; tocar nela abre a prévia ampliada por cima. */
+.tela-conteudo { max-width: var(--largura-pagina); }
 
-  .cc-previa {
-    position: sticky;
-    top: calc(60px + 24px); /* abaixo do topo fixo */
-    align-self: start;
-  }
-
-  .cc-decisao {
-    position: static;
-    margin: 0 0 32px;
-    padding: 0;
-    border: 0;
-    background: none;
-  }
-
-  .cc-decisao-botoes {
-    max-width: 420px;
-  }
-}
-
-/* Tela do conteúdo (editor e página do cliente): no lugar da conversa, o último pedido de
-   ajuste e o botão que abre a conversa filtrada neste conteúdo (resumo-conversa.js). */
-.resumo-conversa {
-  display: grid;
-  gap: var(--esp-3);
-  margin: 0 0 var(--esp-8);
-}
-
-.resumo-conversa-botao { justify-self: start; }
-
-.resumo-ajuste {
-  display: grid;
+.tc-abas {
+  display: flex;
+  align-items: center;
   gap: var(--esp-1);
   min-width: 0;
-  padding: var(--esp-3) var(--esp-4);
-  border: 1px solid var(--cor-borda);
-  border-left: 3px solid var(--cor-erro);
+}
+
+.tc-abas[hidden] { display: none; }
+
+.tc-abas-lista {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.tc-aba {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: 48px;
+  padding: 0 var(--esp-5);
+  border: 0;
+  background: none;
+  color: var(--cor-texto-2);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tc-aba:hover { color: var(--cor-texto); }
+
+.tc-aba[aria-selected="true"] {
+  color: var(--cor-texto);
+  font-weight: 600;
+}
+
+/* Indicador da aba ativa, como o das abas do topo. */
+.tc-aba[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: var(--esp-3);
+  right: var(--esp-3);
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--cor-acao);
+}
+
+.tc-aba:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: -4px;
   border-radius: var(--raio-m);
+}
+
+/* Seta de voltar: só na conversa em tela cheia do celular. */
+.tc-voltar {
+  display: none;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: inherit;
+}
+
+.tc-voltar:focus-visible { outline: 2px solid var(--cor-foco); }
+
+.tc-icone,
+.tc-icone svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.tc-icone svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tc-voltar .tc-icone,
+.tc-voltar .tc-icone svg { width: 24px; height: 24px; }
+
+.tc-grade,
+.tc-parte-previa,
+.tc-parte-editar { min-width: 0; }
+
+.tc-parte-conversa {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--creme);
+}
+
+.tc-parte-conversa[hidden] { display: none; }
+
+.tc-conversa-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  min-width: 0;
+  min-height: 60px;
+  padding: var(--esp-2) var(--esp-4);
+  border-bottom: 1px solid var(--cor-borda);
   background: var(--cor-superficie);
 }
 
-.resumo-ajuste-rotulo {
-  font-size: var(--fs-mini);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--cor-erro-texto);
+.tc-conversa-cab .conversa-foto { flex: none; width: 40px; height: 40px; }
+
+.tc-conversa-quem {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
 }
 
-.resumo-ajuste-texto {
-  margin: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
+.tc-conversa-quem strong,
+.tc-conversa-quem span {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-q.resumo-ajuste-texto { quotes: "“" "”"; }
-
-.resumo-ajuste-quem {
+.tc-conversa-quem span {
   font-size: var(--fs-legenda);
   color: var(--cor-texto-2);
 }
 
-@media (max-width: 599px) {
-  .resumo-conversa-botao { justify-self: stretch; text-align: center; }
+.tc-conversa-cab .botao-link { flex: none; font-size: var(--fs-pequeno); }
+
+.tc-nota {
+  margin: 0;
+  padding: var(--esp-2) var(--esp-4);
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-aviso-fundo);
+  color: var(--cor-aviso-texto);
+  font-size: var(--fs-legenda);
+}
+
+.tc-nota[hidden] { display: none; }
+
+.tc-conversa-corpo {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Miniatura fixa em cima da conversa (celular): tocar abre a prévia ampliada. */
+.tc-mini {
+  display: none;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--esp-3);
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: var(--esp-2) var(--esp-3);
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tc-mini:focus-visible { outline: 2px solid var(--cor-foco); outline-offset: -2px; }
+
+.tc-mini-quadro {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 50px;
+  overflow: hidden;
+  border-radius: var(--raio-p);
+  background: var(--cor-neutro-fundo);
+  color: var(--cor-neutro-texto);
+}
+
+.tc-mini-quadro img,
+.tc-mini-quadro video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tc-mini-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
+}
+
+.tc-mini-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tc-mini-titulo {
+  overflow: hidden;
+  font-size: var(--fs-pequeno);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tc-mini-info .situacao {
+  grid-area: auto;
+  justify-self: start;
+  margin: 0;
+  padding: 1px 8px 1px 6px;
+  font-size: var(--fs-mini);
+}
+
+.tc-mini-ver {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: var(--cor-link);
+  font-size: var(--fs-mini);
+  font-weight: 600;
+}
+
+/* Fechar a prévia ampliada (só existe por cima da conversa, no celular). */
+.tc-fechar-previa {
+  display: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cor-moldura);
+  color: var(--cor-moldura-texto);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tc-fechar-previa:focus-visible { outline: 2px solid var(--cor-foco); outline-offset: 2px; }
+
+/* Bea: a conversa só aparece na aba "Conversa". */
+.tc-bea[data-aba="editar"] .tc-parte-conversa { display: none; }
+
+.tc-bea .tc-abas { margin: 0 0 var(--esp-5); }
+
+@media (min-width: 900px) {
+  /* Cliente: sempre lado a lado, sem abas. */
+  .tc-cliente .tc-abas { display: none; }
+
+  .tc-cliente .tc-grade,
+  .tc-bea[data-aba="conversa"] .tc-grade {
+    display: grid;
+    grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+    column-gap: var(--esp-8);
+    height: calc(100dvh - var(--tc-acima, 84px) - var(--espaco));
+    min-height: 360px;
+  }
+
+  /* A prévia (com a decisão presa embaixo) rola sozinha; a conversa fica parada ao lado. */
+  .tc-cliente .tc-parte-previa,
+  .tc-bea[data-aba="conversa"] .tc-parte-previa {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: var(--esp-2);
+  }
+
+  .tc-cliente .tc-parte-previa .trilha { margin-top: 0; }
+
+  /* Coluna estreita: título menor que o da página inteira. */
+  .tc-cliente .cc-cabecalho h1 { font-size: clamp(1.75rem, 2.4vw, 2.25rem); }
+
+  .tc-cliente .cc-decisao {
+    position: sticky;
+    bottom: 0;
+    margin: 0;
+    padding: var(--esp-3) 0 var(--esp-1);
+  }
+
+  .tc-bea[data-aba="conversa"] .tc-parte-editar { display: none; }
+
+  .tc-bea[data-aba="conversa"] .previa-painel {
+    position: static;
+    margin: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* A tela cabe inteira na altura: o "Sobre o sistema" continua no menu do perfil. */
+  .pagina-tela-conteudo:has(.tc-cliente) .rodape-sistema,
+  body.tc-na-conversa .rodape-sistema { display: none; }
+}
+
+@media (max-width: 899px) {
+  /* As abas ficam presas logo abaixo do topo. */
+  .tc-abas {
+    position: sticky;
+    top: calc(60px + env(safe-area-inset-top));
+    z-index: 4;
+    margin: calc(var(--espaco) * -1) calc(var(--espaco) * -1) var(--esp-2);
+    padding: 0 var(--espaco);
+    border-bottom: 1px solid var(--cor-borda);
+    background: var(--cor-fundo);
+  }
+
+  .tc-bea .tc-abas { margin-top: 0; }
+  .tc-abas-lista { border-bottom: 0; }
+  .tc-aba { flex: 1; }
+
+  .tela-conteudo:not([data-aba="conversa"]) .tc-parte-conversa { display: none; }
+
+  .tela-conteudo[data-aba="conversa"] .tc-parte-editar,
+  .tela-conteudo[data-aba="conversa"] .tc-parte-previa,
+  .tela-conteudo[data-aba="conversa"] > .trilha,
+  .tc-conversa-cab { display: none; }
+
+  .tc-cliente .tc-parte-previa .trilha { margin-top: var(--esp-2); }
+
+  /* Conversa em tela cheia, do tamanho da parte visível (acima do teclado). */
+  body.tc-na-conversa { padding-bottom: 0; overflow: hidden; }
+  body.tc-na-conversa .topo,
+  body.tc-na-conversa .rodape-sistema { display: none; }
+
+  body.tc-na-conversa .tela-conteudo {
+    position: fixed;
+    top: var(--vv-topo, 0px);
+    left: 0;
+    right: 0;
+    z-index: var(--z-barra);
+    display: flex;
+    flex-direction: column;
+    height: var(--vv-altura, 100dvh);
+    max-width: none;
+    padding: 0;
+    background: var(--cor-superficie);
+  }
+
+  body.tc-na-conversa .tc-abas {
+    position: static;
+    margin: 0;
+    padding: env(safe-area-inset-top) var(--esp-2) 0 var(--esp-1);
+    background: var(--cor-superficie);
+  }
+
+  body.tc-na-conversa .tc-voltar { display: grid; }
+
+  body.tc-na-conversa .tc-grade {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  body.tc-na-conversa .tc-parte-conversa {
+    flex: 1;
+    border: 0;
+    border-radius: 0;
+  }
+
+  body.tc-na-conversa .tc-mini { display: grid; }
+
+  /* Prévia ampliada por cima da conversa (que fica parada embaixo, no mesmo ponto). */
+  body.tc-vendo-previa .tela-conteudo[data-aba="conversa"] .tc-parte-previa {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-janela);
+    display: block;
+    margin: 0;
+    padding: calc(env(safe-area-inset-top) + var(--esp-3)) var(--espaco) 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    background: var(--cor-fundo);
+  }
+
+  body.tc-vendo-previa .tc-fechar-previa {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: grid;
+    margin: 0 0 var(--esp-2) auto;
+  }
+
+  body.tc-vendo-previa .tc-parte-previa .trilha { display: none; }
+  body.tc-vendo-previa .cc-decisao { bottom: 0; }
 }
 
 /* ---------- Conversa (estilo WhatsApp) ---------- */
@@ -3671,9 +3982,11 @@ a.conversa-cartao:focus-visible {
   from { opacity: 0; transform: translateY(8px); }
 }
 
-/* O conteúdo aparece com um leve deslizar quando termina de carregar. */
+/* O conteúdo aparece com um leve deslizar quando termina de carregar. Só "backwards":
+   terminada a animação, nada de transform no #app (ele prenderia os elementos fixos,
+   como a conversa em tela cheia e a prévia ampliada do celular). */
 #app:not([hidden]) {
-  animation: var(--dur-lenta) var(--curva) both entra-tela;
+  animation: var(--dur-lenta) var(--curva) backwards entra-tela;
 }
 
 @media (prefers-reduced-motion: reduce) {

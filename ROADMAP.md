@@ -212,6 +212,17 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - A seção completa continua no Meu perfil (`#notificacoes`)
    - Testado com dados de exemplo no computador e em 375px. **Falta:** testar no Preview (ativar pelo sino, pela faixa e pelo menu; bloquear e liberar)
 
+13. [x] **Conversa dentro da tela do conteúdo** (pedido de 09/10/2026: a cliente gostou de ver o conteúdo enquanto escreve; só front, sem migração; `tela-conteudo.js`, sai o `resumo-conversa.js`)
+   - Computador: prévia à esquerda (rola sozinha, com "✦ Aprovado" e "Pedir ajuste" presos embaixo) e a conversa daquele conteúdo à direita, na altura da tela, com a caixa de escrever fixa embaixo
+   - Celular: abas "Prévia | Conversa" no topo, com o número de não lidas; na Conversa, tela cheia (acompanha o teclado) e a miniatura do conteúdo fixa em cima; tocar abre a prévia ampliada por cima (carrossel navegável, vídeo tocando) e fechar (ou o voltar do celular) volta para a conversa no mesmo ponto
+   - "Pedir ajuste" abre a conversa com o pedido pronto para escrever ou gravar; a situação muda na hora
+   - Bea: abas "Editar | Conversa" no editor (a conversa não se mistura com arquivos e legenda); em rascunho, aviso de que o cliente não vê; aprovação ou pedido chegando atualiza a situação
+   - Aba Mensagens continua igual (tudo junto, com o cartão de cada conteúdo): é a mesma conversa
+   - Mensagens só contam como lidas com a conversa à vista (na aba Prévia do celular, não)
+   - Correções: `#app` não fica mais com `transform` depois da entrada (prendia os elementos fixos); balões até 80%, nada passa da borda e sem rolagem lateral (conferido com link longo, palavra enorme, imagem e áudio)
+   - Testado com dados de exemplo em 390px e no computador (cliente e Bea). **Falta:** testar no Preview com o victordev e num celular de verdade (teclado no Android e no iPhone)
+   - Na subida para produção: MINOR (1.9.0), mudança visível sem mudar o jeito de aprovar
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão

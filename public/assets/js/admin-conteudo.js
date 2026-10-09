@@ -6,7 +6,7 @@ import {
   iniciarMidias, carregarMidias, definirFormato, definirDrive, definirTrello, definirDestinoDrive, midiasAtuais, enviandoArquivos, excluirTodas,
 } from './editor-midias.js';
 import { criarPrevia } from './previa-instagram.js';
-import { montarResumoDaConversa } from './resumo-conversa.js';
+import { montarTelaDoConteudo } from './tela-conteudo.js';
 import { limparArquivosDaConversa } from './upload.js';
 
 const form = document.getElementById('form-conteudo');
@@ -53,7 +53,7 @@ iniciarPagina('admin', async () => {
     return;
   }
   desenhar();
-  if (conteudo) await mostrarResumoDaConversa();
+  if (conteudo) await montarConversa();
 });
 
 // ---------------------------------------------------------------- carregar
@@ -127,31 +127,60 @@ function mostrarLinksExternos() {
   caixa.hidden = !caixa.childElementCount;
 }
 
-// A conversa fica na aba Mensagens: aqui, o último pedido de ajuste e o botão que abre a
-// conversa filtrada neste conteúdo. Se o cliente aprovar ou pedir ajuste com o editor
-// aberto, a situação atualiza sozinha.
-async function mostrarResumoDaConversa() {
-  const link = `/admin/mensagens/?cliente=${cliente.id}&conteudo=${conteudo.id}`;
-  // Link antigo (aviso ou Caixa de antes da aba Mensagens): vai direto para a conversa.
-  if (location.hash === '#conversa') {
-    window.location.replace(link);
-    return;
+// Conversa com o cliente sobre este conteúdo, na aba "Conversa" (a mesma da aba Mensagens,
+// só a parte deste conteúdo). Se o cliente aprovar ou pedir ajuste com a tela aberta, a
+// situação atualiza sozinha.
+let tela = null;
+
+async function montarConversa() {
+  const nome = cliente.contato_nome || cliente.nome;
+  document.querySelector('.tc-abas').hidden = false;
+  document.getElementById('painel-conversa').hidden = false;
+  document.getElementById('conversa-nome').textContent = nome;
+  document.getElementById('conversa-tudo').href = `/admin/mensagens/?cliente=${cliente.id}`;
+  const foto = document.getElementById('conversa-foto');
+  foto.textContent = nome.charAt(0).toUpperCase();
+  const fotoUrl = cliente.contato_foto_url || cliente.foto_perfil;
+  if (fotoUrl) {
+    const img = Object.assign(document.createElement('img'), { src: fotoUrl, alt: '' });
+    img.addEventListener('load', () => foto.replaceChildren(img), { once: true });
   }
-  const secao = document.getElementById('secao-conversa');
-  secao.hidden = false;
-  await montarResumoDaConversa(secao, {
-    conteudoId: conteudo.id,
-    eu: 'bea',
-    link,
-    nomeDoOutro: cliente.contato_nome || cliente.nome,
-    aoMudarSituacao: async (m) => {
+
+  tela = montarTelaDoConteudo({
+    pagina: document.querySelector('.tela-conteudo'),
+    abaInicial: 'editar',
+    divididaNoComputador: false,
+    voltar: `/admin/cliente/?id=${cliente.id}`,
+    conversa: {
+      clienteId: cliente.id,
+      conteudoId: conteudo.id,
+      eu: 'bea',
+      perfilDoOutro: { nome: cliente.contato_nome || cliente.nome, foto_url: cliente.contato_foto_url || null },
+      linkDoConteudo: (id) => `/admin/conteudo/?id=${id}`,
+      textoVazio: 'Nenhuma mensagem sobre este conteúdo ainda. Escreva para o cliente por aqui.',
+    },
+    aoChegar: async (m) => {
+      if (m.tipo !== 'aprovacao' && !m.pedido_ajuste) return;
       const { data, error } = await supabase.from('conteudos').select('*').eq('id', conteudo.id).single();
       if (error) return console.error(error);
       conteudo = data;
       atualizarSituacao();
       avisar(m.tipo === 'aprovacao' ? 'O cliente aprovou este conteúdo.' : 'O cliente pediu ajuste.');
     },
-  }).carregar();
+  });
+  atualizarMini();
+  await tela.carregar();
+}
+
+// Miniatura fixa em cima da conversa (celular): primeira mídia, título e situação.
+function atualizarMini() {
+  tela?.atualizarMini({
+    titulo: form.titulo.value.trim() || conteudo?.titulo || '',
+    situacao: conteudo && SITUACOES[conteudo.status],
+    midias: midiasAtuais(),
+  });
+  const rascunho = document.getElementById('conversa-rascunho');
+  rascunho.hidden = conteudo?.status !== 'rascunho';
 }
 
 // ---------------------------------------------------------------- tela
@@ -202,6 +231,7 @@ function atualizarPrevia() {
     cliente,
     drive: form.drive_url.value.trim(),
   });
+  atualizarMini();
 }
 
 function atualizarSituacao() {
@@ -215,6 +245,8 @@ function atualizarSituacao() {
     situacao.textContent = SITUACOES[status].texto;
     situacao.classList.add(SITUACOES[status].classe);
   }
+
+  atualizarMini();
 
   botoes.salvar.textContent = conteudo ? 'Salvar alterações' : 'Criar rascunho';
   botoes.enviar.hidden = !['rascunho', 'ajuste_solicitado'].includes(status) || (postadoNoTrello && status === 'rascunho');
@@ -330,6 +362,8 @@ async function salvar({ silencioso = false } = {}) {
   document.title = `${conteudo.titulo} · BeaCreative`;
   document.getElementById('titulo-pagina').textContent = conteudo.titulo;
   atualizarSituacao();
+  // Conteúdo criado agora: a aba "Conversa" aparece.
+  if (eraNovo) montarConversa().catch(console.error);
   if (!silencioso) avisar(eraNovo ? 'Rascunho criado.' : 'Alterações salvas.');
 }
 

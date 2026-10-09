@@ -1,14 +1,17 @@
-// Um conteúdo visto pelo cliente: prévia estilo Instagram, aprovar ou pedir ajuste, histórico.
+// Um conteúdo visto pelo cliente: prévia estilo Instagram, aprovar ou pedir ajuste e a
+// conversa com a Bea sobre ele, na mesma tela (tela-conteudo.js).
 import { supabase, chamarServidor } from './supabase.js';
 import { sair } from './auth.js';
 import { iniciarPagina, avisar, montarTrilha } from './ui.js';
 import { FORMATOS, SITUACOES_CLIENTE, lerData, diaSemanaHora, parametro } from './conteudos.js';
 import { criarPrevia } from './previa-instagram.js';
-import { montarResumoDaConversa } from './resumo-conversa.js';
+import { montarTelaDoConteudo } from './tela-conteudo.js';
 
 const $ = (id) => document.getElementById(id);
 let conteudo;
 let cliente;
+let midias = [];
+let tela;
 
 iniciarPagina('cliente', async ({ perfil }) => {
   $('sair').addEventListener('click', sair);
@@ -26,30 +29,56 @@ iniciarPagina('cliente', async ({ perfil }) => {
   conteudo = c.data;
   cliente = cad.data;
 
-  const midias = await supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
-    .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem');
-  if (midias.error) throw midias.error;
+  const [m, bea] = await Promise.all([
+    supabase.from('midias').select('id, tipo, arquivo_url, ordem, expira_em')
+      .eq('conteudo_id', id).eq('versao', conteudo.versao_atual).order('ordem'),
+    supabase.rpc('perfil_bea').maybeSingle(),
+  ]);
+  if (m.error) throw m.error;
+  if (bea.error) console.error(bea.error); // sem o perfil, fica só "Bea"
+  midias = m.data;
 
   criarPrevia($('previa')).atualizar({
     formato: conteudo.formato,
-    midias: midias.data,
+    midias,
     legenda: conteudo.legenda ?? '',
     data: conteudo.data_prevista,
     cliente,
     drive: conteudo.drive_url ?? '',
   });
 
-  // A conversa fica na aba Mensagens: aqui, o último pedido de ajuste e o botão que abre a
-  // conversa filtrada neste conteúdo.
-  await montarResumoDaConversa($('secao-conversa'), {
-    conteudoId: conteudo.id,
-    eu: 'cliente',
-    link: `/cliente/mensagens/?conteudo=${conteudo.id}`,
-  }).carregar();
+  mostrarBea(bea.data);
+  tela = montarTelaDoConteudo({
+    pagina: document.querySelector('.tela-conteudo'),
+    abaInicial: 'previa',
+    divididaNoComputador: true,
+    voltar: conteudo.status === 'aprovado' ? '/cliente/?ver=aprovados' : '/cliente/',
+    conversa: {
+      clienteId: cliente.id,
+      conteudoId: conteudo.id,
+      eu: 'cliente',
+      perfilDoOutro: bea.data ?? null,
+      linkDoConteudo: (cid) => `/cliente/conteudo/?id=${cid}`,
+      textoVazio: 'Alguma dúvida ou ideia sobre este conteúdo? Escreva para a Bea por aqui.',
+      pedirAjuste: enviarPedidoDeAjuste,
+    },
+  });
+  await tela.carregar();
 
   ligarDecisao();
   desenhar();
 });
+
+// Nome e foto da Bea no alto da conversa (computador).
+function mostrarBea(bea) {
+  $('conversa-nome').textContent = bea?.nome || 'Bea';
+  const foto = $('conversa-foto');
+  foto.textContent = (bea?.nome || 'Bea').charAt(0).toUpperCase();
+  if (bea?.foto_url) {
+    const img = Object.assign(document.createElement('img'), { src: bea.foto_url, alt: '' });
+    img.addEventListener('load', () => foto.replaceChildren(img), { once: true });
+  }
+}
 
 function voltarParaLista() {
   window.location.replace('/cliente/');
@@ -91,6 +120,8 @@ function desenhar() {
       : `Aprove ou peça ajuste até ${diaSemanaHora(conteudo.prazo_aprovacao)}.`;
   }
 
+  tela?.atualizarMini({ titulo: conteudo.titulo, situacao: SITUACOES_CLIENTE[conteudo.status], midias });
+
   const resultado = $('resultado');
   resultado.hidden = esperando;
   if (conteudo.status === 'aprovado') {
@@ -129,10 +160,26 @@ function ligarDecisao() {
     await decidir(aprovar, () => supabase.rpc('aprovar_conteudo', { p_conteudo_id: conteudo.id }), 'Conteúdo aprovado.');
   });
 
-  // "Pedir ajuste" abre a aba Mensagens com este conteúdo anexado: a próxima mensagem vira o pedido.
-  $('abrir-ajuste').addEventListener('click', () => {
-    window.location.href = `/cliente/mensagens/?conteudo=${conteudo.id}&ajuste=1`;
+  // "Pedir ajuste" abre a conversa ao lado (no celular, a aba Conversa) com o pedido pronto:
+  // a próxima mensagem (texto, áudio ou imagem) vira o pedido.
+  $('abrir-ajuste').addEventListener('click', () => tela.pedirAjuste().catch(console.error));
+}
+
+async function enviarPedidoDeAjuste(mensagem, id) {
+  const { data, error } = await supabase.rpc('pedir_ajuste', {
+    p_conteudo_id: id,
+    p_tipo: mensagem.tipo,
+    p_texto: mensagem.texto ?? null,
+    p_arquivo_url: mensagem.arquivo_url ?? null,
+    p_duracao_s: mensagem.duracao_s ?? null,
+    p_onda: mensagem.onda ?? null,
   });
+  if (error) throw error;
+  avisar('Pedido de ajuste enviado para a Bea.');
+  // A função devolve o conteúdo com a situação nova: some a decisão, aparece "Você pediu ajuste".
+  conteudo = data;
+  desenhar();
+  organizarDepois(id);
 }
 
 async function decidir(botao, chamada, sucesso) {

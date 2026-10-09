@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/assets/css/previa.css">
   <title>Conteúdo · BeaCreative</title>
 </head>
-<body>
+<body class="pagina-tela-conteudo">
   <header class="topo">
     <a class="titulo titulo-link" href="/admin/"><img class="logo" src="/assets/img/logo-beacreative.svg" alt="BeaCreative" width="883" height="153"></a>
     <button id="sair" class="botao-link" type="button">Sair</button>
@@ -31,10 +31,20 @@
   </div>
 
   <div id="app" hidden>
-    <main class="conteudo-pagina editor">
+    <main class="conteudo-pagina editor tela-conteudo tc-bea" data-aba="editar">
       <nav id="trilha" class="trilha" aria-label="Você está aqui" hidden></nav>
 
-      <form id="form-conteudo" class="editor-form" novalidate>
+      <!-- Conteúdo já criado: "Editar" (arquivos e legenda) e "Conversa" com o cliente (tela-conteudo.js). -->
+      <div class="tc-abas" hidden>
+        <a class="tc-voltar" aria-label="Voltar para o cliente"></a>
+        <div class="tc-abas-lista" role="tablist" aria-label="Este conteúdo">
+          <button class="tc-aba" type="button" data-aba="editar" id="aba-editar" aria-controls="form-conteudo">Editar</button>
+          <button class="tc-aba" type="button" data-aba="conversa" id="aba-conversa" aria-controls="painel-conversa">Conversa <span class="nao-lidas" hidden></span></button>
+        </div>
+      </div>
+
+      <div class="tc-grade">
+      <form id="form-conteudo" class="editor-form tc-parte-editar" novalidate>
         <div class="editor-cabecalho">
           <h1 id="titulo-pagina">Novo conteúdo</h1>
           <p id="situacao-atual" class="situacao"></p>
@@ -44,8 +54,6 @@
         </div>
 
         <div id="aviso" class="aviso erro" role="alert" hidden></div>
-
-        <section id="secao-conversa" class="resumo-conversa" aria-label="Conversa sobre este conteúdo" hidden></section>
 
         <fieldset class="formatos">
           <legend>Formato</legend>
@@ -130,11 +138,22 @@
         <p id="prazo-info" class="dica" hidden></p>
       </form>
 
-      <aside class="previa-painel" aria-labelledby="titulo-previa">
+      <aside class="previa-painel tc-parte-previa" aria-labelledby="titulo-previa">
         <h2 id="titulo-previa">Prévia</h2>
         <div id="previa"></div>
         <p class="dica">Os arquivos do jeito que são. "Ver prévia" mostra como vai aparecer no Instagram, e dá para escolher os arquivos e o formato para comparar, sem mudar o cadastro. No Reels e no Story, "Áreas cobertas" mostra onde a interface do app fica por cima (medidas num arquivo 1080 × 1920).</p>
       </aside>
+
+      <section id="painel-conversa" class="tc-parte-conversa" role="tabpanel" aria-labelledby="aba-conversa" hidden>
+        <header class="tc-conversa-cab">
+          <span id="conversa-foto" class="conversa-foto" aria-hidden="true"></span>
+          <span class="tc-conversa-quem"><strong id="conversa-nome"></strong><span>Conversa sobre este conteúdo</span></span>
+          <a id="conversa-tudo" class="botao-link">Todas as mensagens</a>
+        </header>
+        <p id="conversa-rascunho" class="tc-nota" hidden>Ainda é rascunho: o que você escrever agora fica só para você, e o cliente nunca vê. Depois do envio para aprovação, a conversa é com ele.</p>
+        <div class="tc-conversa-corpo"></div>
+      </section>
+      </div>
     </main>
   </div>
 

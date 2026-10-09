@@ -203,9 +203,11 @@ function miniaturaDoConteudo(info) {
  *   pedirAjuste?: (mensagem: {tipo: string, texto?: string}, conteudoId: string) => Promise<void>,
  *   aoChegar?: (mensagem: object) => void,   // mensagem nova da outra pessoa (tempo real)
  *   aoVerTudo?: () => void,                  // conversa filtrada: "Ver tudo" (sem ele, sem a faixa)
+ *   textoVazio?: string,                     // no lugar do texto padrão da conversa vazia
+ *   visivel?: () => boolean,                 // está à vista? (aba escondida no celular: não marca lida)
  * }} opcoes
  */
-export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, aoVerTudo, perfilDoOutro }) {
+export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, aoVerTudo, perfilDoOutro, textoVazio, visivel = () => true }) {
   const outro = eu === 'bea' ? 'cliente' : 'bea';
   const nomeDoOutro = eu === 'bea' ? 'Cliente' : 'Bea';
   const situacoes = eu === 'bea' ? SITUACOES : SITUACOES_CLIENTE;
@@ -215,11 +217,11 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   const lista = el('div', 'conversa-lista');
   lista.setAttribute('role', 'log');
   lista.setAttribute('aria-live', 'polite');
-  const vazia = el('p', 'conversa-vazia', conteudoId
+  const vazia = el('p', 'conversa-vazia', textoVazio ?? (conteudoId
     ? 'Nenhuma mensagem sobre este conteúdo ainda.'
     : eu === 'bea'
       ? 'Nenhuma mensagem ainda. Escreva para o cliente por aqui.'
-      : 'Alguma dúvida ou ideia? Escreva para a Bea por aqui.');
+      : 'Alguma dúvida ou ideia? Escreva para a Bea por aqui.'));
 
   // Conteúdo anexado à próxima mensagem (ou o pedido de ajuste), em cima da caixa de escrever.
   const anexoMini = el('span', 'conversa-anexo-mini');
@@ -520,13 +522,13 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
 
   // ------------------------------------------------------------ lida
 
-  // Só com a conversa na tela; quem acabou de enviar com certeza leu (forcar).
+  // Só com a conversa na tela (aba à vista); quem acabou de enviar com certeza leu (forcar).
   // Sem setTimeout: em aba de fundo o Chrome segura timers por até 1 minuto.
   // Uma chamada por vez; o que chegar no meio vira uma única repetição no fim.
   let marcandoAgora = false;
   let repetir = false;
   function marcarLida(forcar = false) {
-    if (document.hidden && !forcar) return;
+    if ((document.hidden || !visivel()) && !forcar) return;
     if (marcandoAgora) {
       repetir = true;
       return;
@@ -1095,6 +1097,8 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     carregar,
     /** Para de ouvir o tempo real (ao trocar de conversa sem sair da página). */
     fechar: () => supabase.removeChannel(canal),
+    /** A conversa acabou de ficar à vista (ex.: aba Conversa no celular): marca como lida. */
+    marcarLida: () => marcarLida(),
     /** "Pedir ajuste" de um conteúdo: ele fica anexado e a próxima mensagem vira o pedido. */
     async pedirAjuste(id = conteudoId) {
       await carregarConteudos([id]);
