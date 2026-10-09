@@ -51,8 +51,8 @@ iniciarPagina('cliente', async ({ perfil }) => {
   tela = montarTelaDoConteudo({
     pagina: document.querySelector('.tela-conteudo'),
     abaInicial: 'previa',
-    divididaNoComputador: true,
-    voltar: conteudo.status === 'aprovado' ? '/cliente/?ver=aprovados' : '/cliente/',
+    paginaUnica: true,
+    rodape: $('decisao'),
     conversa: {
       clienteId: cliente.id,
       conteudoId: conteudo.id,
@@ -160,8 +160,8 @@ function ligarDecisao() {
     await decidir(aprovar, () => supabase.rpc('aprovar_conteudo', { p_conteudo_id: conteudo.id }), 'Conteúdo aprovado.');
   });
 
-  // "Pedir ajuste" abre a conversa ao lado (no celular, a aba Conversa) com o pedido pronto:
-  // a próxima mensagem (texto, áudio ou imagem) vira o pedido.
+  // "Pedir ajuste" leva à conversa (ao lado no computador, logo abaixo no celular) com o
+  // pedido pronto: a próxima mensagem (texto, áudio ou imagem) vira o pedido.
   $('abrir-ajuste').addEventListener('click', () => tela.pedirAjuste().catch(console.error));
 }
 

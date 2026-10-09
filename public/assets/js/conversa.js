@@ -204,10 +204,11 @@ function miniaturaDoConteudo(info) {
  *   aoChegar?: (mensagem: object) => void,   // mensagem nova da outra pessoa (tempo real)
  *   aoVerTudo?: () => void,                  // conversa filtrada: "Ver tudo" (sem ele, sem a faixa)
  *   textoVazio?: string,                     // no lugar do texto padrão da conversa vazia
- *   visivel?: () => boolean,                 // está à vista? (aba escondida no celular: não marca lida)
+ *   visivel?: () => boolean,                 // está à vista? (fora da tela: não marca lida)
+ *   recentes?: () => number,                 // quantas mostrar de início ("Ver mensagens anteriores" no topo)
  * }} opcoes
  */
-export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, aoVerTudo, perfilDoOutro, textoVazio, visivel = () => true }) {
+export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = false, linkDoConteudo, pedirAjuste, aoChegar, aoVerTudo, perfilDoOutro, textoVazio, visivel = () => true, recentes = () => Infinity }) {
   const outro = eu === 'bea' ? 'cliente' : 'bea';
   const nomeDoOutro = eu === 'bea' ? 'Cliente' : 'Bea';
   const situacoes = eu === 'bea' ? SITUACOES : SITUACOES_CLIENTE;
@@ -454,13 +455,41 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     lista.append(item.no);
   }
 
+  // Conversa longa: só as mais recentes, com "Ver mensagens anteriores" em cima (no celular a
+  // conversa fica embaixo da prévia, na mesma página, e não pode empurrar a prévia para longe).
+  let limite = null; // null: o que `recentes()` pedir; depois de "Ver anteriores", cresce
+  const MAIS_POR_VEZ = 20;
+
+  function botaoAnteriores(quantas) {
+    const b = el('button', 'botao-link conversa-anteriores',
+      quantas === 1 ? 'Ver 1 mensagem anterior' : `Ver mensagens anteriores (${quantas})`);
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      // Quem está lendo continua vendo a mesma mensagem: mede antes e depois e compensa.
+      const ancora = [...lista.querySelectorAll('[data-id]')][0];
+      const id = ancora?.dataset.id;
+      const antes = ancora?.getBoundingClientRect().top ?? 0;
+      limite = (limite ?? recentes()) + MAIS_POR_VEZ;
+      desenharTudo();
+      const depois = id ? lista.querySelector(`[data-id="${CSS.escape(id)}"]`)?.getBoundingClientRect().top : null;
+      if (depois == null) return;
+      const rolaSozinha = lista.scrollHeight > lista.clientHeight + 1;
+      if (rolaSozinha) lista.scrollTop += depois - antes;
+      else window.scrollBy(0, depois - antes);
+    });
+    return b;
+  }
+
   // Redesenha a lista inteira (os balões já prontos são reaproveitados). Usado ao carregar
   // e quando uma mensagem é apagada (ela entra num grupo de apagadas).
   function desenharTudo() {
     lista.replaceChildren();
     ultimoDia = '';
     const ordem = [...mensagens.values()].sort((a, b) => a.m.criado_em.localeCompare(b.m.criado_em));
-    ordem.forEach(anexarNoFim);
+    const n = limite ?? recentes();
+    const visiveis = ordem.length > n ? ordem.slice(-n) : ordem;
+    if (visiveis.length < ordem.length) lista.append(botaoAnteriores(ordem.length - visiveis.length));
+    visiveis.forEach(anexarNoFim);
     if (!ordem.length) lista.append(vazia);
   }
 
@@ -573,6 +602,8 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     microfone.hidden = comTexto;
   }
   campo.addEventListener('input', () => { ajustarAltura(); trocarBotao(); });
+  // Tocar em enviar não tira o foco da caixa: o teclado do celular fica aberto, como no WhatsApp.
+  enviar.addEventListener('mousedown', (e) => e.preventDefault());
 
   // Computador: Enter envia e Shift+Enter quebra linha. No celular, Enter quebra linha.
   const temTeclado = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1097,8 +1128,10 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     carregar,
     /** Para de ouvir o tempo real (ao trocar de conversa sem sair da página). */
     fechar: () => supabase.removeChannel(canal),
-    /** A conversa acabou de ficar à vista (ex.: aba Conversa no celular): marca como lida. */
+    /** A conversa acabou de ficar à vista (ex.: rolou até ela no celular): marca como lida. */
     marcarLida: () => marcarLida(),
+    /** Mudou quantas mensagens mostrar de início (ex.: celular ↔ computador). */
+    redesenhar: () => { limite = null; desenharTudo(); },
     /** "Pedir ajuste" de um conteúdo: ele fica anexado e a próxima mensagem vira o pedido. */
     async pedirAjuste(id = conteudoId) {
       await carregarConteudos([id]);

@@ -149,7 +149,6 @@ async function montarConversa() {
   tela = montarTelaDoConteudo({
     pagina: document.querySelector('.tela-conteudo'),
     abaInicial: 'editar',
-    divididaNoComputador: false,
     voltar: `/admin/cliente/?id=${cliente.id}`,
     conversa: {
       clienteId: cliente.id,

@@ -204,6 +204,13 @@ a {
   opacity: 1; /* o Firefox clareia o placeholder por conta própria */
 }
 
+/* Caixa da conversa estreita (celular): a dica fica numa linha só, com "…" se não couber. */
+.conversa-campo::placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .campo input[aria-invalid="true"],
 .campo select[aria-invalid="true"] {
   border-color: var(--cor-erro);
@@ -2386,10 +2393,41 @@ a.cliente-nome:hover {
 
 .tc-bea .tc-abas { margin: 0 0 var(--esp-5); }
 
-@media (min-width: 900px) {
-  /* Cliente: sempre lado a lado, sem abas. */
-  .tc-cliente .tc-abas { display: none; }
+/* "Nova mensagem ↓": só na página única do celular (cliente), com a pessoa lá em cima. */
+.tc-nova {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--altura-barra, 0px) + var(--tc-rodape, 0px) + var(--esp-3));
+  z-index: var(--z-aviso);
+  transform: translateX(-50%);
+  padding: var(--esp-2) var(--esp-4);
+  border: 0;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-acao);
+  color: var(--cor-acao-texto);
+  box-shadow: var(--sombra-2);
+  font: inherit;
+  font-size: var(--fs-pequeno);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
 
+.tc-nova[hidden] { display: none; }
+
+.tc-nova:focus-visible { outline: 2px solid var(--cor-foco); outline-offset: 2px; }
+
+/* Ver mensagens anteriores: no topo da conversa, quando ela é longa. */
+.conversa-anteriores {
+  align-self: center;
+  min-height: 44px;
+  font-size: var(--fs-pequeno);
+}
+
+@media (min-width: 900px) {
+  .tc-nova { display: none; }
+
+  /* Cliente: sempre lado a lado. */
   .tc-cliente .tc-grade,
   .tc-bea[data-aba="conversa"] .tc-grade {
     display: grid;
@@ -2450,14 +2488,53 @@ a.cliente-nome:hover {
   .tc-abas-lista { border-bottom: 0; }
   .tc-aba { flex: 1; }
 
-  .tela-conteudo:not([data-aba="conversa"]) .tc-parte-conversa { display: none; }
+  .tc-bea:not([data-aba="conversa"]) .tc-parte-conversa { display: none; }
 
   .tela-conteudo[data-aba="conversa"] .tc-parte-editar,
   .tela-conteudo[data-aba="conversa"] .tc-parte-previa,
   .tela-conteudo[data-aba="conversa"] > .trilha,
-  .tc-conversa-cab { display: none; }
+  .tc-bea .tc-conversa-cab { display: none; }
+
+  /* Cliente: uma página só. Prazo e prévia, a conversa embaixo (a página é que rola, não a
+     lista) e a decisão presa no pé, acima da barra de navegação. */
+  .tc-cliente { padding-bottom: calc(var(--tc-rodape, 0px) + var(--espaco)); }
 
   .tc-cliente .tc-parte-previa .trilha { margin-top: var(--esp-2); }
+
+  /* Título compacto: a prévia aparece logo no começo da página. */
+  .tc-cliente .cc-cabecalho { margin-bottom: var(--esp-3); }
+  .tc-cliente .cc-cabecalho h1 { font-size: clamp(1.5rem, 6.5vw, 1.875rem); }
+
+  /* A aba Mensagens já está na barra de baixo: o nome da Bea fica com a largura toda. */
+  .tc-cliente .tc-conversa-cab .botao-link { display: none; }
+
+  .tc-cliente .tc-parte-conversa { margin-top: var(--esp-4); }
+
+  .tc-cliente .conversa.conversa-tela { height: auto; }
+
+  .tc-cliente .conversa-tela .conversa-lista {
+    flex: none;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .tc-cliente .cc-decisao {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--altura-barra, 0px);
+    z-index: var(--z-topo);
+    margin: 0;
+  }
+
+  /* Teclado aberto (escrevendo): sai a barra de aprovação e a de navegação; a caixa de
+     escrever fica logo acima do teclado. Ao sair da caixa, tudo volta. */
+  body.tc-escrevendo { padding-bottom: 0; }
+  body.tc-escrevendo .tc-cliente { padding-bottom: var(--esp-2); }
+  body.tc-escrevendo .painel-nav,
+  body.tc-escrevendo .cc-decisao,
+  body.tc-escrevendo .tc-nova { display: none; }
 
   /* Conversa em tela cheia, do tamanho da parte visível (acima do teclado). */
   body.tc-na-conversa { padding-bottom: 0; overflow: hidden; }
@@ -2524,7 +2601,6 @@ a.cliente-nome:hover {
   }
 
   body.tc-vendo-previa .tc-parte-previa .trilha { display: none; }
-  body.tc-vendo-previa .cc-decisao { bottom: 0; }
 }
 
 /* ---------- Conversa (estilo WhatsApp) ---------- */

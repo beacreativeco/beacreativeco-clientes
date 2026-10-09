@@ -2,9 +2,13 @@
 // conversa da aba Mensagens, só a parte sobre este conteúdo (criarConversa com conteudoId).
 //   Computador: prévia à esquerda e conversa à direita, na altura da tela (na Bea, na aba
 //   "Conversa"; a aba "Editar" continua sendo o editor de arquivos e legenda).
-//   Celular: abas no topo. Na "Conversa", a tela é toda dela (acompanha o teclado), com a
-//   miniatura do conteúdo fixa em cima; tocar nela abre a prévia ampliada por cima, e
-//   fechar volta para a conversa no mesmo ponto.
+//   Celular, cliente (paginaUnica): uma página só que rola. Prazo e prévia em cima, a
+//   conversa embaixo (as mensagens mais recentes, "Ver mensagens anteriores" e a caixa de
+//   escrever no fim) e a barra "✦ Aprovado / Pedir ajuste" presa no pé, que some enquanto o
+//   teclado está aberto. Mensagem nova com a pessoa lá em cima: "Nova mensagem ↓".
+//   Celular, Bea (abas "Editar | Conversa"): na Conversa, a tela é toda dela (acompanha o
+//   teclado), com a miniatura do conteúdo fixa em cima; tocar nela abre a prévia ampliada
+//   por cima, e fechar volta para a conversa no mesmo ponto.
 // O HTML da página traz as partes (.tc-abas, .tc-parte-previa, .tc-parte-conversa e, na
 // Bea, .tc-parte-editar); este módulo liga tudo e cuida do número de não lidas na aba.
 import { supabase } from './supabase.js';
@@ -12,6 +16,8 @@ import { criarConversa, acompanharTeclado } from './conversa.js';
 import { expirou } from './conteudos.js';
 
 const COMPUTADOR = window.matchMedia('(min-width: 900px)');
+// Celular, página única: quantas mensagens aparecem antes do "Ver mensagens anteriores".
+const RECENTES_NO_CELULAR = 6;
 
 function el(tag, classe, ...filhos) {
   const n = document.createElement(tag);
@@ -35,33 +41,81 @@ const ICONE_VIDEO = '<path d="M9 7.5v9l7.5-4.5z" fill="currentColor"/>';
  * @param {{
  *   pagina: HTMLElement,                 // <main class="tela-conteudo" data-aba="…">
  *   abaInicial: 'previa' | 'editar',     // a aba que não é a conversa
- *   divididaNoComputador: boolean,       // cliente: prévia + conversa sempre lado a lado
- *   voltar: string,                      // seta do celular, na conversa em tela cheia
+ *   paginaUnica?: boolean,               // cliente: sem abas (lado a lado no computador, uma página no celular)
+ *   rodape?: HTMLElement,                // barra presa no pé do celular (some com o teclado)
+ *   voltar?: string,                     // seta do celular, na conversa em tela cheia (abas)
  *   conversa: object,                    // opções de criarConversa (clienteId, conteudoId, eu…)
  *   aoChegar?: (m: object) => void,      // mensagem nova da outra pessoa
  * }} opcoes
  */
-export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador, voltar, conversa: opcoesConversa, aoChegar }) {
+export function montarTelaDoConteudo({ pagina, abaInicial, paginaUnica = false, rodape = null, voltar, conversa: opcoesConversa, aoChegar }) {
   const parteConversa = pagina.querySelector('.tc-parte-conversa');
   const partePrevia = pagina.querySelector('.tc-parte-previa');
   const abas = [...pagina.querySelectorAll('.tc-aba')];
   const contador = pagina.querySelector('.tc-aba[data-aba="conversa"] .nao-lidas');
   const conteudoId = opcoesConversa.conteudoId;
+  const celular = () => !COMPUTADOR.matches;
 
-  // Seta de voltar (só aparece na conversa em tela cheia do celular).
-  const seta = pagina.querySelector('.tc-voltar');
-  seta.href = voltar;
-  seta.replaceChildren(icone(ICONE_VOLTAR));
+  // ------------------------------------------------------------ miniatura e prévia ampliada (abas)
 
-  // ------------------------------------------------------------ miniatura fixa (celular)
+  let mini = null;
+  let ampliada = false;
+  const videosDaPrevia = () => partePrevia.querySelectorAll('.previa-tela video');
+  const pausarPrevia = () => videosDaPrevia().forEach((v) => v.pause());
 
-  const mini = el('button', 'tc-mini');
-  mini.type = 'button';
-  mini.setAttribute('aria-label', 'Ver a prévia do conteúdo');
-  parteConversa.prepend(mini);
+  function fecharAmpliada() {
+    if (!ampliada) return;
+    ampliada = false;
+    document.body.classList.remove('tc-vendo-previa');
+    partePrevia.removeAttribute('role');
+    partePrevia.removeAttribute('aria-modal');
+    partePrevia.removeAttribute('aria-label');
+    pausarPrevia();
+    mini.focus({ preventScroll: true });
+  }
+
+  if (!paginaUnica) {
+    // Seta de voltar (só aparece na conversa em tela cheia do celular).
+    const seta = pagina.querySelector('.tc-voltar');
+    seta.href = voltar;
+    seta.replaceChildren(icone(ICONE_VOLTAR));
+
+    mini = el('button', 'tc-mini');
+    mini.type = 'button';
+    mini.setAttribute('aria-label', 'Ver a prévia do conteúdo');
+    parteConversa.prepend(mini);
+
+    const fecharPrevia = el('button', 'tc-fechar-previa', '×');
+    fecharPrevia.type = 'button';
+    fecharPrevia.setAttribute('aria-label', 'Fechar a prévia');
+    partePrevia.prepend(fecharPrevia);
+
+    mini.addEventListener('click', () => {
+      if (ampliada) return;
+      ampliada = true;
+      document.body.classList.add('tc-vendo-previa');
+      partePrevia.setAttribute('role', 'dialog');
+      partePrevia.setAttribute('aria-modal', 'true');
+      partePrevia.setAttribute('aria-label', 'Prévia do conteúdo');
+      // Direto na prévia (título e prazo ficam logo acima, rolando).
+      const previa = partePrevia.querySelector('.previa');
+      partePrevia.scrollTop = previa ? Math.max(0, previa.offsetTop - 60) : 0;
+      // O botão "voltar" do celular fecha a prévia, não sai da página.
+      history.pushState({ tcPrevia: true }, '');
+      fecharPrevia.focus({ preventScroll: true });
+      // Vídeo tocando, como no app (o toque na miniatura libera o som).
+      videosDaPrevia()[0]?.play().catch(() => {});
+    });
+    fecharPrevia.addEventListener('click', () => history.back());
+    window.addEventListener('popstate', fecharAmpliada);
+    partePrevia.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && ampliada) history.back();
+    });
+  }
 
   /** @param {{ titulo: string, situacao?: {texto: string, classe: string}, midias: object[] }} info */
   function atualizarMini({ titulo, situacao, midias }) {
+    if (!mini) return;
     const primeira = midias?.[0];
     const quadro = el('span', 'tc-mini-quadro');
     if (primeira && !expirou(primeira.expira_em)) {
@@ -92,56 +146,13 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
       el('span', 'tc-mini-ver', icone(ICONE_AMPLIAR), el('span', null, 'Ver prévia')));
   }
 
-  // ------------------------------------------------------------ prévia ampliada (celular)
-
-  const fecharPrevia = el('button', 'tc-fechar-previa', '×');
-  fecharPrevia.type = 'button';
-  fecharPrevia.setAttribute('aria-label', 'Fechar a prévia');
-  partePrevia.prepend(fecharPrevia);
-
-  const videosDaPrevia = () => partePrevia.querySelectorAll('.previa-tela video');
-  const pausarPrevia = () => videosDaPrevia().forEach((v) => v.pause());
-
-  let ampliada = false;
-  function abrirPrevia() {
-    if (ampliada) return;
-    ampliada = true;
-    document.body.classList.add('tc-vendo-previa');
-    partePrevia.setAttribute('role', 'dialog');
-    partePrevia.setAttribute('aria-modal', 'true');
-    partePrevia.setAttribute('aria-label', 'Prévia do conteúdo');
-    // Direto na prévia (título e prazo ficam logo acima, rolando).
-    const previa = partePrevia.querySelector('.previa');
-    partePrevia.scrollTop = previa ? Math.max(0, previa.offsetTop - 60) : 0;
-    // O botão "voltar" do celular fecha a prévia, não sai da página.
-    history.pushState({ tcPrevia: true }, '');
-    fecharPrevia.focus({ preventScroll: true });
-    // Vídeo tocando, como no app (o toque na miniatura libera o som).
-    const video = videosDaPrevia()[0];
-    video?.play().catch(() => {});
-  }
-  function fecharAmpliada() {
-    if (!ampliada) return;
-    ampliada = false;
-    document.body.classList.remove('tc-vendo-previa');
-    partePrevia.removeAttribute('role');
-    partePrevia.removeAttribute('aria-modal');
-    partePrevia.removeAttribute('aria-label');
-    pausarPrevia();
-    mini.focus({ preventScroll: true });
-  }
-  mini.addEventListener('click', abrirPrevia);
-  fecharPrevia.addEventListener('click', () => history.back());
-  window.addEventListener('popstate', fecharAmpliada);
-  partePrevia.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && ampliada) history.back();
-  });
-
-  // ------------------------------------------------------------ abas
+  // ------------------------------------------------------------ abas (Bea)
 
   const naConversa = () => pagina.dataset.aba === 'conversa';
-  // A conversa está à vista? Só aí as mensagens contam como lidas.
-  const conversaAVista = () => naConversa() || (divididaNoComputador && COMPUTADOR.matches);
+  // Página única no celular: a conversa conta como vista quando o fim dela (a caixa de
+  // escrever) aparece na tela. Medido pelo IntersectionObserver mais abaixo.
+  let fimAVista = false;
+  const conversaAVista = () => (paginaUnica ? (COMPUTADOR.matches || fimAVista) : naConversa());
 
   function mostrarAba(aba) {
     if (aba !== 'conversa') aba = abaInicial;
@@ -162,7 +173,7 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
     if (!mudou) return;
     if (aba === 'conversa') {
       // Celular: a prévia fica escondida; vídeo tocando atrás da conversa, não.
-      if (!COMPUTADOR.matches) pausarPrevia();
+      if (celular()) pausarPrevia();
       conversa.marcarLida();
       ajustarAltura();
     } else {
@@ -196,10 +207,6 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
   window.addEventListener('resize', ajustarAltura);
   // A página aparecendo (estava escondida enquanto carregava) e a trilha ou as abas mudando.
   new ResizeObserver(ajustarAltura).observe(pagina);
-  COMPUTADOR.addEventListener('change', () => {
-    ajustarAltura();
-    if (conversaAVista()) conversa.marcarLida();
-  });
 
   // ------------------------------------------------------------ conversa
 
@@ -207,10 +214,20 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
     ...opcoesConversa,
     tela: true,
     visivel: conversaAVista,
+    recentes: () => (paginaUnica && celular() ? RECENTES_NO_CELULAR : Infinity),
     aoChegar: (m) => {
       contarNaoLidas();
+      if (paginaUnica && celular() && !fimAVista) avisoNova.hidden = false;
       aoChegar?.(m);
     },
+  });
+  const caixa = parteConversa.querySelector('.conversa-escrever');
+  const campo = parteConversa.querySelector('.conversa-campo');
+
+  COMPUTADOR.addEventListener('change', () => {
+    ajustarAltura();
+    if (paginaUnica) conversa.redesenhar();
+    if (conversaAVista()) conversa.marcarLida();
   });
 
   // Número de mensagens novas da outra pessoa sobre este conteúdo, na aba "Conversa".
@@ -225,11 +242,57 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
   }
   window.addEventListener('conversa-lida', () => contarNaoLidas());
 
+  // ------------------------------------------------------------ página única (celular)
+
+  const avisoNova = el('button', 'tc-nova', 'Nova mensagem ↓');
+  avisoNova.type = 'button';
+  avisoNova.hidden = true;
+  const irAoFim = () => caixa.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  if (paginaUnica) {
+    pagina.append(avisoNova);
+    avisoNova.addEventListener('click', () => {
+      avisoNova.hidden = true;
+      irAoFim();
+    });
+
+    // O fim da conversa (a caixa de escrever) apareceu: lida, e o aviso some.
+    new IntersectionObserver(([entrada]) => {
+      fimAVista = entrada.isIntersecting;
+      if (!fimAVista) return;
+      avisoNova.hidden = true;
+      conversa.marcarLida();
+    }).observe(caixa);
+
+    // Altura da barra do pé: a página reserva o espaço e o aviso fica logo acima dela.
+    if (rodape) {
+      new ResizeObserver(() => {
+        document.body.style.setProperty('--tc-rodape', `${rodape.hidden ? 0 : rodape.offsetHeight}px`);
+      }).observe(rodape);
+    }
+
+    // Teclado aberto (escrevendo): a barra de aprovação e a de navegação saem e a caixa fica
+    // logo acima do teclado. Fechou (saiu da caixa), tudo volta.
+    campo.addEventListener('focus', () => document.body.classList.add('tc-escrevendo'));
+    campo.addEventListener('blur', () => document.body.classList.remove('tc-escrevendo'));
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', () => {
+      if (!celular() || document.activeElement !== campo) return;
+      // Android (a página encolhe junto com o teclado): a caixa vai para o pé da parte
+      // visível. No iPhone o próprio Safari sobe a página até o campo.
+      if (window.innerHeight - vv.height < 40) caixa.scrollIntoView({ block: 'end' });
+    });
+  }
+
   acompanharTeclado();
-  const inicial = new URLSearchParams(location.search).get('aba') === 'conversa' || location.hash === '#conversa'
-    ? 'conversa' : abaInicial;
-  pagina.dataset.aba = '';
-  mostrarAba(inicial);
+  if (paginaUnica) {
+    pagina.dataset.aba = abaInicial;
+  } else {
+    const inicial = new URLSearchParams(location.search).get('aba') === 'conversa' || location.hash === '#conversa'
+      ? 'conversa' : abaInicial;
+    pagina.dataset.aba = '';
+    mostrarAba(inicial);
+  }
 
   return {
     conversa,
@@ -240,13 +303,16 @@ export function montarTelaDoConteudo({ pagina, abaInicial, divididaNoComputador,
       await contarNaoLidas();
       ajustarAltura();
     },
-    /** "Pedir ajuste": abre a conversa com o pedido pronto para escrever ou gravar. */
+    /** "Pedir ajuste": a conversa com o pedido pronto, o cursor na caixa e a página nela. */
     async pedirAjuste() {
       if (ampliada) history.back();
-      mostrarAba('conversa');
+      if (!paginaUnica) mostrarAba('conversa');
       await conversa.pedirAjuste(conteudoId);
+      if (paginaUnica && celular()) {
+        campo.focus({ preventScroll: true });
+        caixa.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
     },
-    /** Depois que a página aparece (antes disso a trilha ainda não tem altura). */
     ajustarAltura,
   };
 }

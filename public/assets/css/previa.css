@@ -151,23 +151,26 @@
   background: #fff;
 }
 
-/* Arquivos crus: sem moldura de celular; a foto aparece inteira, do jeito que é. */
+/* Arquivos crus: sem moldura de celular; a foto aparece inteira (contain, nunca cortada),
+   do jeito que é, com fundo neutro em volta. Seletores com ".arq" na frente: a regra do
+   post (.ig-post-item, "cover") vem depois no arquivo e, com o mesmo peso, venceria. */
 .previa[data-formato="arquivos"] .previa-tela {
+  --fundo-cru: #222;
   width: min(100%, 420px);
   border-radius: 10px;
-  background: #1F1A17;
+  background: var(--fundo-cru);
 }
 
-.arq .ig-post-midia { background: #1F1A17; }
+.arq .ig-post-midia { background: var(--fundo-cru); }
 
-.arq-item {
+.arq .arq-item {
   aspect-ratio: auto;
   height: min(70svh, 560px);
-  background: #1F1A17;
+  background: var(--fundo-cru);
 }
 
-.arq-item > .ig-imagem,
-.arq-item > .ig-video {
+.arq .arq-item > .ig-imagem,
+.arq .arq-item > .ig-video {
   object-fit: contain;
 }
 

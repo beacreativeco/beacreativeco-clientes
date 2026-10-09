@@ -32,17 +32,10 @@
 
   <div id="app" hidden>
     <main class="conteudo-pagina tela-conteudo tc-cliente" data-aba="previa">
-      <!-- Celular: abas no topo. Computador: as duas partes lado a lado (tela-conteudo.js). -->
-      <div class="tc-abas">
-        <a class="tc-voltar" aria-label="Voltar para os conteúdos"></a>
-        <div class="tc-abas-lista" role="tablist" aria-label="Este conteúdo">
-          <button class="tc-aba" type="button" data-aba="previa" id="aba-previa" aria-controls="painel-previa">Prévia</button>
-          <button class="tc-aba" type="button" data-aba="conversa" id="aba-conversa" aria-controls="painel-conversa">Conversa <span class="nao-lidas" hidden></span></button>
-        </div>
-      </div>
-
+      <!-- Computador: prévia e conversa lado a lado. Celular: uma página só, a conversa
+           embaixo da prévia e a decisão presa no pé (tela-conteudo.js). -->
       <div class="tc-grade">
-        <div id="painel-previa" class="tc-parte-previa cc-previa-parte" role="tabpanel" aria-labelledby="aba-previa">
+        <div class="tc-parte-previa">
           <nav id="trilha" class="trilha" aria-label="Você está aqui" hidden></nav>
 
           <div class="cc-cabecalho">
@@ -69,7 +62,7 @@
           </section>
         </div>
 
-        <section id="painel-conversa" class="tc-parte-conversa" role="tabpanel" aria-labelledby="aba-conversa">
+        <section class="tc-parte-conversa" aria-label="Conversa com a Bea sobre este conteúdo">
           <header class="tc-conversa-cab">
             <span id="conversa-foto" class="conversa-foto" aria-hidden="true"></span>
             <span class="tc-conversa-quem"><strong id="conversa-nome">Bea</strong><span>Conversa sobre este conteúdo</span></span>

@@ -222,6 +222,12 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - Correções: `#app` não fica mais com `transform` depois da entrada (prendia os elementos fixos); balões até 80%, nada passa da borda e sem rolagem lateral (conferido com link longo, palavra enorme, imagem e áudio)
    - Testado com dados de exemplo em 390px e no computador (cliente e Bea). **Falta:** testar no Preview com o victordev e num celular de verdade (teclado no Android e no iPhone)
    - Na subida para produção: MINOR (1.9.0), mudança visível sem mudar o jeito de aprovar
+   - [x] Ajuste de 09/10/2026 (celular do cliente): no lugar das abas, uma página só que rola. Prazo e prévia em cima; a conversa logo abaixo (as 6 mais recentes, "Ver mensagens anteriores" no topo dela sem pular a leitura, e a caixa de escrever no fim); "✦ Aprovado / Pedir ajuste" presos no pé
+     - Teclado aberto: somem a barra de aprovação e a de navegação e a caixa fica logo acima do teclado; ao sair da caixa, voltam. Tocar em enviar não fecha o teclado
+     - "Pedir ajuste" rola até a conversa e põe o cursor na caixa; mensagem nova com a pessoa lá em cima: "Nova mensagem ↓", que leva até ela; a conversa conta como lida quando o fim dela aparece na tela
+     - Bea continua com as abas "Editar | Conversa" no celular; no computador nada muda
+     - Modo cru da prévia: a imagem aparece inteira (contain), sem cortar, com fundo neutro em volta (a regra do post, "cover", vencia por vir depois no CSS)
+     - Testado com dados de exemplo em 390px (print deitado no modo cru, conversa longa, mensagem chegando, teclado simulado). **Falta:** teclado de verdade no Android e no iPhone
 
 ## Já pronto antes deste roadmap
 
