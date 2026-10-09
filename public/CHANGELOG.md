@@ -19,6 +19,22 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.0] — 09/10/2026
+
+### Novidades
+
+- A conversa sobre cada conteúdo agora fica na própria tela do conteúdo: dá para ver o post enquanto escreve, sem ir para outra página
+- No computador, a prévia fica à esquerda e a conversa à direita, com a caixa de escrever sempre à vista
+- No celular, a conversa aparece logo abaixo da prévia, com as mensagens mais recentes e "Ver mensagens anteriores"; os botões ✦ Aprovado e Pedir ajuste ficam presos embaixo e saem da frente enquanto você escreve
+- "Pedir ajuste" leva direto à conversa, pronto para escrever ou gravar um áudio
+- Aviso "Nova mensagem ↓" quando chega mensagem e você está olhando a prévia
+- Bea: o editor do conteúdo ganhou as abas Editar e Conversa
+
+### Correções
+
+- Na visualização dos arquivos, a imagem aparece inteira, sem cortar as bordas
+- Balões da conversa não passam mais da largura da tela no celular
+
 ## [1.8.1] — 07/10/2026
 
 ### Correções
