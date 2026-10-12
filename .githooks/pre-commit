@@ -1,0 +1,16 @@
+#!/bin/sh
+# Barra o commit se alguma linha nova tiver cara de chave secreta (repositório público).
+# Ligado por: git config core.hooksPath .githooks
+# Chaves públicas de propósito (sb_publishable_, VAPID pública, ID do cliente OAuth) passam.
+PADROES='AIza[0-9A-Za-z_-]{35}|GOCSPX-[0-9A-Za-z_-]+|sb_secret_[0-9A-Za-z_-]+|eyJ[0-9A-Za-z_-]{10,}\.[0-9A-Za-z_-]{10,}\.[0-9A-Za-z_-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|re_[0-9A-Za-z]{8,}_[0-9A-Za-z]{8,}|ATTA[0-9a-fA-F]{60,}|(SERVICE_ROLE_KEY|API_SECRET|TRELLO_TOKEN|TRELLO_API_KEY|GOOGLE_API_KEY|VAPID_PRIVATE_KEY|PUSH_SEGREDO|RESEND_API_KEY)[ ]*[=:][ ]*["'\'']?[0-9A-Za-z_-]{16,}'
+
+achados=$(git diff --cached -U0 --diff-filter=ACM -- . ':!.githooks/pre-commit' | grep -E '^\+[^+]' | grep -nE "$PADROES")
+arquivos=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)\.dev\.vars$|(^|/)\.env(\.|$)' | grep -v '\.example$')
+
+if [ -n "$achados$arquivos" ]; then
+  echo "COMMIT BLOQUEADO: parece ter chave secreta no que vai pro Git (o repositório é público)." >&2
+  [ -n "$arquivos" ] && echo "Arquivo de segredos: $arquivos" >&2
+  [ -n "$achados" ] && echo "$achados" | cut -c1-160 >&2
+  echo "Segredo vai em variável do Cloudflare Pages e no .dev.vars, nunca no código." >&2
+  exit 1
+fi

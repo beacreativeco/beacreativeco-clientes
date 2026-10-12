@@ -46,5 +46,5 @@ Em **Settings → Environment variables** (Production): `SUPABASE_URL` e `SUPABA
 npx wrangler pages dev public --port 8788 --r2 MIDIAS
 ```
 
-Abre em `http://localhost:8788`. Segredos locais em `.dev.vars` (copiar de `.dev.vars.example`).
+Abre em `http://localhost:8788`. Segredos locais em `.dev.vars` (copiar de `.dev.vars.example`). Depois de clonar, ligar a trava de segredos: `git config core.hooksPath .githooks`.
 `--r2 MIDIAS` cria um bucket R2 simulado em `.wrangler/` (os arquivos enviados localmente ficam só nele).

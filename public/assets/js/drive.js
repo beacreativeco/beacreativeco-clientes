@@ -5,7 +5,8 @@
 // escolheu no Google Picker. Por isso, na primeira vez com cada cliente, o Picker abre para
 // ela escolher a pasta do Drive dele; o Google lembra dessa liberação nas próximas vezes.
 // O token fica só na memória da página (nada guardado no servidor nem no navegador).
-import { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_APP_ID } from './config.js';
+import { GOOGLE_CLIENT_ID, GOOGLE_APP_ID } from './config.js';
+import { chamarServidor } from './supabase.js';
 
 const ESCOPO = 'https://www.googleapis.com/auth/drive.file';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -16,7 +17,7 @@ let token = null;       // { valor, expira } (ms)
 let cliente = null;     // google.accounts.oauth2 token client
 const scripts = new Map();
 
-export const driveConfigurado = () => Boolean(GOOGLE_CLIENT_ID && GOOGLE_API_KEY && GOOGLE_APP_ID);
+export const driveConfigurado = () => Boolean(GOOGLE_CLIENT_ID && GOOGLE_APP_ID);
 
 /** Id da pasta a partir do link do Drive (".../folders/<id>" ou "...?id=<id>"). */
 export function idDaPasta(url) {
@@ -72,7 +73,7 @@ async function chamarDrive(caminho, valorToken) {
 
 /** O Picker para a Bea escolher (e assim liberar) a pasta do cliente. Devolve o id escolhido. */
 async function escolherPasta(valorToken, nomeCliente) {
-  await carregar('https://apis.google.com/js/api.js');
+  const [{ chave }] = await Promise.all([chamarServidor('/api/drive/chave'), carregar('https://apis.google.com/js/api.js')]);
   await new Promise((resolve) => window.gapi.load('picker', resolve));
   const { picker } = window.google;
   return new Promise((resolve, reject) => {
@@ -84,7 +85,7 @@ async function escolherPasta(valorToken, nomeCliente) {
       .setTitle(`Escolha a pasta do Drive de ${nomeCliente}`)
       .setLocale('pt-BR')
       .setAppId(GOOGLE_APP_ID)
-      .setDeveloperKey(GOOGLE_API_KEY)
+      .setDeveloperKey(chave)
       .setOAuthToken(valorToken)
       .addView(visao)
       .setCallback((dados) => {

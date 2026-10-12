@@ -56,6 +56,8 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 - `service_role` do Supabase, chaves do R2, Trello, e-mail e a chave privada VAPID (`VAPID_PRIVATE_KEY`) NUNCA vão para o front nem para o Git. Ficam em variáveis de ambiente do Cloudflare Pages e em `.dev.vars` local (no `.gitignore`).
 - No front só entra a URL do projeto e a chave `anon`/publishable do Supabase.
+- **O repositório é público.** Nenhuma chave de API (nem as "públicas por natureza", como a do Google Picker) vai em arquivo versionado: o que o navegador precisa e não é publishable vem de uma função só para quem está logado (ex.: `/api/drive/chave`, de `GOOGLE_API_KEY`). Na dúvida se algo é segredo, tratar como segredo.
+- Hook `.githooks/pre-commit` barra commit com cara de chave (`AIza…`, `sb_secret_`, JWT, chave privada, `.dev.vars` etc.). Em clone novo: `git config core.hooksPath .githooks`. Nunca usar `--no-verify`; se o hook acusar, tirar o segredo do código.
 - Todo acesso a dados é protegido por RLS (Row Level Security) no Postgres:
   - Cliente só lê os próprios conteúdos com status diferente de `rascunho`, nunca `observacao_interna`.
   - Cliente com `login_ativo = false` não lê nada.

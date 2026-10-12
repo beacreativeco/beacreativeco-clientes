@@ -1,3 +1,5 @@
 # Copie para .dev.vars (NUNCA commitar). Em produção, configurar no painel do Cloudflare Pages.
 SUPABASE_URL=https://dudxbbqyofzetuvpuzrh.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
+# Chave de API do Google Picker (servida só para a admin por /api/drive/chave)
+GOOGLE_API_KEY=
