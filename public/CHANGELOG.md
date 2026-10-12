@@ -19,6 +19,12 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.1] — 12/10/2026
+
+### Correções
+
+- Mais segurança no "Enviar pro Drive": a chave de acesso ao Google não fica mais à vista no código do sistema
+
 ## [1.9.0] — 09/10/2026
 
 ### Novidades
