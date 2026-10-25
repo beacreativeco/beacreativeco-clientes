@@ -2,6 +2,7 @@
 // localhost usam o mesmo Supabase e o mesmo R2, mas nunca registram webhooks do Trello
 // nem mandam e-mail para cliente de verdade (regras no CLAUDE.md, seção "Branches").
 export const HOST_PRODUCAO = 'clientes.beacreativeco.com.br';
+export const HOST_PREVIEW = 'dev.beacreativeco-clientes.pages.dev';
 
 export function ehProducao(request) {
   return new URL(request.url).hostname === HOST_PRODUCAO;
