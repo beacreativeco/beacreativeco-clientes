@@ -19,6 +19,16 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.2] — 25/10/2026
+
+### Correções
+
+- Mandar imagem na conversa voltou a funcionar (dava sempre "a imagem não foi enviada")
+- Mais segurança: quem não está logado não acessa nada do sistema, e as páginas só carregam arquivos de endereços conhecidos
+- As mensagens sempre ficam com a data e a hora em que foram enviadas
+- Os áudios da conversa só carregam quando você toca no play, e um áudio que não existe mais aparece como "Áudio expirado"
+- Menus mais fáceis de usar pelo teclado e páginas com título para quem usa leitor de tela
+
 ## [1.9.1] — 12/10/2026
 
 ### Correções
