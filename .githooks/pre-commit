@@ -14,3 +14,14 @@ if [ -n "$achados$arquivos" ]; then
   echo "Segredo vai em variável do Cloudflare Pages e no .dev.vars, nunca no código." >&2
   exit 1
 fi
+
+# Testes automáticos (testes/, menos de 1 segundo). Sem Node no computador, só avisa.
+if command -v node >/dev/null 2>&1; then
+  if ! saida=$(node --test "testes/*.test.js" 2>&1); then
+    echo "COMMIT BLOQUEADO: algum teste falhou. Rode: node --test \"testes/*.test.js\"" >&2
+    echo "$saida" | grep -E '^✖' | head -10 >&2
+    exit 1
+  fi
+else
+  echo "Aviso: Node não encontrado, os testes não rodaram." >&2
+fi

@@ -241,6 +241,14 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - `mensagem_valida` de 4 parâmetros fica: `pedir_ajuste` ainda usa
    - Realtime: o sistema usa só Postgres Changes (nada de Broadcast ou Presence). Desligar canal público no Supabase: decidir depois
 
+15. [ ] **Supabase de desenvolvimento** (pedido de 25/10/2026; **pré-requisito da Fase 2**, antes de qualquer entrega nova da Fase 2): hoje o Preview usa o mesmo banco e o mesmo R2 da produção, então não dá para testar regras de acesso nem fluxos inteiros sem mexer em dados reais
+   - [ ] Criar um segundo projeto no Supabase só para desenvolvimento
+   - [ ] Rodar nele todas as migrações de `supabase/migrations/`, em ordem
+   - [ ] Apontar o Preview (e o localhost) para ele: URL e chaves nas variáveis do ambiente Preview do Cloudflare e no `.dev.vars`, e o `config.js` escolhendo o projeto pelo endereço
+   - [ ] Testes de RLS (cada perfil só lê e escreve o que pode) rodando contra o banco de desenvolvimento
+   - [ ] Testes Playwright dos fluxos principais (login, enviar para aprovação, aprovar, pedir ajuste, conversa) no Preview
+   - Passo a passo detalhado: a combinar (pedido para depois da etapa 7 do item 14)
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão
