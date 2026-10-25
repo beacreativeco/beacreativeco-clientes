@@ -42,7 +42,9 @@ async function entregar({ request, env, params }, comCorpo) {
   if (tipo) headers.set('Content-Type', tipo.mime);
   headers.set('ETag', objeto.httpEtag);
   headers.set('Accept-Ranges', 'bytes');
-  headers.set('Cache-Control', 'private, max-age=31536000, immutable');
+  // Áudio e imagem da conversa podem ser apagados: no navegador, no máximo 1 dia.
+  const daConversa = CHAVE_CONVERSA.test(chave) || CHAVE_CONVERSA_CLIENTE.test(chave);
+  headers.set('Cache-Control', daConversa ? 'private, max-age=86400' : 'private, max-age=31536000, immutable');
   headers.set('X-Content-Type-Options', 'nosniff');
 
   if (new URL(request.url).searchParams.has('download')) {
