@@ -1,0 +1,2 @@
+# Hooks rodam no sh: sempre LF, mesmo em clone no Windows.
+.githooks/* text eol=lf
