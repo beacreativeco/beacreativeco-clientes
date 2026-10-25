@@ -194,6 +194,7 @@ function desenhar() {
   if (conteudo) {
     document.title = `${conteudo.titulo} · BeaCreative`;
     document.getElementById('titulo-pagina').textContent = conteudo.titulo;
+    document.getElementById('titulo-conversa').textContent = `Conversa sobre ${conteudo.titulo}`;
     form.formato.value = conteudo.formato;
     form.titulo.value = conteudo.titulo;
     form.data_prevista.value = conteudo.data_prevista ?? '';
@@ -360,6 +361,7 @@ async function salvar({ silencioso = false } = {}) {
   if (eraNovo) history.replaceState(null, '', `/admin/conteudo/?id=${conteudo.id}`);
   document.title = `${conteudo.titulo} · BeaCreative`;
   document.getElementById('titulo-pagina').textContent = conteudo.titulo;
+  document.getElementById('titulo-conversa').textContent = `Conversa sobre ${conteudo.titulo}`;
   atualizarSituacao();
   // Conteúdo criado agora: a aba "Conversa" aparece.
   if (eraNovo) montarConversa().catch(console.error);
