@@ -46,7 +46,8 @@ const ONDA_PADRAO = Array(BARRAS_ONDA).fill(22);
 // arrastar, teclado e leitor de tela de graça.
 function playerDeAudio(src, duracaoSalva, ondaSalva) {
   const audio = el('audio');
-  audio.preload = 'metadata';
+  // Com a duração salva, nada a ler antes do play: abrir a conversa não baixa (nem dá 404 em) cada áudio.
+  audio.preload = Number(duracaoSalva) > 0 ? 'none' : 'metadata';
   audio.src = src;
   const botao = el('button', 'audio-play', icone(ICONE_PLAY));
   botao.type = 'button';
@@ -108,7 +109,8 @@ function playerDeAudio(src, duracaoSalva, ondaSalva) {
   audio.addEventListener('error', () => {
     player.replaceWith(el('p', 'conversa-expirado', 'Áudio expirado'));
   }, { once: true });
-  botao.addEventListener('click', () => (audio.paused ? audio.play().catch(console.error) : audio.pause()));
+  // Arquivo que sumiu: o evento 'error' já troca pelo aviso; só registra os outros erros.
+  botao.addEventListener('click', () => (audio.paused ? audio.play().catch((err) => audio.error || console.error(err)) : audio.pause()));
   barra.addEventListener('input', () => {
     audio.currentTime = Number(barra.value);
     mostrar();

@@ -32,6 +32,16 @@
   // A <meta> só existe depois do parse do <head>: acerta a cor de novo quando a página carrega.
   document.addEventListener('DOMContentLoaded', aplicar);
 
+  // Trocar de tela rápido cancela a transição entre páginas, e o navegador rejeita as promessas
+  // dela ("Transition was aborted"). Não é erro nosso: só não deixa sujar o console.
+  function calarTransicao(e) {
+    var t = e.viewTransition;
+    if (!t) return;
+    [t.ready, t.finished, t.updateCallbackDone].forEach(function (p) { if (p) p.catch(function () {}); });
+  }
+  window.addEventListener('pageswap', calarTransicao);
+  window.addEventListener('pagereveal', calarTransicao);
+
   window.beaTema = {
     escolha: ler,
     definir: function (valor) {
