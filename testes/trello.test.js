@@ -40,7 +40,7 @@ test('data sem ano: o ano mais perto de hoje', () => {
 
 test('separadores de semana e etapas pelas etiquetas', () => {
   assert.ok(ehSeparador('.'));
-  assert.ok(ehSeparador('​​'));
+  assert.ok(ehSeparador('\u200b\u200b'));
   assert.ok(ehSeparador(''));
   assert.ok(!ehSeparador('Título'));
   assert.deepEqual(etapasDoCartao([{ name: 'aprovado' }, { name: ' GRAVAR ' }, { name: 'outra' }, {}]), ['GRAVAR', 'APROVADO']);
