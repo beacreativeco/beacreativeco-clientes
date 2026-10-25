@@ -230,7 +230,8 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
      - Testado com dados de exemplo em 390px (print deitado no modo cru, conversa longa, mensagem chegando, teclado simulado). **Falta:** teclado de verdade no Android e no iPhone
 
 14. [ ] **Revisão de segurança e qualidade** (pedido de 24/10/2026, em etapas: acesso sem login, dados, scripts externos e CSP, acessibilidade, Biome e Knip, testes, Sentry)
-   - [ ] Etapa 1, acesso sem login: revisada. Banco, funções e rotas negam quem não está logado (conferido no ar). Em andamento: tirar do `anon` toda permissão de tabela, sequência e função (migração com arquivo de desfazer, depois de backup)
+   - [x] Etapa 1, acesso sem login: banco, funções e rotas negam quem não está logado (conferido no ar). O `anon` não tem mais nenhuma permissão de tabela, sequência ou função, nem nas que forem criadas depois (migração `20261024000000`, aplicada em 25/10/2026; desfazer em `supabase/desfazer/`)
+   - [ ] Etapa 2, dados: próxima
    - Decisão de 24/10/2026: `/api/midia` continua sem login (chave impossível de adivinhar). **Links assinados, com validade, entram junto com a API da Meta** (envio automático no WhatsApp, item 5h), que vai precisar deles. Por enquanto, só o cache dos arquivos da conversa (áudio e imagem) caiu de 1 ano para 1 dia no navegador
    - `mensagem_valida` de 4 parâmetros fica: `pedir_ajuste` ainda usa
    - Realtime: o sistema usa só Postgres Changes (nada de Broadcast ou Presence). Desligar canal público no Supabase: decidir depois
