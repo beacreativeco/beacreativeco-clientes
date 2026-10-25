@@ -19,6 +19,12 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.4] — 25/10/2026
+
+### Melhorias
+
+- Quando algo dá erro no sistema, a equipe é avisada na hora para corrigir, sem enviar nenhum dado pessoal (nome, e-mail ou mensagens)
+
 ## [1.9.3] — 25/10/2026
 
 ### Correções
