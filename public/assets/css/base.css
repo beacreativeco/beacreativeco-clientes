@@ -3225,6 +3225,8 @@ a.cliente-nome:hover {
 .conversa-imagem {
   display: block;
   width: 100%;
+  aspect-ratio: var(--proporcao, 1); /* o espaço já fica reservado enquanto a foto carrega */
+  max-height: 320px;
   margin: 0 0 4px;
   padding: 0;
   border: 0;
@@ -3242,8 +3244,7 @@ a.cliente-nome:hover {
 .conversa-imagem img {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 320px;
+  height: 100%;
   object-fit: contain;
 }
 
