@@ -31,6 +31,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
 - E-mail transacional: Resend (ou similar), a definir na implementação.
+- Erros do navegador: Sentry (`public/assets/js/erros.js`, em todas as páginas logo depois do `tema.js`). Só produção e Preview: o DSN fica em `SENTRY_DSN` no Cloudflare (fora do Git) e `/api/erros/config` só o entrega nesses dois endereços. SDK `bundle.min.js` com versão fixa e SRI (trocar a versão = trocar o hash), sem Session Replay e sem desempenho. Nada pessoal sai: `limpar()` apaga ids, e-mails, tokens e query das URLs; console e cliques não viram registro; sem usuário (teste em `testes/erros.test.js`). Serviço novo de fora: incluir também na CSP do `_headers`.
 
 ## Armazenamento (nunca passar dos 10 GB grátis do R2)
 
