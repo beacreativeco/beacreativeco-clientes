@@ -701,9 +701,9 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
       rolarProFim();
       try {
         const leve = await otimizarImagem(arquivo);
-        const arquivo = await subirArquivo(leve);
+        const enviado = await subirArquivo(leve);
         espera.remove();
-        await enviarComArquivo({ tipo: 'referencia', ...arquivo });
+        await enviarComArquivo({ tipo: 'referencia', ...enviado });
         rolarProFim();
         marcarLida(true);
       } catch (err) {
