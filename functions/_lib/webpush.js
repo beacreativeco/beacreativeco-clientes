@@ -1,7 +1,6 @@
 // Web Push sem pacote npm (as Functions não têm build): criptografia do conteúdo
 // (RFC 8291, "aes128gcm") e assinatura VAPID (RFC 8292, JWT ES256), tudo com o WebCrypto
-// da Cloudflare. Conferido contra o exemplo do Apêndice A da RFC 8291
-// (scripts de teste fora do site: não ficam no repositório).
+// da Cloudflare. Conferido contra o exemplo do Apêndice A da RFC 8291 (testes/webpush.test.js).
 //
 // Segredos: VAPID_PRIVATE_KEY (o "d" da chave P-256, base64url) e VAPID_SUBJECT
 // (https://… ou mailto:…). A chave pública fica em public/assets/js/config.js.

@@ -155,3 +155,4 @@ Versionamento semântico (MAJOR.MINOR.PATCH), igual ao do sistema do LAEG-BIO. H
 - Entregas pequenas e testáveis; mostrar o que mudou em cada etapa.
 - Não traduzir nomes de arquivos especiais (ex.: `_headers` tem que manter esse nome exato).
 - Testar sempre no celular (largura ~375px) e no desktop.
+- Testes automáticos: `node --test "testes/*.test.js"` (executor do próprio Node, sem instalar nada; a pasta `testes/` fica fora do site). Cobrem a lógica pura: chaves de arquivo do R2, títulos e webhook do Trello, criptografia do push (exemplo da RFC 8291), regras de arquivo por formato e o formato do `CHANGELOG.md`. Rodar antes de cada subida para produção; mexeu numa dessas partes, ajustar ou criar o teste junto.
