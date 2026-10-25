@@ -19,6 +19,12 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.3] — 25/10/2026
+
+### Correções
+
+- Imagem na conversa ocupa o balão inteiro, do tamanho certo para foto deitada, em pé ou quadrada, sem cortar
+
 ## [1.9.2] — 25/10/2026
 
 ### Correções
