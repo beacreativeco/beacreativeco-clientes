@@ -59,6 +59,7 @@ function playerDeAudio(src, duracaoSalva, ondaSalva) {
   });
   const barra = el('input', 'audio-barra');
   barra.type = 'range';
+  barra.name = 'posicao-audio';
   barra.min = '0';
   barra.step = '0.1';
   barra.value = '0';
@@ -249,6 +250,7 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   avisoEdicao.hidden = true;
 
   const campo = el('textarea', 'conversa-campo');
+  campo.name = 'mensagem';
   campo.rows = 1;
   campo.maxLength = LIMITE_TEXTO;
   campo.placeholder = 'Mensagem';
@@ -265,6 +267,7 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
   anexar.setAttribute('aria-haspopup', comCartoes ? 'menu' : 'false');
   const seletor = el('input');
   seletor.type = 'file';
+  seletor.name = 'imagens';
   seletor.accept = 'image/*';
   seletor.multiple = true;
   seletor.hidden = true;

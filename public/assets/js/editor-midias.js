@@ -367,7 +367,7 @@ async function aoClicarNaLista(e) {
 // ---------------------------------------------------------------- Drive
 
 // Arquivo escolhido à mão (o original que está no computador da Bea).
-const escolhaOriginal = Object.assign(document.createElement('input'), { type: 'file', hidden: true });
+const escolhaOriginal = Object.assign(document.createElement('input'), { type: 'file', name: 'original', hidden: true });
 document.body.append(escolhaOriginal);
 
 async function pedirDrive(i, botao) {

@@ -5202,3 +5202,12 @@ div.convite-texto p { margin: 0; }
 }
 
 .liberar-passos li::marker { color: var(--cor-acao); font-weight: 600; }
+
+/* Itens de menu: só o fundo no foco quase não aparece no branco. No teclado, contorno também
+   (fica no fim para valer sobre os "outline: none" de cada item). */
+.conversa-menu-item:focus-visible,
+.perfil-item:focus-visible,
+.sino-item:focus-visible {
+  outline: 2px solid var(--cor-foco);
+  outline-offset: -2px;
+}
