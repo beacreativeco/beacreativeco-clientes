@@ -3209,23 +3209,42 @@ a.cliente-nome:hover {
   outline-offset: 0;
 }
 
+/* Balão com foto: a largura é a da foto (pela proporção, entre 160 e 280px, e no máximo
+   320px de altura), com uma borda fina do balão em volta, como no WhatsApp. O texto e a
+   hora quebram dentro dessa largura. --proporcao (largura / altura) vem do JS quando a
+   foto carrega; até lá, quadrada. */
+.conversa-balao.conversa-com-imagem {
+  width: calc(clamp(160px, 320px * var(--proporcao, 1), 280px) + 8px);
+  padding: 4px 4px 3px;
+}
+
+.conversa-com-imagem > :not(.conversa-imagem, .conversa-mais) {
+  margin-inline: 5px;
+}
+
 .conversa-imagem {
   display: block;
+  width: 100%;
   margin: 0 0 4px;
   padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 7px; /* o do balão (10px) menos a borda */
   overflow: hidden;
-  background: var(--creme);
+  background: color-mix(in srgb, var(--cor-texto) 8%, transparent);
   cursor: zoom-in;
 }
 
+/* O canto do "rabinho" do balão é quase reto: a foto acompanha. */
+.conversa-meu .conversa-imagem:first-child { border-top-right-radius: 2px; }
+.conversa-outro .conversa-imagem:first-child { border-top-left-radius: 2px; }
+
+/* Ocupa a largura toda; só foto em pé mais comprida que 1:2 ganha faixas dos lados, sem cortar. */
 .conversa-imagem img {
   display: block;
-  width: auto;
-  max-width: min(240px, 100%);
-  max-height: 280px;
-  object-fit: cover;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
 }
 
 .conversa-imagem:focus-visible {

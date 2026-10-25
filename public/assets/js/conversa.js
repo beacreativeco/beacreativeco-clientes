@@ -390,7 +390,10 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
       // Já apagado pela exclusão automática (aprovados/, 30 dias depois): só o aviso.
       const sumiu = m.arquivo_url && m.arquivo_expira_em && new Date(m.arquivo_expira_em) <= new Date();
       if (sumiu) corpo.append(el('p', 'conversa-expirado', m.tipo === 'audio' ? 'Áudio expirado' : 'Imagem expirada'));
-      else if (m.tipo === 'referencia' && m.arquivo_url) corpo.append(miniatura(m.arquivo_url));
+      else if (m.tipo === 'referencia' && m.arquivo_url) {
+        corpo.classList.add('conversa-com-imagem');
+        corpo.append(miniatura(m.arquivo_url));
+      }
       else if (m.tipo === 'audio' && m.arquivo_url) corpo.append(playerDeAudio(m.arquivo_url, m.duracao_s, m.onda));
       if (m.texto) corpo.append(el('p', 'conversa-texto', textoComLinks(m.texto)));
     }
@@ -415,7 +418,12 @@ export function criarConversa(alvo, { clienteId, conteudoId = null, eu, tela = f
     img.src = src;
     img.alt = 'Imagem de referência';
     img.loading = 'lazy';
+    // O balão ganha a largura da foto pela proporção dela (CSS em .conversa-com-imagem).
+    img.addEventListener('load', () => {
+      if (img.naturalHeight) (botao.closest('.conversa-balao') ?? botao).style.setProperty('--proporcao', img.naturalWidth / img.naturalHeight);
+    }, { once: true });
     img.addEventListener('error', () => {
+      botao.closest('.conversa-balao')?.classList.remove('conversa-com-imagem');
       botao.replaceWith(el('p', 'conversa-expirado', 'Imagem expirada'));
     }, { once: true });
     botao.append(img);
