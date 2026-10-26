@@ -264,7 +264,25 @@ Mudar para o Supabase Pro quando acontecer o primeiro destes:
 - [ ] Banco acima de 400 MB (o limite do plano grátis é 500 MB)
 - [ ] Qualquer pausa do projeto por inatividade
 
-O uso do banco contra o limite de 500 MB entra no painel do dono (etapa 14 da proposta de várias agências).
+O uso do banco contra o limite de 500 MB entra no painel do dono (etapa 14 da proposta de várias agências). Pelas regras do Supabase (conferidas em 26/10/2026): projeto grátis pausa depois de 7 dias com pouca atividade; passar dos 500 MB não deixa o banco só leitura, mas a organização pode ter as chamadas bloqueadas (erro 402); o modo só leitura vem com 95% do disco de 2 GB.
+
+### Backup semanal (opção A, escolhida em 26/10/2026)
+
+Repositório privado `beacreativeco-backup` (GitHub Actions, domingo 3h): `pg_dump` de `public` e `auth` → restauração num Postgres temporário do workflow → contagens conferidas → só então cifra com a chave pública do age e envia ao bucket `beacreativeco-backups`. Regras no `CLAUDE.md`, seção "Backup do banco"; passo a passo no README do repositório do backup.
+
+- [x] Código do workflow, dos scripts e do teste da conferência (pasta local `beacreativeco-backup`, ainda sem repositório no GitHub)
+- [x] Migração `20261027000000_backup_leitura` (usuário só de leitura), com desfazer
+- [ ] Teste no dev: o `backup_leitura` consegue fazer o dump de `public` e `auth`
+- [ ] Contas (Victor, um passo de cada vez): chave do age, repositório privado, bucket, token do R2, secrets, aviso de falha por e-mail
+- [ ] Primeira rodada com alvo `dev`; depois a migração na produção (com "pode subir pra produção") e a primeira rodada com alvo `producao`
+
+**Teste de abertura e restauração, de 3 em 3 meses** (no computador do Victor, passo a passo no README do repositório do backup: abrir um backup com a chave privada e restaurar no banco de dev em esquemas separados). Anotar aqui a data e o resultado:
+
+- [ ] Primeiro: na semana seguinte ao primeiro backup da produção
+- [ ] 26/01/2027
+- [ ] 26/04/2027
+- [ ] 26/07/2027
+- [ ] 26/10/2027
 
 ## Já pronto antes deste roadmap
 

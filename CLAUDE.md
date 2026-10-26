@@ -22,7 +22,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 
 - Front: HTML, CSS e JavaScript puro (sem framework, sem build obrigatório). Mobile-first.
 - Backend: Supabase (Postgres, Auth, Realtime). Cliente JS do Supabase via CDN ou ES module.
-- Arquivos (imagens, vídeos, áudios): Cloudflare R2, acessado só pelo binding `MIDIAS` das Pages Functions (sem chaves de acesso do R2).
+- Arquivos (imagens, vídeos, áudios): Cloudflare R2, acessado só pelo binding `MIDIAS` das Pages Functions (sem chaves de acesso do R2). **Única exceção:** o backup do banco (ver "Backup do banco") usa um token do R2 "Object Read & Write" restrito ao bucket `beacreativeco-backups`, guardado só nos Secrets do repositório privado do backup.
   - Upload sempre em partes (multipart, 10 MiB por parte) pelas funções em `functions/api/midias/`, para passar do limite de corpo de requisição das Functions e aguentar vídeos grandes.
   - Entrega por `functions/api/midia/[[caminho]].js`, com suporte a Range (o player do vídeo consegue pular) e `?download=1` para baixar a versão do sistema com o nome do arquivo.
   - Os links de arquivo não exigem login: a proteção é a chave impossível de adivinhar (`<conteudo_id>/<uuid>.<ext>`). Decisão consciente para prévias de agência.
@@ -52,6 +52,14 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 - **Mudança de pasta:** o arquivo nasce na pasta da situação do conteúdo e, quando a situação muda, `/api/conteudo/organizar` (chamado pela página depois de enviar, retirar, aprovar ou pedir ajuste) copia para a pasta nova, atualiza o banco e só então apaga a chave antiga (`functions/_lib/armazenamento.js`). Como a cópia é um objeto novo, a regra do R2 conta a partir da aprovação. O mesmo endpoint acerta o cartão do Trello.
 - **Expiração na tela:** `midias.expira_em` e `mensagens.arquivo_expira_em` (data em que o R2 apaga). Passou da data, ou o arquivo deu 404: a tela mostra "Arquivo expirado, veja no Drive" com o link, nunca imagem quebrada (prévia, editor e conversa).
 - **Espaço usado:** página Clientes, pela função `espaco_usado()` (soma de `midias.tamanho_mb` e `mensagens.arquivo_mb` não expirados, aproximada; só admin); aviso a partir de 8 GB.
+
+## Backup do banco (plano grátis do Supabase)
+
+- A produção fica no plano grátis até um dos gatilhos do `ROADMAP.md` (seção "Plano do Supabase"); sem backup do Supabase, o backup é próprio.
+- Repositório privado separado (`beacreativeco-backup`, nunca este): GitHub Actions todo domingo às 3h faz `pg_dump` de `public` e `auth` pelo Session pooler (o runner não tem IPv6) com o usuário `backup_leitura` (só leitura, `bypassrls`; migração `20261027000000`, senha definida à mão em cada banco, fora do Git), restaura num Postgres temporário do próprio workflow, confere as contagens e só então cifra com a chave **pública** do age e envia ao bucket `beacreativeco-backups` (privado). Falhou: não envia e o workflow falha (e-mail do GitHub).
+- A chave **privada** do age nunca vai para o GitHub nem fica no computador: gerenciador de senhas e papel. Backup em texto puro nunca fora do runner, nunca em pasta sincronizada, nunca neste repositório.
+- Antes de cada migração na produção: rodar o workflow à mão (alvo `producao`) e esperar ficar verde.
+- De 3 em 3 meses: o Victor abre um backup com a chave privada e restaura no banco de dev em esquemas separados (`scripts/restaurar-no-dev.sh` do repositório do backup), datas no `ROADMAP.md`.
 
 ## Regras de segurança (inegociáveis)
 
