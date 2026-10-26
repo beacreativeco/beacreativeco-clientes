@@ -254,6 +254,18 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - [x] `config.js`: banco de dev só em `dev.beacreativeco-clientes.pages.dev` e localhost; `clientes.beacreativeco.com.br` e `beacreativeco-clientes.pages.dev` são produção e o endereço do projeto novo na CSP do `_headers`. **Falta (Victor):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `TRELLO_QUADROS_TESTE` no Preview do Cloudflare e no `.dev.vars`
    - [x] Trava do Trello: fora do banco da produção, o servidor só mexe nos quadros de `TRELLO_QUADROS_TESTE` (ids separados por vírgula, variável do Preview e do `.dev.vars`); sem ela, nenhum. A lista de quadros do "Editar cliente" só mostra esses, e sincronizar, refletir e anexar recusam com aviso
 
+## Plano do Supabase
+
+Decisão de 26/10/2026: a produção fica no plano grátis do Supabase até um dos gatilhos abaixo. Sem backup automático no plano grátis, o banco tem um backup semanal próprio (proposta em https://claude.ai/artifact/ULBSX3PFUcKXTTK4UX2zHH, seção "Backup no plano grátis"), além do backup manual antes de cada migração na produção.
+
+Mudar para o Supabase Pro quando acontecer o primeiro destes:
+
+- [ ] Primeira agência pagante
+- [ ] Banco acima de 400 MB (o limite do plano grátis é 500 MB)
+- [ ] Qualquer pausa do projeto por inatividade
+
+O uso do banco contra o limite de 500 MB entra no painel do dono (etapa 14 da proposta de várias agências).
+
 ## Já pronto antes deste roadmap
 
 - Login da Bea e dos clientes, com suspensão
