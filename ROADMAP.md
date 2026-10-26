@@ -246,7 +246,7 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - [x] Rodar nele todas as migrações de `supabase/migrations/`, em ordem
    - [ ] Apontar o Preview (e o localhost) para ele: URL e chaves nas variáveis do ambiente Preview do Cloudflare e no `.dev.vars`, e o `config.js` escolhendo o projeto pelo endereço
    - [x] Convite no banco de dev: o SMTP padrão do Supabase só entrega para a equipe do projeto, então fora da produção o "Enviar convite" gera o link e copia (abrir numa janela anônima)
-   - [ ] Testes de RLS (cada perfil só lê e escreve o que pode) rodando contra o banco de desenvolvimento
+   - [x] Testes de RLS (cada perfil só lê e escreve o que pode) rodando contra o banco de desenvolvimento: `testes/rls.test.js`, 8 testes (sem login, cliente, suspenso, escrita direta, `aprovar_conteudo`, conversa, tabelas do push, Bea), passando em 25/10/2026; conferido que acusa erro (falha plantada) e que não deixa sobra no banco
    - [ ] Testes Playwright dos fluxos principais (login, enviar para aprovação, aprovar, pedir ajuste, conversa) no Preview
    - [ ] R2 separado: bucket `beacreativeco-midias-dev`, ligado como `MIDIAS` só no ambiente Preview, com as mesmas Lifecycle Rules (`aprovados/` e `conversa/` 30 dias, uploads em partes incompletos 1 dia)
    - [x] `config.js`: banco de dev só em `dev.beacreativeco-clientes.pages.dev` e localhost; `clientes.beacreativeco.com.br` e `beacreativeco-clientes.pages.dev` são produção e o endereço do projeto novo na CSP do `_headers`. **Falta (Victor):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `TRELLO_QUADROS_TESTE` no Preview do Cloudflare e no `.dev.vars`

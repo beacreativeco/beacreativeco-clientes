@@ -3,3 +3,5 @@ SUPABASE_URL=https://dudxbbqyofzetuvpuzrh.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 # Chave de API do Google Picker (servida só para a admin por /api/drive/chave)
 GOOGLE_API_KEY=
+# Só fora da produção: quadros do Trello de teste (ids separados por vírgula; ver quadroLiberado)
+TRELLO_QUADROS_TESTE=
