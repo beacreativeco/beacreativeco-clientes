@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac, randomUUID } from 'node:crypto';
-import { lerTitulo, ehSeparador, etapasDoCartao } from '../functions/_lib/trello.js';
+import { lerTitulo, ehSeparador, etapasDoCartao, quadroLiberado } from '../functions/_lib/trello.js';
 import { assinaturaValida, acaoInteressa } from '../functions/_lib/trello-webhook.js';
 
 const OUTUBRO = new Date(2026, 9, 1);
@@ -68,4 +68,14 @@ test('webhook: só mudanças que importam sincronizam', () => {
   assert.equal(acaoInteressa({ type: 'updateCard', data: { old: { pos: 1 } } }), false);
   assert.equal(acaoInteressa({ type: 'commentCard' }), false);
   assert.equal(acaoInteressa(null), false);
+});
+
+test('banco de desenvolvimento só mexe nos quadros de teste', () => {
+  const prod = { SUPABASE_URL: 'https://dudxbbqyofzetuvpuzrh.supabase.co/' };
+  assert.equal(quadroLiberado(prod, 'qualquer'), true);
+  const dev = { SUPABASE_URL: 'https://outro.supabase.co', TRELLO_QUADROS_TESTE: 'teste1, teste2' };
+  assert.equal(quadroLiberado(dev, 'teste2'), true);
+  assert.equal(quadroLiberado(dev, 'clienteDeVerdade'), false);
+  assert.equal(quadroLiberado({ SUPABASE_URL: 'https://outro.supabase.co' }, 'teste1'), false);
+  assert.equal(quadroLiberado({ SUPABASE_URL: 'https://outro.supabase.co', TRELLO_QUADROS_TESTE: '' }, ''), false);
 });

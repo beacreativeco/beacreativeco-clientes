@@ -4,7 +4,7 @@
 // Trello grátis aceita anexo de até 10 MB: acima disso, anexa o link do arquivo no sistema.
 // Grava em `midias` quando e como foi, para o editor mostrar "✓ No Trello".
 import { responder, exigirAdmin, rest, UUID } from '../../_lib/servidor.js';
-import { trello, trelloConfigurado } from '../../_lib/trello.js';
+import { trello, trelloConfigurado, quadroLiberado, AVISO_QUADRO_DE_TESTE } from '../../_lib/trello.js';
 import { chaveDaUrl, tipoDaChave } from '../../_lib/midias.js';
 
 const LIMITE_ANEXO = 10 * 1024 * 1024;
@@ -20,10 +20,11 @@ export async function onRequestPost({ request, env }) {
   if (!midiaId || !UUID.test(midiaId)) return responder(400, 'Arquivo inválido.');
 
   const [midia] = (await rest(env,
-    `midias?select=id,ordem,tipo,arquivo_url,trello_enviado_em,conteudos(titulo,trello_card_id)&id=eq.${midiaId}`)) ?? [];
+    `midias?select=id,ordem,tipo,arquivo_url,trello_enviado_em,conteudos(titulo,trello_card_id,clientes(trello_board_id))&id=eq.${midiaId}`)) ?? [];
   if (!midia) return responder(404, 'Arquivo não encontrado.');
   const cartao = midia.conteudos?.trello_card_id;
   if (!cartao) return responder(400, 'Este conteúdo não está ligado a um cartão do Trello.');
+  if (!quadroLiberado(env, midia.conteudos.clientes?.trello_board_id)) return responder(403, AVISO_QUADRO_DE_TESTE);
   if (midia.trello_enviado_em && !corpo.de_novo) return responder(409, 'Este arquivo já foi enviado pro Trello.');
 
   const chave = chaveDaUrl(midia.arquivo_url);

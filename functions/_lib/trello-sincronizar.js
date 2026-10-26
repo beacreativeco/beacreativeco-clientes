@@ -8,11 +8,12 @@
 // Cuidado com o limite de 50 requisições por chamada (Cloudflare gratuito): tudo em lote,
 // umas 8 por quadro, não importa quantos cartões.
 import { rest } from './servidor.js';
-import { trello, lerTitulo, ehSeparador, etapasDoCartao, LISTA_DE_ENTREGAS } from './trello.js';
+import { trello, quadroLiberado, AVISO_QUADRO_DE_TESTE, lerTitulo, ehSeparador, etapasDoCartao, LISTA_DE_ENTREGAS } from './trello.js';
 
 const AVISO_SAIU = 'O cartão saiu das listas de entregas do Trello (arquivado, apagado ou movido).';
 
 export async function sincronizarQuadro(env, cliente) {
+  if (!quadroLiberado(env, cliente.trello_board_id)) throw new Error(AVISO_QUADRO_DE_TESTE);
   const agora = new Date().toISOString();
   const quadro = await trello(env, `/boards/${cliente.trello_board_id}`, {
     params: {

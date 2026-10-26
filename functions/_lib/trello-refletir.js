@@ -5,7 +5,7 @@
 // Pode rodar de novo à vontade: o que já está no cartão não se repete.
 // Chamado por /api/conteudo/organizar, depois de cada mudança de situação.
 import { rest } from './servidor.js';
-import { trello } from './trello.js';
+import { trello, quadroLiberado, AVISO_QUADRO_DE_TESTE } from './trello.js';
 
 const AGUARDANDO = { nome: 'AGUARDANDO APROVAÇÃO', cor: 'yellow' };
 const APROVADO = { nome: 'APROVADO', cor: 'green' };
@@ -19,6 +19,7 @@ export async function refletirNoTrello(env, conteudoId) {
   const [conteudo] = (await rest(env,
     `conteudos?select=id,titulo,status,aprovado_por,trello_card_id,clientes(nome,trello_board_id),conteudos_internos(trello_refletido_ate,trello_anexado)&id=eq.${conteudoId}`)) ?? [];
   if (!conteudo?.trello_card_id || !conteudo.clientes?.trello_board_id) return { trello: false };
+  if (!quadroLiberado(env, conteudo.clientes.trello_board_id)) return { trello: false, aviso: AVISO_QUADRO_DE_TESTE };
   const internos = conteudo.conteudos_internos ?? { trello_refletido_ate: new Date().toISOString(), trello_anexado: false };
 
   let cartao;

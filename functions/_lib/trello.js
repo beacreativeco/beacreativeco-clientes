@@ -2,7 +2,17 @@
 // dos cartões no padrão combinado: "13/10 · Reels · Título" (data e formato no título,
 // como no quadro do Casa Coelho; a "Data de entrega" do Trello fica livre para a Bea).
 
+import { SUPABASE_PRODUCAO } from './ambiente.js';
+
 const API = 'https://api.trello.com/1';
+
+// Fora do banco da produção, só os quadros de TRELLO_QUADROS_TESTE (ids separados por vírgula).
+// Sem a variável, nenhum: cliente de teste nunca mexe no quadro de um cliente de verdade.
+export function quadroLiberado(env, quadroId) {
+  if ((env.SUPABASE_URL ?? '').replace(/\/+$/, '') === SUPABASE_PRODUCAO) return true;
+  return Boolean(quadroId) && (env.TRELLO_QUADROS_TESTE ?? '').split(',').map((s) => s.trim()).includes(quadroId);
+}
+export const AVISO_QUADRO_DE_TESTE = 'Banco de desenvolvimento: este quadro do Trello não é de teste (veja TRELLO_QUADROS_TESTE).';
 
 export function trelloConfigurado(env) {
   return Boolean(env.TRELLO_API_KEY && env.TRELLO_TOKEN);

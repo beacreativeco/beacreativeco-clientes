@@ -247,7 +247,9 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - [ ] Apontar o Preview (e o localhost) para ele: URL e chaves nas variáveis do ambiente Preview do Cloudflare e no `.dev.vars`, e o `config.js` escolhendo o projeto pelo endereço
    - [ ] Testes de RLS (cada perfil só lê e escreve o que pode) rodando contra o banco de desenvolvimento
    - [ ] Testes Playwright dos fluxos principais (login, enviar para aprovação, aprovar, pedir ajuste, conversa) no Preview
-   - Passo a passo detalhado: a combinar (pedido para depois da etapa 7 do item 14)
+   - [ ] R2 separado: bucket `beacreativeco-midias-dev`, ligado como `MIDIAS` só no ambiente Preview, com as mesmas Lifecycle Rules (`aprovados/` e `conversa/` 30 dias, uploads em partes incompletos 1 dia)
+   - [x] `config.js`: banco de dev só em `dev.beacreativeco-clientes.pages.dev` e localhost; `clientes.beacreativeco.com.br` e `beacreativeco-clientes.pages.dev` são produção (faltam a URL e a chave publishable do projeto novo, e o endereço dele na CSP do `_headers`)
+   - [x] Trava do Trello: fora do banco da produção, o servidor só mexe nos quadros de `TRELLO_QUADROS_TESTE` (ids separados por vírgula, variável do Preview e do `.dev.vars`); sem ela, nenhum. A lista de quadros do "Editar cliente" só mostra esses, e sincronizar, refletir e anexar recusam com aviso
 
 ## Já pronto antes deste roadmap
 
