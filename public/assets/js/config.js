@@ -3,8 +3,8 @@
 // Banco de desenvolvimento só no Preview da dev e no localhost; qualquer outro endereço
 // (clientes.beacreativeco.com.br, beacreativeco-clientes.pages.dev) é produção.
 const DEV = ['dev.beacreativeco-clientes.pages.dev', 'localhost', '127.0.0.1'].includes(globalThis.location?.hostname);
-export const SUPABASE_URL = DEV ? 'PREENCHER_URL_DEV' : 'https://dudxbbqyofzetuvpuzrh.supabase.co';
-export const SUPABASE_ANON_KEY = DEV ? 'PREENCHER_PUBLISHABLE_DEV' : 'sb_publishable_ihe5BwV3tW0q9vnvcJQSEw_QVdJR-oM';
+export const SUPABASE_URL = DEV ? 'https://dwhpwlxnhxkmklrokxhq.supabase.co' : 'https://dudxbbqyofzetuvpuzrh.supabase.co';
+export const SUPABASE_ANON_KEY = DEV ? 'sb_publishable_K06j4O3uSQP5W8jvyt_n8g_IV4wfopq' : 'sb_publishable_ihe5BwV3tW0q9vnvcJQSEw_QVdJR-oM';
 
 // Google Drive ("Enviar pro Drive" no editor; projeto 493593349658 no Google Cloud).
 // Públicos por natureza: o ID do cliente OAuth e o número do projeto. A chave de API do
