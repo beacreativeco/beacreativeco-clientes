@@ -136,7 +136,17 @@ async function convidar(cliente) {
   const corpo = await resposta.json().catch(() => ({}));
   if (!resposta.ok) throw new Error(corpo.erro || 'Não foi possível enviar o convite.');
 
-  avisar(`Convite enviado para ${cliente.email}.`);
+  if (corpo.link) {
+    // Banco de desenvolvimento: sem e-mail, o link vai para a área de transferência (ou fica à vista para copiar).
+    try {
+      await navigator.clipboard.writeText(corpo.link);
+      avisar('Link do convite copiado. Abra numa janela anônima (abrir aqui troca o seu login).');
+    } catch {
+      window.prompt('Copie o link do convite e abra numa janela anônima:', corpo.link);
+    }
+  } else {
+    avisar(`Convite enviado para ${cliente.email}.`);
+  }
   await carregarClientes();
 }
 

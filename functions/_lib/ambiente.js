@@ -4,8 +4,10 @@
 export const HOST_PRODUCAO = 'clientes.beacreativeco.com.br';
 export const HOST_PREVIEW = 'dev.beacreativeco-clientes.pages.dev';
 
-// Banco da produção: com qualquer outro (o de desenvolvimento), o Trello fica preso aos quadros de teste.
+// Banco da produção: com qualquer outro (o de desenvolvimento), o Trello fica preso aos quadros
+// de teste e o convite vira um link para copiar (o e-mail padrão do Supabase só vai para a equipe).
 export const SUPABASE_PRODUCAO = 'https://dudxbbqyofzetuvpuzrh.supabase.co';
+export const bancoDeProducao = (env) => (env.SUPABASE_URL ?? '').replace(/\/+$/, '') === SUPABASE_PRODUCAO;
 
 export function ehProducao(request) {
   return new URL(request.url).hostname === HOST_PRODUCAO;

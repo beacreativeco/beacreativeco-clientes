@@ -2,7 +2,9 @@
 // Envia o convite do Supabase Auth para o e-mail do cliente e liga a
 // conta criada ao cadastro (clientes.user_id). Só a admin pode chamar.
 // Usa a chave secreta, por isso roda aqui e nunca no navegador.
+// Fora do banco da produção, não manda e-mail: gera o link do convite e devolve para a Bea copiar.
 import { responder, exigirAdmin, rest, cabecalhosServidor, UUID } from '../_lib/servidor.js';
+import { bancoDeProducao } from '../_lib/ambiente.js';
 
 export async function onRequestPost({ request, env }) {
   const { resposta } = await exigirAdmin(request, env);
@@ -19,10 +21,14 @@ export async function onRequestPost({ request, env }) {
 
   // O link do e-mail leva para /definir-senha/.
   const destino = new URL('/definir-senha/', request.url).toString();
-  const respConvite = await fetch(`${env.SUPABASE_URL}/auth/v1/invite?redirect_to=${encodeURIComponent(destino)}`, {
+  const soLink = !bancoDeProducao(env);
+  const dados = { email: cliente.email, data: { cliente_id: cliente.id } };
+  const respConvite = await fetch(soLink
+    ? `${env.SUPABASE_URL}/auth/v1/admin/generate_link`
+    : `${env.SUPABASE_URL}/auth/v1/invite?redirect_to=${encodeURIComponent(destino)}`, {
     method: 'POST',
     headers: { ...cabecalhosServidor(env), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: cliente.email, data: { cliente_id: cliente.id } }),
+    body: JSON.stringify(soLink ? { ...dados, type: 'invite', redirect_to: destino } : dados),
   });
 
   if (!respConvite.ok) {
@@ -41,11 +47,13 @@ export async function onRequestPost({ request, env }) {
 
   try {
     await rest(env, `clientes?id=eq.${cliente.id}`, {
-      metodo: 'PATCH', corpo: { user_id: novoUsuario.id }, retornar: false,
+      metodo: 'PATCH', corpo: { user_id: novoUsuario.user?.id ?? novoUsuario.id }, retornar: false,
     });
   } catch {
     return responder(500, 'O convite saiu, mas a conta não foi ligada ao cliente. Avise o suporte técnico.');
   }
 
-  return responder(200, null, { ok: true });
+  return responder(200, null, {
+    ok: true, ...(soLink && { link: novoUsuario.properties?.action_link ?? novoUsuario.action_link }),
+  });
 }
