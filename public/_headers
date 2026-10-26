@@ -1,6 +1,8 @@
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
+  # Só https por 1 ano. Sem includeSubDomains/preload: isso é decidido no domínio principal (outro repositório).
+  Strict-Transport-Security: max-age=31536000
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), geolocation=(), microphone=(self)
   X-Robots-Tag: noindex, nofollow
