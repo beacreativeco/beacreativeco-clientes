@@ -1,0 +1,13 @@
+{
+  "name": "beacreativeco-clientes-testes",
+  "private": true,
+  "type": "module",
+  "description": "Só para os testes (Playwright). O site não tem build: nada daqui vai para public/.",
+  "scripts": {
+    "testes": "node --test \"testes/*.test.js\"",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

@@ -3,50 +3,14 @@
 // Cria uma Bea, dois clientes (um suspenso à parte) e conteúdos de teste, e apaga tudo no fim.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { cabecalhosServidor } from '../functions/_lib/servidor.js';
+import { pular, api, linhas, inserir, novoLogin as criarLogin, apagarLogin } from './banco-dev.js';
 
-const lerVars = () => { try { return readFileSync(new URL('../.dev.vars', import.meta.url), 'utf8'); } catch { return ''; } };
-const vars = Object.fromEntries(lerVars()
-  .split(/\r?\n/).map((l) => l.match(/^([A-Z_]+)=(.*)$/)).filter(Boolean).map((m) => [m[1], m[2].trim()]));
-const config = readFileSync(new URL('../public/assets/js/config.js', import.meta.url), 'utf8');
-const URL_DEV = config.match(/SUPABASE_URL = DEV \? '([^']+)'/)[1];
-const PUBLICA = config.match(/SUPABASE_ANON_KEY = DEV \? '([^']+)'/)[1];
-const pular = vars.SUPABASE_URL?.replace(/\/+$/, '') !== URL_DEV
-  && 'o .dev.vars não aponta para o banco de desenvolvimento';
-
-const SERVICO = cabecalhosServidor({ SUPABASE_SERVICE_ROLE_KEY: vars.SUPABASE_SERVICE_ROLE_KEY ?? '' });
-const SENHA = `Rls-${crypto.randomUUID()}`;
 const marca = crypto.randomUUID().slice(0, 8);
-
-// token: null = anon (só a chave publishable); 'servico' = chave secreta; texto = login.
-async function api(caminho, { metodo = 'GET', corpo, token = 'servico' } = {}) {
-  const headers = token === 'servico' ? { ...SERVICO } : { apikey: PUBLICA, ...(token && { Authorization: `Bearer ${token}` }) };
-  if (corpo !== undefined) headers['Content-Type'] = 'application/json';
-  headers.Prefer = 'return=representation';
-  const resp = await fetch(`${URL_DEV}${caminho}`, { method: metodo, headers, body: corpo === undefined ? undefined : JSON.stringify(corpo) });
-  const dados = await resp.json().catch(() => null);
-  return { status: resp.status, dados };
-}
-const linhas = async (caminho, token) => {
-  const r = await api(`/rest/v1/${caminho}`, { token });
-  return r.status === 200 ? r.dados : [];
-};
-
 const usuarios = [];
-async function novoLogin(nome) {
-  const email = `rls-${marca}-${nome}@teste.invalid`;
-  const { dados } = await api('/auth/v1/admin/users', { metodo: 'POST', corpo: { email, password: SENHA, email_confirm: true } });
-  assert.ok(dados?.id, `criar login ${nome}: ${JSON.stringify(dados)}`);
-  usuarios.push(dados.id);
-  const login = await api('/auth/v1/token?grant_type=password', { metodo: 'POST', corpo: { email, password: SENHA }, token: null });
-  assert.ok(login.dados?.access_token, `entrar como ${nome}`);
-  return { id: dados.id, token: login.dados.access_token };
-}
-const inserir = async (tabela, corpo) => {
-  const r = await api(`/rest/v1/${tabela}`, { metodo: 'POST', corpo });
-  assert.equal(r.status, 201, `inserir em ${tabela}: ${JSON.stringify(r.dados)}`);
-  return r.dados[0];
+const novoLogin = async (nome) => {
+  const login = await criarLogin(`rls-${nome}`);
+  usuarios.push(login.id);
+  return login;
 };
 
 const t = {};
@@ -98,7 +62,7 @@ before(async () => {
 after(async () => {
   if (pular) return;
   for (const c of [t.cliA, t.cliB, t.cliS].filter(Boolean)) await api(`/rest/v1/clientes?id=eq.${c.id}`, { metodo: 'DELETE' });
-  for (const id of usuarios) await api(`/auth/v1/admin/users/${id}`, { metodo: 'DELETE' });
+  for (const id of usuarios) await apagarLogin(id);
 });
 
 const ids = (rows) => rows.map((r) => r.id);
