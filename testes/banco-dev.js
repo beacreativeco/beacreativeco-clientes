@@ -13,8 +13,9 @@ const config = ler('../public/assets/js/config.js');
 export const URL_DEV = config.match(/SUPABASE_URL = DEV \? '([^']+)'/)[1];
 export const PUBLICA = config.match(/SUPABASE_ANON_KEY = DEV \? '([^']+)'/)[1];
 const urlDoVars = vars.SUPABASE_URL?.replace(/\/+$/, '');
-export const pular = (urlDoVars !== URL_DEV || URL_DEV === SUPABASE_PRODUCAO)
-  && 'o .dev.vars não aponta para o banco de desenvolvimento';
+// TESTES_SEM_BANCO: o hook de commit roda só os testes sem banco.
+export const pular = (process.env.TESTES_SEM_BANCO && 'TESTES_SEM_BANCO ligado')
+  || ((urlDoVars !== URL_DEV || URL_DEV === SUPABASE_PRODUCAO) && 'o .dev.vars não aponta para o banco de desenvolvimento');
 
 const SERVICO = cabecalhosServidor({ SUPABASE_SERVICE_ROLE_KEY: vars.SUPABASE_SERVICE_ROLE_KEY ?? '' });
 

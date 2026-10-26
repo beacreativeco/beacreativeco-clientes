@@ -15,10 +15,12 @@ if [ -n "$achados$arquivos" ]; then
   exit 1
 fi
 
-# Testes automáticos (testes/, menos de 1 segundo). Sem Node no computador, só avisa.
+# Testes automáticos sem banco (testes/, menos de 1 segundo). Os que usam o banco de dev
+# (RLS, e o Playwright em e2e/) ficam para antes de cada subida para produção (CLAUDE.md).
+# Sem Node no computador, só avisa.
 if command -v node >/dev/null 2>&1; then
-  if ! saida=$(node --test "testes/*.test.js" 2>&1); then
-    echo "COMMIT BLOQUEADO: algum teste falhou. Rode: node --test \"testes/*.test.js\"" >&2
+  if ! saida=$(TESTES_SEM_BANCO=1 node --test "testes/*.test.js" 2>&1); then
+    echo "COMMIT BLOQUEADO: algum teste falhou. Rode: TESTES_SEM_BANCO=1 node --test \"testes/*.test.js\"" >&2
     echo "$saida" | grep -E '^✖' | head -10 >&2
     exit 1
   fi
