@@ -19,6 +19,13 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.5] — 25/10/2026
+
+### Correções
+
+- Cliente com o acesso suspenso não consegue mais editar nem apagar mensagens da conversa
+- O endereço do sistema passa a abrir sempre com conexão segura (https), mesmo quando digitado sem ela
+
 ## [1.9.4] — 25/10/2026
 
 ### Melhorias
