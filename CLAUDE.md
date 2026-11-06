@@ -30,7 +30,11 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
   - Regras de armazenamento: ver a seção "Armazenamento (nunca passar dos 10 GB grátis do R2)".
 - Funções no servidor: Cloudflare Pages Functions (`/functions`), para tudo que usa chave secreta (R2, Trello, Drive, e-mail).
 - Só a pasta `public/` é publicada (Build output directory no Cloudflare Pages). Páginas e assets vão nela; `functions/`, `supabase/` e docs ficam na raiz, fora do site.
-- E-mail transacional: Resend (ou similar), a definir na implementação.
+- E-mail transacional: Resend (conta da BeaCreative, domínio `beacreativeco.com.br` verificado; DNS na Cloudflare, no subdomínio `send` e em `resend._domainkey`).
+  - E-mails do login (convite, nova senha, troca de e-mail): SMTP próprio no Supabase **da produção** (`smtp.resend.com`, porta 465, usuário `resend`, senha = chave da API do Resend, só no painel), remetente `nao-responda@beacreativeco.com.br` / "BeaCreative". Sem SMTP próprio, o Supabase só entrega para a equipe do projeto (cliente nunca recebe). Limite de e-mails por hora: 30 (Rate Limits). O dev continua sem SMTP (convite vira link copiado).
+  - Textos em português com a logo: `supabase/emails/` (cópia versionada; colar no painel em Emails → Templates, assunto e corpo; tabela no `LEIAME.md`). Logo em PNG (`public/assets/img/logo-email.png`, o Gmail não mostra SVG), lida do endereço da produção.
+  - Validade dos links de e-mail: "Email OTP Expiration" = 86400 (24 h, o máximo; Sign In / Providers → Email). Os textos dizem "24 horas": mudou lá, mudar nos modelos.
+  - `nao-responda@beacreativeco.com.br` recebe pelo Email Routing da Cloudflare (MX no domínio principal) e encaminha para o Gmail da Bea. Existe uma conta Google com esse endereço só para a foto do remetente no Gmail (monograma no creme).
 - Erros do navegador: Sentry (`public/assets/js/erros.js`, em todas as páginas logo depois do `tema.js`). Só produção e Preview: o DSN fica em `SENTRY_DSN` no Cloudflare (fora do Git) e `/api/erros/config` só o entrega nesses dois endereços. SDK `bundle.min.js` com versão fixa e SRI (trocar a versão = trocar o hash), sem Session Replay e sem desempenho. Nada pessoal sai: `limpar()` apaga ids, e-mails, tokens e query das URLs; console e cliques não viram registro; sem usuário (teste em `testes/erros.test.js`). Serviço novo de fora: incluir também na CSP do `_headers`.
 
 ## Armazenamento (nunca passar dos 10 GB grátis do R2)
@@ -81,7 +85,7 @@ Portal onde a BeaCreative (agência de social media da Beatriz) envia conteúdos
 | Perfil | Acesso |
 | --- | --- |
 | Admin (Beatriz, única por enquanto) | Login e-mail/senha ou Google; tudo. Menu do avatar no topo (`perfil-menu.js`, montado por `ui.js`) e Meu perfil em `/admin/perfil/` (foto, nome, troca de e-mail com confirmação, troca de senha pedindo a atual, dados da agência) |
-| Cliente | Login e-mail/senha ou Google (mesmo e-mail do cadastro) a partir de convite da Bea; Bea suspende/reativa a qualquer momento; exclui de vez só depois de suspenso (ou sem convite), digitando o nome (`/api/clientes/excluir`: apaga R2, conteúdos, login e cadastro; com vitrine mantida, o cadastro fica com `arquivado_em` e some das listas) |
+| Cliente | Login e-mail/senha ou Google (mesmo e-mail do cadastro) a partir de convite da Bea (quem nunca entrou aparece como "Convite pendente", pelo `last_sign_in_at` do Auth em `/api/clientes/acessos`, e pode receber outro: convite de novo ou, com o e-mail já confirmado, link de nova senha); Bea suspende/reativa a qualquer momento; exclui de vez só depois de suspenso (ou sem convite), digitando o nome (`/api/clientes/excluir`: apaga R2, conteúdos, login e cadastro; com vitrine mantida, o cadastro fica com `arquivado_em` e some das listas) |
 | Visitante | Só a vitrine pública (no site institucional, lendo dados liberados) |
 
 ## Situações de um conteúdo
