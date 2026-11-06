@@ -19,6 +19,14 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.9.6] — 06/11/2026
+
+### Correções
+
+- Cliente que recebeu o convite e nunca entrou aparece como "Convite pendente" na página Clientes, e não mais como "Acesso ativo"
+- A Bea pode reenviar o convite para quem ainda não entrou, pelo botão "Reenviar convite"
+- Quando o link do convite vence, a tela explica como pedir um novo ou usar "Esqueci minha senha"
+
 ## [1.9.5] — 25/10/2026
 
 ### Correções
