@@ -1,7 +1,7 @@
 // Situação do login de um cliente no Supabase Auth (com a chave secreta).
 // O convite liga a conta ao cadastro (clientes.user_id) na hora em que sai, mas o cliente
 // só "tem acesso" de verdade depois de abrir o link: até lá o convite fica pendente e pode
-// ser reenviado (o link do Supabase vence em 24 h).
+// ser reenviado (o link do Supabase vence; o prazo é o "Email OTP Expiration" do painel).
 import { cabecalhosServidor } from './servidor.js';
 
 /** Usuário do Auth pelo id, ou null se não existe mais. Lança erro se o Supabase falhar. */

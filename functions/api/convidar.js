@@ -5,7 +5,7 @@
 // Fora do banco da produção, não manda e-mail: gera o link do convite e devolve para a Bea copiar.
 //
 // Reenvio: com a conta já ligada, mas sem a pessoa nunca ter entrado (o link do convite vence
-// em 24 h), manda de novo. Se ela chegou a confirmar o e-mail (abriu o link e não definiu a
+// depois de um tempo), manda de novo. Se ela chegou a confirmar o e-mail (abriu o link e não definiu a
 // senha), o Supabase recusa outro convite; aí vai o link de definir senha (recuperação).
 import { responder, exigirAdmin, rest, cabecalhosServidor, UUID } from '../_lib/servidor.js';
 import { bancoDeProducao } from '../_lib/ambiente.js';

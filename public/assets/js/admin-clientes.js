@@ -75,7 +75,7 @@ async function carregarClientes() {
 function situacaoDoAcesso(c) {
   if (!c.user_id) return { texto: 'Sem acesso', classe: 'sem-acesso', acao: 'convidar', rotulo: 'Enviar convite' };
   if (!c.login_ativo) return { texto: 'Suspenso', classe: 'suspenso', acao: 'reativar', rotulo: 'Reativar' };
-  // Convite enviado, mas a pessoa nunca entrou (o link vence em 24 h): dá para mandar outro.
+  // Convite enviado, mas a pessoa nunca entrou: dá para mandar outro.
   if (pendentes.has(c.id)) return { texto: 'Convite pendente', classe: 'aguardando', acao: 'convidar', rotulo: 'Reenviar convite' };
   return { texto: 'Acesso ativo', classe: 'ativo', acao: 'suspender', rotulo: 'Suspender' };
 }
