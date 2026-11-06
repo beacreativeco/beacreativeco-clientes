@@ -13,3 +13,6 @@ são a cópia versionada: mudou aqui, colar lá (produção; no dev só se quise
 
 A logo vem de `public/assets/img/logo-email.png` (PNG, porque o Gmail não mostra SVG), pelo
 endereço da produção: só aparece depois que a `main` tem o arquivo.
+
+Validade dos links: Authentication → Sign In / Providers → Email → "Email OTP Expiration" =
+86400 (24 h, o máximo; vale para todos os links de e-mail). Os textos dizem "24 horas": mudou lá, mudar aqui.
