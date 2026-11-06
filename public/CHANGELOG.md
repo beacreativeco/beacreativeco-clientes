@@ -19,6 +19,13 @@ depois, a partir do histórico do Git, e não têm tag.
      e itens "- ...". A primeira entrada é a versão atual do sistema.
      Mantenha cada item em uma linha só e sem formatação markdown. -->
 
+## [1.10.0] — 06/11/2026
+
+### Melhorias
+
+- Os e-mails de convite, de nova senha e de troca de e-mail agora chegam em português, com a logo da BeaCreative
+- O link do convite e o de nova senha valem por 24 horas
+
 ## [1.9.6] — 06/11/2026
 
 ### Correções
