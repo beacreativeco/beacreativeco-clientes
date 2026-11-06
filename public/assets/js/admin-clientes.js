@@ -12,6 +12,7 @@ const form = document.getElementById('form-cliente');
 const avisoForm = document.getElementById('aviso-form');
 
 let clientes = [];
+let pendentes = new Set(); // convidados que nunca abriram o link (vem do servidor)
 let editandoId = null;
 
 iniciarPagina('admin', async () => {
@@ -60,15 +61,22 @@ async function mostrarEspaco() {
 // ---------------------------------------------------------------- lista
 
 async function carregarClientes() {
-  const { data, error } = await supabase.from('clientes').select(CAMPOS).is('arquivado_em', null).order('nome');
+  const [{ data, error }, acessos] = await Promise.all([
+    supabase.from('clientes').select(CAMPOS).is('arquivado_em', null).order('nome'),
+    // Se o servidor não responder, a lista sai igual (sem "Convite pendente").
+    chamarServidor('/api/clientes/acessos').catch((err) => { console.error(err); return null; }),
+  ]);
   if (error) throw error;
   clientes = data;
+  pendentes = new Set(acessos?.pendentes ?? []);
   desenharLista();
 }
 
 function situacaoDoAcesso(c) {
   if (!c.user_id) return { texto: 'Sem acesso', classe: 'sem-acesso', acao: 'convidar', rotulo: 'Enviar convite' };
   if (!c.login_ativo) return { texto: 'Suspenso', classe: 'suspenso', acao: 'reativar', rotulo: 'Reativar' };
+  // Convite enviado, mas a pessoa nunca entrou (o link vence em 24 h): dá para mandar outro.
+  if (pendentes.has(c.id)) return { texto: 'Convite pendente', classe: 'aguardando', acao: 'convidar', rotulo: 'Reenviar convite' };
   return { texto: 'Acesso ativo', classe: 'ativo', acao: 'suspender', rotulo: 'Suspender' };
 }
 
@@ -145,7 +153,7 @@ async function convidar(cliente) {
       window.prompt('Copie o link do convite e abra numa janela anônima:', corpo.link);
     }
   } else {
-    avisar(`Convite enviado para ${cliente.email}.`);
+    avisar(`Convite ${corpo.reenvio ? 'enviado de novo' : 'enviado'} para ${cliente.email}.`);
   }
   await carregarClientes();
 }

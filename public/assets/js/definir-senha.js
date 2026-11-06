@@ -18,7 +18,7 @@ const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {
   mostrar(erroNaUrl
-    ? 'Este link expirou ou já foi usado. Peça um novo na tela de login.'
+    ? 'Este link expirou ou já foi usado. Na tela de login, toque em “Esqueci minha senha” ou peça um novo convite à BeaCreative.'
     : 'Abra esta página pelo link que chegou no seu e-mail.');
 } else {
   form.hidden = false;

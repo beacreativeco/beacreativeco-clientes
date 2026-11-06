@@ -241,18 +241,48 @@ Ao fim de cada entrega, este arquivo é atualizado e a próxima é indicada. Des
    - `mensagem_valida` de 4 parâmetros fica: `pedir_ajuste` ainda usa
    - Realtime: o sistema usa só Postgres Changes (nada de Broadcast ou Presence). Desligar canal público no Supabase: decidir depois
 
-15. [ ] **Supabase de desenvolvimento** (pedido de 25/10/2026; **pré-requisito da Fase 2**, antes de qualquer entrega nova da Fase 2): hoje o Preview usa o mesmo banco e o mesmo R2 da produção, então não dá para testar regras de acesso nem fluxos inteiros sem mexer em dados reais
+15. [x] **Supabase de desenvolvimento** (concluído em 26/10/2026) (pedido de 25/10/2026; **pré-requisito da Fase 2**, antes de qualquer entrega nova da Fase 2): hoje o Preview usa o mesmo banco e o mesmo R2 da produção, então não dá para testar regras de acesso nem fluxos inteiros sem mexer em dados reais
    - [x] Criar um segundo projeto no Supabase só para desenvolvimento (`dwhpwlxnhxkmklrokxhq`, 25/10/2026, com a Bea de teste como admin)
    - [x] Rodar nele todas as migrações de `supabase/migrations/`, em ordem
-   - [ ] Apontar o Preview (e o localhost) para ele: URL e chaves nas variáveis do ambiente Preview do Cloudflare e no `.dev.vars`, e o `config.js` escolhendo o projeto pelo endereço
+   - [x] Apontar o Preview (e o localhost) para ele: URL e chaves nas variáveis do ambiente Preview do Cloudflare e no `.dev.vars`, e o `config.js` escolhendo o projeto pelo endereço
    - [x] Convite no banco de dev: o SMTP padrão do Supabase só entrega para a equipe do projeto, então fora da produção o "Enviar convite" gera o link e copia (abrir numa janela anônima)
    - [x] Testes de RLS (cada perfil só lê e escreve o que pode) rodando contra o banco de desenvolvimento: `testes/rls.test.js`, 8 testes (sem login, cliente, suspenso, escrita direta, `aprovar_conteudo`, conversa, tabelas do push, Bea), passando em 25/10/2026; conferido que acusa erro (falha plantada) e que não deixa sobra no banco
      - Ampliados em 25/10/2026 (14 testes; dois clientes, um suspenso e o anon): `pedir_ajuste`, editar/apagar mensagem (de outra pessoa e fora do prazo), marcar conversa como lida, `midias` e `push_aparelhos`. Falhas plantadas em mídias e aparelhos acusadas
      - **Achado:** cliente suspenso (`meu_cliente_id()` null) passava na checagem de dono de `minha_mensagem_alteravel` e editava/apagava mensagem de qualquer cliente (com o id); `marcar_conversa_do_cliente_lida` com o mesmo padrão. Correção: migração `20261026000000` (desfazer em `supabase/desfazer/`), aplicada no dev e na produção em 25/10/2026; os 38 testes passam
    - [x] Testes Playwright dos fluxos principais (login, enviar para aprovação, aprovar, pedir ajuste, conversa) no Preview: `e2e/fluxos.spec.js`, 4 fluxos × computador e 375px, 8 passando em 25/10/2026 (Playwright 1.64.0 fixo). Contas temporárias, apagadas no fim junto com os arquivos do R2 de dev (conferido: nada sobra no banco)
-   - [ ] R2 separado: bucket `beacreativeco-midias-dev`, ligado como `MIDIAS` só no ambiente Preview, com as mesmas Lifecycle Rules (`aprovados/` e `conversa/` 30 dias, uploads em partes incompletos 1 dia)
+   - [x] R2 separado: bucket `beacreativeco-midias-dev`, ligado como `MIDIAS` só no ambiente Preview. Sem Lifecycle Rules, de propósito: é bucket de teste (decisão do Victor, 26/10/2026)
    - [x] `config.js`: banco de dev só em `dev.beacreativeco-clientes.pages.dev` e localhost; `clientes.beacreativeco.com.br` e `beacreativeco-clientes.pages.dev` são produção e o endereço do projeto novo na CSP do `_headers`. **Falta (Victor):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `TRELLO_QUADROS_TESTE` no Preview do Cloudflare e no `.dev.vars`
    - [x] Trava do Trello: fora do banco da produção, o servidor só mexe nos quadros de `TRELLO_QUADROS_TESTE` (ids separados por vírgula, variável do Preview e do `.dev.vars`); sem ela, nenhum. A lista de quadros do "Editar cliente" só mostra esses, e sincronizar, refletir e anexar recusam com aviso
+
+## Plano do Supabase
+
+Decisão de 26/10/2026: a produção fica no plano grátis do Supabase até um dos gatilhos abaixo. Sem backup automático no plano grátis, o banco tem um backup semanal próprio (proposta em https://claude.ai/artifact/ULBSX3PFUcKXTTK4UX2zHH, seção "Backup no plano grátis"), além do backup manual antes de cada migração na produção.
+
+Mudar para o Supabase Pro quando acontecer o primeiro destes:
+
+- [ ] Primeira agência pagante
+- [ ] Banco acima de 400 MB (o limite do plano grátis é 500 MB)
+- [ ] Qualquer pausa do projeto por inatividade
+
+O uso do banco contra o limite de 500 MB entra no painel do dono (etapa 14 da proposta de várias agências). Pelas regras do Supabase (conferidas em 26/10/2026): projeto grátis pausa depois de 7 dias com pouca atividade; passar dos 500 MB não deixa o banco só leitura, mas a organização pode ter as chamadas bloqueadas (erro 402); o modo só leitura vem com 95% do disco de 2 GB.
+
+### Backup semanal (opção A, escolhida em 26/10/2026)
+
+Repositório privado `beacreativeco-backup` (GitHub Actions, domingo 3h): `pg_dump` de `public` e `auth` → restauração num Postgres temporário do workflow → contagens conferidas → só então cifra com a chave pública do age e envia ao bucket `beacreativeco-backups`. Regras no `CLAUDE.md`, seção "Backup do banco"; passo a passo no README do repositório do backup.
+
+- [x] Código do workflow, dos scripts e do teste da conferência (pasta local `beacreativeco-backup`, ainda sem repositório no GitHub)
+- [x] Migração `20261027000000_backup_leitura` (usuário só de leitura), com desfazer
+- [ ] Teste no dev: o `backup_leitura` consegue fazer o dump de `public` e `auth`
+- [ ] Contas (Victor, um passo de cada vez): chave do age, repositório privado, bucket, token do R2, secrets, aviso de falha por e-mail
+- [ ] Primeira rodada com alvo `dev`; depois a migração na produção (com "pode subir pra produção") e a primeira rodada com alvo `producao`
+
+**Teste de abertura e restauração, de 3 em 3 meses** (no computador do Victor, passo a passo no README do repositório do backup: abrir um backup com a chave privada e restaurar no banco de dev em esquemas separados). Anotar aqui a data e o resultado:
+
+- [ ] Primeiro: na semana seguinte ao primeiro backup da produção
+- [ ] 26/01/2027
+- [ ] 26/04/2027
+- [ ] 26/07/2027
+- [ ] 26/10/2027
 
 ## Já pronto antes deste roadmap
 
